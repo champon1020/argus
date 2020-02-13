@@ -16,22 +16,59 @@ type Article struct {
 	Private    bool
 }
 
-func (article *Article) InsertArticle(tx *sql.Tx) {
+func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
+	cmd := "INSERT INTO articles " +
+		"(id, title, create_date, update_date, content_url, image_url, private)" +
+		"VALUES (?, ?, ?, ?, ?, ?, ?)"
 
+	_, err = tx.Exec(cmd,
+		article.Id,
+		article.Title,
+		article.CreateDate,
+		article.UpdateDate,
+		article.ContentUrl,
+		article.ImageUrl,
+		article.Private)
+
+	if err != nil {
+		logger.ErrorPrintf(err)
+	}
+	return
 }
 
-func (article *Article) UpdateArticle(tx *sql.Tx, argsFlg uint32) {
+func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
+	cmd := "UPDATE articles " +
+		"SET title=?, create_date=?, update_date=?, content_url=?, image_url=?, private=?" +
+		"WHERE id=?"
 
+	_, err = tx.Exec(cmd,
+		article.Title,
+		article.CreateDate,
+		article.UpdateDate,
+		article.ContentUrl,
+		article.ImageUrl,
+		article.Private,
+		article.Id)
+
+	if err != nil {
+		logger.ErrorPrintf(err)
+	}
+	return
 }
 
-func (article *Article) DeleteArticle(tx *sql.Tx, argsFlg uint32) {
-
+func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
+	cmd := "DELETE FROM articles WHERE id=?"
+	_, err = tx.Exec(cmd, article.Id)
+	if err != nil {
+		logger.ErrorPrintf(err)
+	}
+	return
 }
 
 func (article *Article) FindArticle(tx *sql.Tx, argsFlg uint32) (articles []Article) {
 	args := GenArgsSlice(argsFlg, article)
 	whereQuery := GenArgsQuery(argsFlg, article)
-	query := "SELECT * FROM WORDS " + whereQuery + "ORDER BY ID LIMIT 10"
+	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id LIMIT 10"
 
 	rows, err := tx.Query(query, args...)
 	defer func() {
