@@ -1,2 +1,5 @@
-
 .idea/
+cmd/argus
+token.json
+config.json
+script/
