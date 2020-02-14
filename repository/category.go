@@ -46,12 +46,21 @@ func (category *Category) DeleteCategory(tx *sql.Tx) (err error) {
 	return
 }
 
-func (category *Category) FindCategory(tx *sql.Tx, argsFlg uint32) (categories []Category) {
+func (category *Category) DeleteArticleCategoryByCategory(tx *sql.Tx) (err error) {
+	cmd := "DELETE FROM article_category WHERE category_id=?"
+	_, err = tx.Exec(cmd, category.Id)
+	if err != nil {
+		logger.ErrorPrintf(err)
+	}
+	return
+}
+
+func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []Category) {
 	args := GenArgsSlice(argsFlg, category)
 	whereQuery := GenArgsQuery(argsFlg, category)
 	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id LIMIT 10"
 
-	rows, err := tx.Query(query, args...)
+	rows, err := db.Query(query, args...)
 	defer func() {
 		if err := rows.Close(); err != nil {
 			logger.ErrorPrintf(err)

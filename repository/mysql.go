@@ -30,7 +30,9 @@ func (mysql *MySQL) Connect(config argus.Config, dbName string) (err error) {
 	return
 }
 
-func (mysql *MySQL) Transact(txFunc func(*sql.Tx) error) (err error) {
+func (mysql *MySQL) Transact(
+	txFunc func(*sql.Tx) error) (err error) {
+
 	tx, err := mysql.Begin()
 	if err != nil {
 		logger.ErrorPrintf(err)
