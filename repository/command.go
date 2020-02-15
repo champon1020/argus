@@ -8,7 +8,7 @@ import (
 func RegisterArticle(mysql MySQL, article Article) {
 	mysql.Transact(func(tx *sql.Tx) (err error) {
 		wg := new(sync.WaitGroup)
-		wg.Add(2)
+		wg.Add(3)
 
 		go func() {
 			defer wg.Done()
@@ -20,19 +20,23 @@ func RegisterArticle(mysql MySQL, article Article) {
 			err = article.InsertArticleCategory(tx)
 		}()
 
-		innerWg := new(sync.WaitGroup)
-		for _, c := range article.Categories {
-			innerWg.Add(1)
-			go func() {
-				defer innerWg.Done()
+		go func() {
+			defer wg.Done()
+			innerWg := new(sync.WaitGroup)
+			for _, c := range article.Categories {
+				innerWg.Add(1)
+				go func() {
+					defer innerWg.Done()
 
-				err = c.InsertCategory(tx)
-				if err != nil {
-					logger.ErrorPrintf(err)
-				}
-			}()
-		}
-		innerWg.Wait()
+					err = c.InsertCategory(tx)
+					if err != nil {
+						logger.ErrorPrintf(err)
+					}
+				}()
+			}
+			innerWg.Wait()
+		}()
+
 		wg.Wait()
 
 		return

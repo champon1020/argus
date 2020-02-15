@@ -8,12 +8,15 @@ type Category struct {
 }
 
 func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
-	cmd := "INSERT INTO categories " +
-		"(id, name)" +
-		"VALUES (?, ?)"
+	cmd := "INSERT INTO categories (id, name) " +
+		"SELECT * FROM (SELECT ?, ?) AS tmp " +
+		"WHERE NOT EXISTS (" +
+		"SELECT name FROM categories WHERE name=?)" +
+		"LIMIT 1"
 
 	_, err = tx.Exec(cmd,
 		category.Id,
+		category.Name,
 		category.Name)
 
 	if err != nil {

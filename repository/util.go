@@ -45,3 +45,15 @@ func ToSnakeCase(str string) (snake string) {
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
 	return
 }
+
+func articleIdConverter(mysql MySQL, article *Article) {
+	idList := GetEmptyMinId(mysql.DB, "article", 1)
+	(*article).Id = idList[0]
+}
+
+func categoriesIdConverter(mysql MySQL, categories *[]Category) {
+	idList := GetEmptyMinId(mysql.DB, "categories", len(*categories))
+	for i := 0; i < len(*categories); i++ {
+		(*categories)[i].Id = idList[i]
+	}
+}

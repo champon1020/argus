@@ -44,14 +44,14 @@ func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 	wg := new(sync.WaitGroup)
 	for _, c := range article.Categories {
 		wg.Add(1)
-		go func(c Category) {
+		go func() {
 			defer wg.Done()
 
 			_, err = tx.Exec(cmd, article.Id, c.Id)
 			if err != nil {
 				logger.ErrorPrintf(err)
 			}
-		}(c)
+		}()
 	}
 	wg.Wait()
 	return
@@ -101,14 +101,14 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 	wg := new(sync.WaitGroup)
 	for _, c := range article.Categories {
 		wg.Add(1)
-		go func(c Category) {
+		go func() {
 			defer wg.Done()
 
 			_, err = tx.Exec(cmd, article.Id, c.Id)
 			if err != nil {
 				logger.ErrorPrintf(err)
 			}
-		}(c)
+		}()
 	}
 	wg.Wait()
 	return
