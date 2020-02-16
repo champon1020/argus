@@ -5,13 +5,24 @@ import (
 	"regexp"
 )
 
-func GenArgsSlice(argsFlg uint32, st interface{}) (args []interface{}) {
+func GenArgsSlice(argsFlg uint32, st interface{}) []interface{} {
+	return genArgsSlice(argsFlg, st, false)
+}
+
+func GenArgsSliceIsLimit(argsFlg uint32, st interface{}, isLimit bool) []interface{} {
+	return genArgsSlice(argsFlg, st, isLimit)
+}
+
+func genArgsSlice(argsFlg uint32, st interface{}, isLimit bool) (args []interface{}) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
-		if 1 << i & argsFlg {
+		if 1<<i&argsFlg > 0 {
 			args = append(args, v.Field(i))
 		}
+	}
+	if isLimit {
+		args = append(args, config.Web.MaxViewArticleNum)
 	}
 	return
 }
@@ -22,7 +33,7 @@ func GenArgsQuery(argsFlg uint32, st interface{}) (query string) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
-		if 1 << i & argsFlg {
+		if 1<<i&argsFlg > 0 {
 			if query != initQuery {
 				query += "AND "
 			}

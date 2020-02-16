@@ -61,7 +61,7 @@ func (category *Category) DeleteArticleCategoryByCategory(tx *sql.Tx) (err error
 func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []Category) {
 	args := GenArgsSlice(argsFlg, category)
 	whereQuery := GenArgsQuery(argsFlg, category)
-	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id LIMIT 10"
+	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id"
 
 	rows, err := db.Query(query, args...)
 	defer func() {

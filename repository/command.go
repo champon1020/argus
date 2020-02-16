@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-func RegisterArticle(mysql MySQL, article Article) {
+func RegisterArticleCmd(mysql MySQL, article Article) {
 	mysql.Transact(func(tx *sql.Tx) (err error) {
 		wg := new(sync.WaitGroup)
 		wg.Add(3)
@@ -43,7 +43,7 @@ func RegisterArticle(mysql MySQL, article Article) {
 	})
 }
 
-func UpdateArticle(mysql MySQL, article Article) {
+func UpdateArticleCmd(mysql MySQL, article Article) {
 	mysql.Transact(func(tx *sql.Tx) (err error) {
 		nowCategories := article.FindArticleCategory(mysql.DB)
 		cMap := map[int]Category{}
@@ -94,12 +94,12 @@ func UpdateArticle(mysql MySQL, article Article) {
 	})
 }
 
-func FindArticle(mysql MySQL, article Article, argFlg uint32) (articles []Article) {
+func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Article) {
 	articles = article.FindArticle(mysql.DB, argFlg)
 	return
 }
 
-func FindCategory(mysql MySQL, category Category, argFlg uint32) (categories []Category) {
+func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories []Category) {
 	categories = category.FindCategory(mysql.DB, argFlg)
 	return
 }

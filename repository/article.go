@@ -7,14 +7,14 @@ import (
 )
 
 type Article struct {
-	Id         int
-	Title      string
-	Categories []Category
-	CreateDate time.Time
-	UpdateDate time.Time
-	ContentUrl string
-	ImageUrl   string
-	Private    bool
+	Id         int        `json: "id"`
+	Title      string     `json: "title"`
+	Categories []Category `json: "categories"`
+	CreateDate time.Time  `json: "create_date"`
+	UpdateDate time.Time  `json: "update_date"`
+	ContentUrl string     `json: "content_url"`
+	ImageUrl   string     `json: "image_url"`
+	Private    bool       `json: "private"`
 }
 
 func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
@@ -114,10 +114,13 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 	return
 }
 
+// ArgFlg determines where statement's arguments.
+// For Example, 'argFlg = 0101' means
+// it includes first and third fields of objects in where statement.
 func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Article) {
-	args := GenArgsSlice(argsFlg, article)
+	args := GenArgsSliceIsLimit(argsFlg, article, true)
 	whereQuery := GenArgsQuery(argsFlg, article)
-	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id LIMIT 10"
+	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id LIMIT ?"
 
 	rows, err := db.Query(query, args...)
 	defer func() {
@@ -127,10 +130,14 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 	}()
 
 	if err != nil {
+		logger.Printf("Query: %s\n", query)
+		logger.Printf("Args: %v\n", args)
 		logger.ErrorPrintf(err)
 	}
 
 	if rows == nil {
+		logger.Printf("Query: %s\n", query)
+		logger.Printf("Args: %v\n", args)
 		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
 		return
 	}
@@ -167,6 +174,11 @@ func (article *Article) FindArticleCategory(db *sql.DB) (categories []Category) 
 	}()
 
 	if err != nil {
+		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
+		return
+	}
+
+	if rows == nil {
 		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
 		return
 	}

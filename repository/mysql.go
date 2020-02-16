@@ -4,30 +4,43 @@ import (
 	"database/sql"
 
 	"github.com/champon1020/argus"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-var logger argus.Logger
+var (
+	logger argus.Logger
+	config argus.Config
+)
 
 func init() {
-	logger.NewLogger("[Repository]")
+	logger.NewLogger("[repository]")
+	config.Load()
 }
 
 type MySQL struct {
 	*sql.DB
 }
 
-func (mysql *MySQL) Connect(config argus.Config, dbName string) (err error) {
+func (mysql *MySQL) Connect(config argus.DbConf, dbName string) (err error) {
 	dataSourceName :=
-		config.Db.User + ":" +
-			config.Db.Pass + "@tcp(" +
-			config.Db.Host + ":" +
-			config.Db.Port + ")/" +
-			dbName
+		config.User + ":" +
+			config.Pass + "@tcp(" +
+			config.Host + ":" +
+			config.Port + ")/" +
+			dbName + "?parseTime=true"
+
+	logger.Printf("DataSource: %s\n", dataSourceName)
 	mysql.DB, err = sql.Open("mysql", dataSourceName)
-	mysql.SetMaxIdleConns(5)
+	if err != nil {
+		logger.ErrorPrintf(err)
+		return
+	}
+
+	mysql.SetMaxIdleConns(20)
 	mysql.SetConnMaxLifetime(1)
 	mysql.SetMaxOpenConns(10)
-	return
+
+	return nil
 }
 
 func (mysql *MySQL) Transact(

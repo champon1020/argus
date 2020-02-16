@@ -1,0 +1,16 @@
+[repository]2020/02/16 17:00:24 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus
+[repository]2020/02/16 17:00:25 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:00:25 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:00:25 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:00:25 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:00:25 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:00:25 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:00:25 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:06:57 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:06:57 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:06:57 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:06:57 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:06:57 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:06:57 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:06:57 sql: Scan error on column index 2, name "create_date": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+[repository]2020/02/16 17:10:41 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
