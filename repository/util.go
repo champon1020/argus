@@ -57,14 +57,24 @@ func ToSnakeCase(str string) (snake string) {
 	return
 }
 
-func articleIdConverter(mysql MySQL, article *Article) {
-	idList := GetEmptyMinId(mysql.DB, "article", 1)
+func articleIdConverter(mysql MySQL, article *Article) (err error) {
+	idList, err := GetEmptyMinId(mysql.DB, "articles", 1)
+	if err != nil {
+		logger.ErrorPrintf(err)
+		return
+	}
 	(*article).Id = idList[0]
+	return
 }
 
-func categoriesIdConverter(mysql MySQL, categories *[]Category) {
-	idList := GetEmptyMinId(mysql.DB, "categories", len(*categories))
+func categoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
+	idList, err := GetEmptyMinId(mysql.DB, "categories", len(*categories))
+	if err != nil {
+		logger.ErrorPrintf(err)
+		return
+	}
 	for i := 0; i < len(*categories); i++ {
 		(*categories)[i].Id = idList[i]
 	}
+	return
 }

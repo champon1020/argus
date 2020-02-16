@@ -10,16 +10,24 @@ import (
 )
 
 func FindArticleHandler(c *gin.Context) {
-	body, err := RootHandler(c.Writer, c.Request, "GET", "application/json")
+	body, err := RootHandler(c.Writer, c.Request, "GET")
 	if err != nil {
 		return
 	}
 
-	res := repository.FindArticleCmd(mysql, body.Article, 0)
+	res, err := repository.FindArticleCmd(mysql, body.Article, 0)
+	if err != nil {
+		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+		return
+	}
 	fmt.Fprint(c.Writer, res)
 }
 
-func FindCategoryHandler(w http.ResponseWriter, r *http.Request) {
-	res := repository.FindCategoryCmd(mysql, repository.Category{}, 0)
-	fmt.Fprint(w, res)
+func FindCategoryHandler(c *gin.Context) {
+	res, err := repository.FindCategoryCmd(mysql, repository.Category{}, 0)
+	if err != nil {
+		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprint(c.Writer, res)
 }

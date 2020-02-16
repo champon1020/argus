@@ -43,8 +43,7 @@ func (mysql *MySQL) Connect(config argus.DbConf, dbName string) (err error) {
 	return nil
 }
 
-func (mysql *MySQL) Transact(
-	txFunc func(*sql.Tx) error) (err error) {
+func (mysql *MySQL) Transact(txFunc func(*sql.Tx) error) (err error) {
 
 	tx, err := mysql.Begin()
 	if err != nil {
@@ -56,10 +55,12 @@ func (mysql *MySQL) Transact(
 	defer func() {
 		if p := recover(); p != nil {
 			tx.Rollback()
-			logger.ErrorPanic(err)
+			logger.Printf("%v\n", p)
+			return
 		} else if err != nil {
 			tx.Rollback()
-			logger.ErrorPanic(err)
+			logger.ErrorPrintf(err)
+			return
 		} else {
 			err = tx.Commit()
 		}

@@ -3,8 +3,8 @@ package repository
 import "database/sql"
 
 type Category struct {
-	Id   int
-	Name string
+	Id   int    `json: "id"`
+	Name string `json: "name"`
 }
 
 func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
@@ -58,7 +58,7 @@ func (category *Category) DeleteArticleCategoryByCategory(tx *sql.Tx) (err error
 	return
 }
 
-func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []Category) {
+func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []Category, err error) {
 	args := GenArgsSlice(argsFlg, category)
 	whereQuery := GenArgsQuery(argsFlg, category)
 	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id"
@@ -72,6 +72,7 @@ func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories [
 
 	if err != nil {
 		logger.ErrorPrintf(err)
+		return
 	}
 
 	if rows == nil {

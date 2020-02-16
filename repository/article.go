@@ -117,7 +117,7 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 // ArgFlg determines where statement's arguments.
 // For Example, 'argFlg = 0101' means
 // it includes first and third fields of objects in where statement.
-func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Article) {
+func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Article, err error) {
 	args := GenArgsSliceIsLimit(argsFlg, article, true)
 	whereQuery := GenArgsQuery(argsFlg, article)
 	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id LIMIT ?"
@@ -133,6 +133,7 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 		logger.Printf("Query: %s\n", query)
 		logger.Printf("Args: %v\n", args)
 		logger.ErrorPrintf(err)
+		return
 	}
 
 	if rows == nil {
@@ -154,13 +155,17 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 			&a.Private); err != nil {
 			logger.ErrorPrintf(err)
 		}
-		a.Categories = a.FindArticleCategory(db)
+		a.Categories, err = a.FindArticleCategory(db)
+		if err != nil {
+			logger.ErrorPrintf(err)
+			break
+		}
 		articles = append(articles, a)
 	}
 	return
 }
 
-func (article *Article) FindArticleCategory(db *sql.DB) (categories []Category) {
+func (article *Article) FindArticleCategory(db *sql.DB) (categories []Category, err error) {
 	query := "SELECT * FROM categories " +
 		"WHERE id IN (" +
 		"SELECT category_id FROM article_category " +

@@ -5,19 +5,31 @@ import (
 	"sync"
 )
 
-func RegisterArticleCmd(mysql MySQL, article Article) {
-	mysql.Transact(func(tx *sql.Tx) (err error) {
+func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
+	if err = articleIdConverter(mysql, &article); err != nil {
+		return
+	}
+
+	err = mysql.Transact(func(tx *sql.Tx) (err error) {
 		wg := new(sync.WaitGroup)
 		wg.Add(3)
 
 		go func() {
 			defer wg.Done()
 			err = article.InsertArticle(tx)
+			if err != nil {
+				logger.ErrorPrintf(err)
+				return
+			}
 		}()
 
 		go func() {
 			defer wg.Done()
 			err = article.InsertArticleCategory(tx)
+			if err != nil {
+				logger.ErrorPrintf(err)
+				return
+			}
 		}()
 
 		go func() {
@@ -31,6 +43,7 @@ func RegisterArticleCmd(mysql MySQL, article Article) {
 					err = c.InsertCategory(tx)
 					if err != nil {
 						logger.ErrorPrintf(err)
+						return
 					}
 				}()
 			}
@@ -38,14 +51,19 @@ func RegisterArticleCmd(mysql MySQL, article Article) {
 		}()
 
 		wg.Wait()
-
 		return
 	})
+	return
 }
 
-func UpdateArticleCmd(mysql MySQL, article Article) {
-	mysql.Transact(func(tx *sql.Tx) (err error) {
-		nowCategories := article.FindArticleCategory(mysql.DB)
+func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
+	err = mysql.Transact(func(tx *sql.Tx) (err error) {
+		nowCategories, err := article.FindArticleCategory(mysql.DB)
+		if err != nil {
+			logger.ErrorPrintf(err)
+			return
+		}
+
 		cMap := map[int]Category{}
 		for _, c := range nowCategories {
 			cMap[c.Id] = c
@@ -75,6 +93,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) {
 			err = a.InsertArticleCategory(tx)
 			if err != nil {
 				logger.ErrorPrintf(err)
+				return
 			}
 		}()
 
@@ -86,20 +105,28 @@ func UpdateArticleCmd(mysql MySQL, article Article) {
 			err = a.DeleteArticleCategoryByBoth(tx)
 			if err != nil {
 				logger.ErrorPrintf(err)
+				return
 			}
 		}()
 		wg.Wait()
 
 		return err
 	})
-}
-
-func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Article) {
-	articles = article.FindArticle(mysql.DB, argFlg)
 	return
 }
 
-func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories []Category) {
-	categories = category.FindCategory(mysql.DB, argFlg)
+func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Article, err error) {
+	articles, err = article.FindArticle(mysql.DB, argFlg)
+	if err != nil {
+		logger.ErrorPrintf(err)
+	}
+	return
+}
+
+func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories []Category, err error) {
+	categories, err = category.FindCategory(mysql.DB, argFlg)
+	if err != nil {
+		logger.ErrorPrintf(err)
+	}
 	return
 }

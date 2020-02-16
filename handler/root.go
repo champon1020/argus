@@ -22,7 +22,11 @@ func init() {
 	}
 }
 
-func RootHandler(w http.ResponseWriter, r *http.Request, method string, contentType string) (body RequestBody, err error) {
+func RootHandler(w http.ResponseWriter, r *http.Request, method string) (body RequestBody, err error) {
+	return rootHandler(w, r, method, "application/json")
+}
+
+func rootHandler(w http.ResponseWriter, r *http.Request, method string, contentType string) (body RequestBody, err error) {
 	isErr := Validation(&w, r, method, contentType)
 	if isErr {
 		err = errors.New("unable to pass validation")
