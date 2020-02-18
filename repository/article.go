@@ -7,14 +7,14 @@ import (
 )
 
 type Article struct {
-	Id         int
-	Title      string
-	Categories []Category
-	CreateDate time.Time
-	UpdateDate time.Time
-	ContentUrl string
-	ImageUrl   string
-	Private    bool
+	Id         int        `json:"id"`
+	Title      string     `json:"title"`
+	Categories []Category `json:"categories"`
+	CreateDate time.Time  `json:"create_date"`
+	UpdateDate time.Time  `json:"update_date"`
+	ContentUrl string     `json:"content_url"`
+	ImageUrl   string     `json:"image_url"`
+	Private    bool       `json:"private"`
 }
 
 func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
@@ -44,14 +44,14 @@ func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 	wg := new(sync.WaitGroup)
 	for _, c := range article.Categories {
 		wg.Add(1)
-		go func(c Category) {
+		go func() {
 			defer wg.Done()
 
 			_, err = tx.Exec(cmd, article.Id, c.Id)
 			if err != nil {
 				logger.ErrorPrintf(err)
 			}
-		}(c)
+		}()
 	}
 	wg.Wait()
 	return
@@ -59,7 +59,7 @@ func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 
 func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 	cmd := "UPDATE articles " +
-		"SET title=?, create_date=?, update_date=?, content_url=?, image_url=?, private=?" +
+		"SET title=?, create_date=?, update_date=?, content_url=?, image_url=?, private=? " +
 		"WHERE id=?"
 
 	_, err = tx.Exec(cmd,
@@ -101,23 +101,26 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 	wg := new(sync.WaitGroup)
 	for _, c := range article.Categories {
 		wg.Add(1)
-		go func(c Category) {
+		go func() {
 			defer wg.Done()
 
 			_, err = tx.Exec(cmd, article.Id, c.Id)
 			if err != nil {
 				logger.ErrorPrintf(err)
 			}
-		}(c)
+		}()
 	}
 	wg.Wait()
 	return
 }
 
-func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Article) {
-	args := GenArgsSlice(argsFlg, article)
+// ArgFlg determines where statement's arguments.
+// For Example, 'argFlg = 0101' means
+// it includes first and third fields of objects in where statement.
+func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Article, err error) {
+	args := GenArgsSliceIsLimit(argsFlg, article, true)
 	whereQuery := GenArgsQuery(argsFlg, article)
-	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id LIMIT 10"
+	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id LIMIT ?"
 
 	rows, err := db.Query(query, args...)
 	defer func() {
@@ -127,10 +130,15 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 	}()
 
 	if err != nil {
+		logger.Printf("Query: %s\n", query)
+		logger.Printf("Args: %v\n", args)
 		logger.ErrorPrintf(err)
+		return
 	}
 
 	if rows == nil {
+		logger.Printf("Query: %s\n", query)
+		logger.Printf("Args: %v\n", args)
 		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
 		return
 	}
@@ -147,13 +155,17 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 			&a.Private); err != nil {
 			logger.ErrorPrintf(err)
 		}
-		a.Categories = a.FindArticleCategory(db)
+		a.Categories, err = a.FindArticleCategory(db)
+		if err != nil {
+			logger.ErrorPrintf(err)
+			break
+		}
 		articles = append(articles, a)
 	}
 	return
 }
 
-func (article *Article) FindArticleCategory(db *sql.DB) (categories []Category) {
+func (article *Article) FindArticleCategory(db *sql.DB) (categories []Category, err error) {
 	query := "SELECT * FROM categories " +
 		"WHERE id IN (" +
 		"SELECT category_id FROM article_category " +
@@ -167,6 +179,11 @@ func (article *Article) FindArticleCategory(db *sql.DB) (categories []Category) 
 	}()
 
 	if err != nil {
+		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
+		return
+	}
+
+	if rows == nil {
 		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
 		return
 	}

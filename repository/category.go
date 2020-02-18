@@ -3,29 +3,31 @@ package repository
 import "database/sql"
 
 type Category struct {
-	Id   int
-	Name string
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
-	cmd := "INSERT INTO categories " +
-		"(id, name)" +
-		"VALUES (?, ?)"
+	cmd := "INSERT INTO categories (id, name) " +
+		"SELECT ?, ? " +
+		"WHERE NOT EXISTS (" +
+		"SELECT name FROM categories WHERE name=?)"
 
 	_, err = tx.Exec(cmd,
 		category.Id,
+		category.Name,
 		category.Name)
 
 	if err != nil {
-		logger.ErrorPrintf(err)
+		logger.ErrorMsgPrintf("InsertCategory", err)
 	}
 	return
 }
 
 func (category *Category) UpdateCategory(tx *sql.Tx) (err error) {
 	cmd := "UPDATE categories " +
-		"SET name=?" +
-		"WHERE id=?"
+		"SET name=? " +
+		"WHERE id=? "
 
 	_, err = tx.Exec(cmd,
 		category.Name,
@@ -55,10 +57,10 @@ func (category *Category) DeleteArticleCategoryByCategory(tx *sql.Tx) (err error
 	return
 }
 
-func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []Category) {
+func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []Category, err error) {
 	args := GenArgsSlice(argsFlg, category)
 	whereQuery := GenArgsQuery(argsFlg, category)
-	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id LIMIT 10"
+	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id"
 
 	rows, err := db.Query(query, args...)
 	defer func() {
@@ -69,6 +71,7 @@ func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories [
 
 	if err != nil {
 		logger.ErrorPrintf(err)
+		return
 	}
 
 	if rows == nil {

@@ -2,4 +2,4 @@
 cmd/argus
 token.json
 config.json
-script/
+script/**

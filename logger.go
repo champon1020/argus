@@ -10,8 +10,14 @@ type Logger struct {
 	log.Logger
 }
 
-func (l Logger) NewLogger(prefix string) {
-	logfile, err := os.OpenFile("../../logs/debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+var logger Logger
+
+func init() {
+	logger.NewLogger("[argus]")
+}
+
+func (l *Logger) NewLogger(prefix string) {
+	logfile, err := os.OpenFile("logs/debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Printf("Unable to open log file: %s\n", err)
 		l.SetOutput(os.Stdout)
