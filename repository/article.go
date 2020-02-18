@@ -46,10 +46,9 @@ func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-
-			_, err = tx.Exec(cmd, article.Id, c.Id)
-			if err != nil {
+			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
 				logger.ErrorPrintf(err)
+				return
 			}
 		}()
 	}
@@ -79,8 +78,7 @@ func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 
 func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM articles WHERE id=?"
-	_, err = tx.Exec(cmd, article.Id)
-	if err != nil {
+	if _, err = tx.Exec(cmd, article.Id); err != nil {
 		logger.ErrorPrintf(err)
 	}
 	return
@@ -88,8 +86,7 @@ func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 
 func (article *Article) DeleteArticleCategoryByArticle(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM article_category WHERE article_id=?"
-	_, err = tx.Exec(cmd, article.Id)
-	if err != nil {
+	if _, err = tx.Exec(cmd, article.Id); err != nil {
 		logger.ErrorPrintf(err)
 	}
 	return
@@ -103,9 +100,7 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-
-			_, err = tx.Exec(cmd, article.Id, c.Id)
-			if err != nil {
+			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
 				logger.ErrorPrintf(err)
 			}
 		}()
@@ -155,8 +150,7 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 			&a.Private); err != nil {
 			logger.ErrorPrintf(err)
 		}
-		a.Categories, err = a.FindArticleCategory(db)
-		if err != nil {
+		if a.Categories, err = a.FindArticleCategory(db); err != nil {
 			logger.ErrorPrintf(err)
 			break
 		}

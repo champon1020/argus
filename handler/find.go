@@ -10,24 +10,35 @@ import (
 )
 
 func FindArticleHandler(c *gin.Context) {
-	body, err := RootHandler(c.Writer, c.Request, "GET")
-	if err != nil {
-		return
-	}
+	var (
+		body RequestBody
+		err  error
+		res  []repository.Article
+	)
 
-	res, err := repository.FindArticleCmd(mysql, body.Article, 0)
-	if err != nil {
+	if body, err = RootHandler(c.Writer, c.Request, "GET"); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return
 	}
+
+	if res, err = repository.FindArticleCmd(mysql, body.Article, 0); err != nil {
+		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+		return
+	}
+
 	fmt.Fprint(c.Writer, res)
 }
 
 func FindCategoryHandler(c *gin.Context) {
-	res, err := repository.FindCategoryCmd(mysql, repository.Category{}, 0)
-	if err != nil {
+	var (
+		err error
+		res []repository.Category
+	)
+
+	if res, err = repository.FindCategoryCmd(mysql, repository.Category{}, 0); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return
 	}
+
 	fmt.Fprint(c.Writer, res)
 }

@@ -33,9 +33,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request, method string, contentT
 		return
 	}
 
-	err = ParseRequestBody(&w, r, &body)
-	if err != nil {
-		logger.ErrorPrintf(err)
+	if err = ParseRequestBody(&w, r, &body); err != nil {
 		return
 	}
 

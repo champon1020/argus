@@ -9,15 +9,20 @@ import (
 )
 
 func RegisterArticleHandler(c *gin.Context) {
-	body, err := RootHandler(c.Writer, c.Request, "POST")
-	if err != nil {
-		return
-	}
+	var (
+		body RequestBody
+		err  error
+	)
 
-	err = repository.RegisterArticleCmd(mysql, body.Article)
-	if err != nil {
+	if body, err = RootHandler(c.Writer, c.Request, "POST"); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return
 	}
+
+	if err = repository.RegisterArticleCmd(mysql, body.Article); err != nil {
+		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+		return
+	}
+
 	fmt.Fprint(c.Writer, http.StatusOK)
 }

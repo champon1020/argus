@@ -30,8 +30,7 @@ func (mysql *MySQL) Connect(config argus.DbConf, dbName string) (err error) {
 			dbName + "?parseTime=true"
 
 	logger.Printf("DataSource: %s\n", dataSourceName)
-	mysql.DB, err = sql.Open("mysql", dataSourceName)
-	if err != nil {
+	if mysql.DB, err = sql.Open("mysql", dataSourceName); err != nil {
 		logger.ErrorPrintf(err)
 		return
 	}
@@ -44,7 +43,6 @@ func (mysql *MySQL) Connect(config argus.DbConf, dbName string) (err error) {
 }
 
 func (mysql *MySQL) Transact(txFunc func(*sql.Tx) error) (err error) {
-
 	tx, err := mysql.Begin()
 	if err != nil {
 		logger.ErrorPrintf(err)

@@ -52,20 +52,21 @@ type Checkin struct {
 }
 
 func ParseRequestBody(w *http.ResponseWriter, r *http.Request, entity *RequestBody) error {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
+	var (
+		body []byte
+		err  error
+	)
+	if body, err = ioutil.ReadAll(r.Body); err != nil {
 		(*w).WriteHeader(http.StatusInternalServerError)
 		logger.Println("Unable to read request body")
 		return err
 	}
 
-	err = json.Unmarshal(body, &entity)
-	if err != nil {
+	if err = json.Unmarshal(body, &entity); err != nil {
 		(*w).WriteHeader(http.StatusInternalServerError)
 		logger.Println("Json format is not comfortable")
 		return err
 	}
-
 	return nil
 }
 
