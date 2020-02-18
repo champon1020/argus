@@ -19,3 +19,26 @@
 [handler]2020/02/18 19:39:09 This is not POST request
 [repository]2020/02/18 19:39:22 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
 [repository]2020/02/18 19:39:23 Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '?WHERE id=?' at line 1
+[repository]2020/02/18 19:44:21 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
+[repository]2020/02/18 19:44:26 Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '?WHERE id=?' at line 1
+[repository]2020/02/18 19:45:47 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
+[repository]2020/02/18 19:45:50 Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '?WHERE id=?' at line 1
+[repository]2020/02/18 19:46:28 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
+[repository]2020/02/18 19:47:29 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
+[repository]2020/02/18 19:47:31 [{0 }]
+[repository]2020/02/18 19:48:10 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
+[repository]2020/02/18 19:48:11 [{-1 teste}]
+[repository]2020/02/18 19:49:54 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
+[repository]2020/02/18 19:49:55 [{-1 teste}] [{0 }]
+[repository]2020/02/18 19:56:54 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
+[repository]2020/02/18 19:56:58 map[0:{0 }]
+[repository]2020/02/18 19:56:58 [{-1 teste}] [{0 }]
+[repository]2020/02/18 19:57:24 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
+[repository]2020/02/18 19:57:25 map[0:{0 }]
+[repository]2020/02/18 19:57:25 [{-1 teste}] [{0 }]
+[repository]2020/02/18 19:57:58 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true
+[repository]2020/02/18 19:58:00 [{0 }]
+[repository]2020/02/18 19:58:00 [{-1 teste}] [{0 }]
+[repository]2020/02/18 19:59:16 []
+[repository]2020/02/18 19:59:16 [{-1 teste}] []
+[repository]2020/02/18 20:00:57 DataSource: root:mysql@tcp(127.0.0.1:43306)/argus?parseTime=true

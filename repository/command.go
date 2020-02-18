@@ -76,8 +76,8 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 
 		var newCategories, delCategories []Category
 		for i := 0; i < len(article.Categories); i++ {
-			if c, ok := cMap[article.Categories[i].Id]; !ok {
-				newCategories = append(newCategories, c)
+			if _, ok := cMap[article.Categories[i].Id]; !ok {
+				newCategories = append(newCategories, article.Categories[i])
 				continue
 			}
 			delete(cMap, article.Categories[i].Id)
@@ -101,23 +101,28 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		// insert new categories
 		go func() {
 			defer wg.Done()
-
-			a := Article{Id: article.Id, Categories: newCategories}
-			if err = InsertCategories(tx, newCategories); err != nil {
-				return
-			}
-			if err = a.InsertArticleCategory(tx); err != nil {
-				return
+			if len(newCategories) > 0 {
+				if err = categoriesIdConverter(mysql, &newCategories); err != nil {
+					return
+				}
+				a := Article{Id: article.Id, Categories: newCategories}
+				if err = InsertCategories(tx, newCategories); err != nil {
+					return
+				}
+				if err = a.InsertArticleCategory(tx); err != nil {
+					return
+				}
 			}
 		}()
 
 		// delete old categories
 		go func() {
 			defer wg.Done()
-
-			a := Article{Id: article.Id, Categories: delCategories}
-			if err = a.DeleteArticleCategoryByBoth(tx); err != nil {
-				return
+			if len(delCategories) > 0 {
+				a := Article{Id: article.Id, Categories: delCategories}
+				if err = a.DeleteArticleCategoryByBoth(tx); err != nil {
+					return
+				}
 			}
 		}()
 		wg.Wait()

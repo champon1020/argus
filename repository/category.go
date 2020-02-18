@@ -26,8 +26,8 @@ func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
 
 func (category *Category) UpdateCategory(tx *sql.Tx) (err error) {
 	cmd := "UPDATE categories " +
-		"SET name=?" +
-		"WHERE id=?"
+		"SET name=? " +
+		"WHERE id=? "
 
 	_, err = tx.Exec(cmd,
 		category.Name,

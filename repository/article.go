@@ -59,7 +59,7 @@ func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 
 func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 	cmd := "UPDATE articles " +
-		"SET title=?, create_date=?, update_date=?, content_url=?, image_url=?, private=?" +
+		"SET title=?, create_date=?, update_date=?, content_url=?, image_url=?, private=? " +
 		"WHERE id=?"
 
 	_, err = tx.Exec(cmd,
