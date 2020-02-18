@@ -7,14 +7,14 @@ import (
 )
 
 type Article struct {
-	Id         int        `json: "id"`
-	Title      string     `json: "title"`
-	Categories []Category `json: "categories"`
-	CreateDate time.Time  `json: "create_date"`
-	UpdateDate time.Time  `json: "update_date"`
-	ContentUrl string     `json: "content_url"`
-	ImageUrl   string     `json: "image_url"`
-	Private    bool       `json: "private"`
+	Id         int        `json:"id"`
+	Title      string     `json:"title"`
+	Categories []Category `json:"categories"`
+	CreateDate time.Time  `json:"create_date"`
+	UpdateDate time.Time  `json:"update_date"`
+	ContentUrl string     `json:"content_url"`
+	ImageUrl   string     `json:"image_url"`
+	Private    bool       `json:"private"`
 }
 
 func (article *Article) InsertArticle(tx *sql.Tx) (err error) {

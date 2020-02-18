@@ -5,8 +5,20 @@ import (
 	"sync"
 )
 
+/*
+Flow:
+	- Convert article id.
+	- Insert article.
+	- Sample new categories from article.Categories.
+	- Insert new categories.
+	- Insert the pair of article_id and category_ids.
+*/
 func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 	if err = articleIdConverter(mysql, &article); err != nil {
+		return
+	}
+
+	if err = categoriesIdConverter(mysql, &article.Categories); err != nil {
 		return
 	}
 
@@ -16,38 +28,23 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 
 		go func() {
 			defer wg.Done()
-			err = article.InsertArticle(tx)
-			if err != nil {
-				logger.ErrorPrintf(err)
+			if err = article.InsertArticle(tx); err != nil {
 				return
 			}
 		}()
 
 		go func() {
 			defer wg.Done()
-			err = article.InsertArticleCategory(tx)
-			if err != nil {
-				logger.ErrorPrintf(err)
+			if err = InsertCategories(tx, article.Categories); err != nil {
 				return
 			}
 		}()
 
 		go func() {
 			defer wg.Done()
-			innerWg := new(sync.WaitGroup)
-			for _, c := range article.Categories {
-				innerWg.Add(1)
-				go func() {
-					defer innerWg.Done()
-
-					err = c.InsertCategory(tx)
-					if err != nil {
-						logger.ErrorPrintf(err)
-						return
-					}
-				}()
+			if err = article.InsertArticleCategory(tx); err != nil {
+				return
 			}
-			innerWg.Wait()
 		}()
 
 		wg.Wait()
@@ -56,11 +53,19 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 	return
 }
 
+/*
+Flow:
+	- Get categories by article_id.
+	- Classify categories to new and old.
+	- Update article.
+	- Insert new categories.
+	- Insert the pair of article_id and new category_ids.
+	- Delete the pair of article_id and old category_ids.
+*/
 func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
 		nowCategories, err := article.FindArticleCategory(mysql.DB)
 		if err != nil {
-			logger.ErrorPrintf(err)
 			return
 		}
 
@@ -83,16 +88,25 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		}
 
 		wg := new(sync.WaitGroup)
-		wg.Add(2)
+		wg.Add(3)
+
+		// update article
+		go func() {
+			defer wg.Done()
+			if err = article.UpdateArticle(tx); err != nil {
+				return
+			}
+		}()
 
 		// insert new categories
 		go func() {
 			defer wg.Done()
 
 			a := Article{Id: article.Id, Categories: newCategories}
-			err = a.InsertArticleCategory(tx)
-			if err != nil {
-				logger.ErrorPrintf(err)
+			if err = InsertCategories(tx, newCategories); err != nil {
+				return
+			}
+			if err = a.InsertArticleCategory(tx); err != nil {
 				return
 			}
 		}()
@@ -102,9 +116,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 			defer wg.Done()
 
 			a := Article{Id: article.Id, Categories: delCategories}
-			err = a.DeleteArticleCategoryByBoth(tx)
-			if err != nil {
-				logger.ErrorPrintf(err)
+			if err = a.DeleteArticleCategoryByBoth(tx); err != nil {
 				return
 			}
 		}()
@@ -128,5 +140,20 @@ func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories 
 	if err != nil {
 		logger.ErrorPrintf(err)
 	}
+	return
+}
+
+func InsertCategories(tx *sql.Tx, categories []Category) (err error) {
+	wg := new(sync.WaitGroup)
+	for _, c := range categories {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err = c.InsertCategory(tx); err != nil {
+				return
+			}
+		}()
+	}
+	wg.Wait()
 	return
 }

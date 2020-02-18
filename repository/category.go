@@ -3,16 +3,15 @@ package repository
 import "database/sql"
 
 type Category struct {
-	Id   int    `json: "id"`
-	Name string `json: "name"`
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
 	cmd := "INSERT INTO categories (id, name) " +
-		"SELECT * FROM (SELECT ?, ?) AS tmp " +
+		"SELECT ?, ? " +
 		"WHERE NOT EXISTS (" +
-		"SELECT name FROM categories WHERE name=?)" +
-		"LIMIT 1"
+		"SELECT name FROM categories WHERE name=?)"
 
 	_, err = tx.Exec(cmd,
 		category.Id,
@@ -20,7 +19,7 @@ func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
 		category.Name)
 
 	if err != nil {
-		logger.ErrorPrintf(err)
+		logger.ErrorMsgPrintf("InsertCategory", err)
 	}
 	return
 }

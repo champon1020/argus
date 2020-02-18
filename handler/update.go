@@ -9,7 +9,7 @@ import (
 )
 
 func UpdateArticleHandler(c *gin.Context) {
-	body, err := RootHandler(c.Writer, c.Request, "POST")
+	body, err := RootHandler(c.Writer, c.Request, "PUT")
 	if err != nil {
 		return
 	}

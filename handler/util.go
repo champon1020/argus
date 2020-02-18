@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"time"
 
 	"github.com/champon1020/argus/repository"
 
@@ -12,7 +13,7 @@ import (
 )
 
 type RequestBody struct {
-	Article repository.Article `json: "article"`
+	Article repository.Article `json:"article"`
 }
 
 var logger argus.Logger
@@ -45,6 +46,11 @@ func Validation(w *http.ResponseWriter, r *http.Request, method string, contentT
 	return
 }
 
+type Checkin struct {
+	Timestamp time.Time `json:"timestamp"`
+	User      string    `json:"user"`
+}
+
 func ParseRequestBody(w *http.ResponseWriter, r *http.Request, entity *RequestBody) error {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -53,7 +59,7 @@ func ParseRequestBody(w *http.ResponseWriter, r *http.Request, entity *RequestBo
 		return err
 	}
 
-	err = json.Unmarshal(body, entity)
+	err = json.Unmarshal(body, &entity)
 	if err != nil {
 		(*w).WriteHeader(http.StatusInternalServerError)
 		logger.Println("Json format is not comfortable")

@@ -36,7 +36,7 @@ func NewRouter() *gin.Engine {
 
 	update := router.Group("/update", handler.UpdateArticleHandler)
 	{
-		update.PUT("/article/id/:id")
+		update.PUT("/article")
 	}
 
 	return router
