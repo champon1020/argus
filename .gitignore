@@ -3,3 +3,4 @@ cmd/argus
 token.json
 config.json
 script/**
+logs/debug.log
