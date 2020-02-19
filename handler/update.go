@@ -12,10 +12,15 @@ func UpdateArticleHandler(c *gin.Context) {
 	var (
 		body RequestBody
 		err  error
+		w    http.ResponseWriter
 	)
 
-	if body, err = RootHandler(c.Writer, c.Request, "PUT"); err != nil {
-		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+	w = c.Writer
+	if isErr := Validation(&w, c.Request, "PUT", "application/json"); isErr {
+		return
+	}
+
+	if err = ParseRequestBody(&w, c.Request, &body); err != nil {
 		return
 	}
 
