@@ -58,8 +58,8 @@ func ToSnakeCase(str string) (snake string) {
 }
 
 func articleIdConverter(mysql MySQL, article *Article) (err error) {
-	idList, err := GetEmptyMinId(mysql.DB, "articles", 1)
-	if err != nil {
+	var idList []int
+	if idList, err = GetEmptyMinId(mysql.DB, "articles", 1); err != nil {
 		return
 	}
 
@@ -68,8 +68,8 @@ func articleIdConverter(mysql MySQL, article *Article) (err error) {
 }
 
 func categoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
-	idList, err := GetEmptyMinId(mysql.DB, "categories", len(*categories))
-	if err != nil {
+	var idList []int
+	if idList, err = GetEmptyMinId(mysql.DB, "categories", len(*categories)); err != nil {
 		return
 	}
 

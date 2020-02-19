@@ -1,2 +1,4 @@
 # argus
-My blog (API)
+
+## Description
+My blog's server side api.

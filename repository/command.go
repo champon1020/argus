@@ -134,17 +134,11 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 
 func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Article, err error) {
 	articles, err = article.FindArticle(mysql.DB, argFlg)
-	if err != nil {
-		logger.ErrorPrintf(err)
-	}
 	return
 }
 
 func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories []Category, err error) {
 	categories, err = category.FindCategory(mysql.DB, argFlg)
-	if err != nil {
-		logger.ErrorPrintf(err)
-	}
 	return
 }
 

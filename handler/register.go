@@ -9,13 +9,23 @@ import (
 )
 
 func RegisterArticleHandler(c *gin.Context) {
-	body, err := RootHandler(c.Writer, c.Request, "POST")
-	if err != nil {
+	var (
+		body RequestBody
+		err  error
+		w    http.ResponseWriter
+	)
+
+	w = c.Writer
+	if isErr := Validation(&w, c.Request, "POST", "application/json"); isErr {
 		return
 	}
 
-	err = repository.RegisterArticleCmd(mysql, body.Article)
-	if err != nil {
+	if err = ParseRequestBody(&w, c.Request, &body); err != nil {
+		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+		return
+	}
+
+	if err = repository.RegisterArticleCmd(mysql, body.Article); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return
 	}

@@ -3,9 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"reflect"
-	"time"
 
 	"github.com/champon1020/argus/repository"
 
@@ -16,10 +16,19 @@ type RequestBody struct {
 	Article repository.Article `json:"article"`
 }
 
-var logger argus.Logger
+var (
+	logger argus.Logger
+	mysql  repository.MySQL
+	config argus.Config
+	DBNAME = "argus"
+)
 
 func init() {
 	logger.NewLogger("[handler]")
+	config.Load()
+	if err := mysql.Connect(config.DevDb, DBNAME); err != nil {
+		log.Fatalf("%v\n", err)
+	}
 }
 
 func Validation(w *http.ResponseWriter, r *http.Request, method string, contentType string) (isErr bool) {
@@ -46,26 +55,22 @@ func Validation(w *http.ResponseWriter, r *http.Request, method string, contentT
 	return
 }
 
-type Checkin struct {
-	Timestamp time.Time `json:"timestamp"`
-	User      string    `json:"user"`
-}
-
 func ParseRequestBody(w *http.ResponseWriter, r *http.Request, entity *RequestBody) error {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
+	var (
+		body []byte
+		err  error
+	)
+	if body, err = ioutil.ReadAll(r.Body); err != nil {
 		(*w).WriteHeader(http.StatusInternalServerError)
 		logger.Println("Unable to read request body")
 		return err
 	}
 
-	err = json.Unmarshal(body, &entity)
-	if err != nil {
+	if err = json.Unmarshal(body, &entity); err != nil {
 		(*w).WriteHeader(http.StatusInternalServerError)
 		logger.Println("Json format is not comfortable")
 		return err
 	}
-
 	return nil
 }
 

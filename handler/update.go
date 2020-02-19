@@ -9,13 +9,22 @@ import (
 )
 
 func UpdateArticleHandler(c *gin.Context) {
-	body, err := RootHandler(c.Writer, c.Request, "PUT")
-	if err != nil {
+	var (
+		body RequestBody
+		err  error
+		w    http.ResponseWriter
+	)
+
+	w = c.Writer
+	if isErr := Validation(&w, c.Request, "PUT", "application/json"); isErr {
 		return
 	}
 
-	err = repository.UpdateArticleCmd(mysql, body.Article)
-	if err != nil {
+	if err = ParseRequestBody(&w, c.Request, &body); err != nil {
+		return
+	}
+
+	if err = repository.UpdateArticleCmd(mysql, body.Article); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return
 	}
