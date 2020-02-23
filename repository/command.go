@@ -14,11 +14,11 @@ Flow:
 	- Insert the pair of article_id and category_ids.
 */
 func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
-	if err = articleIdConverter(mysql, &article); err != nil {
+	if err = ArticleIdConverter(mysql, &article); err != nil {
 		return
 	}
 
-	if err = categoriesIdConverter(mysql, &article.Categories); err != nil {
+	if err = CategoriesIdConverter(mysql, &article.Categories); err != nil {
 		return
 	}
 
@@ -102,7 +102,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		go func() {
 			defer wg.Done()
 			if len(newCategories) > 0 {
-				if err = categoriesIdConverter(mysql, &newCategories); err != nil {
+				if err = CategoriesIdConverter(mysql, &newCategories); err != nil {
 					return
 				}
 				a := Article{Id: article.Id, Categories: newCategories}

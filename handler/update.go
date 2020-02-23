@@ -16,10 +16,6 @@ func UpdateArticleHandler(c *gin.Context) {
 	)
 
 	w = c.Writer
-	if isErr := Validation(&w, c.Request, "PUT", "application/json"); isErr {
-		return
-	}
-
 	if err = ParseRequestBody(&w, c.Request, &body); err != nil {
 		return
 	}

@@ -15,6 +15,10 @@ type QueryParam struct {
 	Article repository.Article
 }
 
+type ResponseType struct {
+	Articles []repository.Article `json:"articles"`
+}
+
 func parseQueryParam(param *QueryParam, c *gin.Context) (err error) {
 	param.Article.Id, err = strconv.Atoi(c.Query("id"))
 	param.Article.Title = c.Query("title")
@@ -28,26 +32,61 @@ func parseQueryParam(param *QueryParam, c *gin.Context) (err error) {
 
 func FindArticleHandler(c *gin.Context) {
 	var (
-		param QueryParam
-		err   error
-		res   []repository.Article
-		w     http.ResponseWriter
+		err error
+		res []repository.Article
 	)
 
-	w = c.Writer
-	if isErr := Validation(&w, c.Request, "GET", "application/json"); isErr {
+	if res, err = repository.FindArticleCmd(mysql, repository.Article{}, 0); err != nil {
 		return
 	}
 
-	if err = parseQueryParam(&param, c); err != nil {
-		logger.ErrorPrintf(err)
-		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+	fmt.Fprint(c.Writer, res)
+}
+
+func FindArticleHandlerByTitle(c *gin.Context) {
+	var (
+		argArticle repository.Article
+		err        error
+		res        []repository.Article
+		argFlg     uint32
+	)
+
+	argArticle.Title = c.Query("title")
+
+	argFlg = 1 << 2
+	if res, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
 		return
 	}
 
-	logger.Println(param)
+	fmt.Fprint(c.Writer, res)
+}
 
-	if res, err = repository.FindArticleCmd(mysql, param.Article, 0); err != nil {
+func FindArticleHandlerByCreateDate(c *gin.Context) {
+	var (
+		argArticle repository.Article
+		err        error
+		res        []repository.Article
+		argFlg     uint32
+	)
+
+	argFlg = 1 << 4
+	if res, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
+		return
+	}
+
+	fmt.Fprint(c.Writer, res)
+}
+
+func FindArticleHandlerByCategory(c *gin.Context) {
+	var (
+		argArticle repository.Article
+		err        error
+		res        []repository.Article
+	)
+
+	// add parameter handling
+
+	if res, err = repository.FindArticleCmd(mysql, argArticle, 0); err != nil {
 		return
 	}
 
@@ -58,13 +97,7 @@ func FindCategoryHandler(c *gin.Context) {
 	var (
 		err error
 		res []repository.Category
-		w   http.ResponseWriter
 	)
-
-	w = c.Writer
-	if isErr := Validation(&w, c.Request, "GET", "application/json"); isErr {
-		return
-	}
 
 	if res, err = repository.FindCategoryCmd(mysql, repository.Category{}, 0); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
