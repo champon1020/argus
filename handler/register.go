@@ -16,10 +16,6 @@ func RegisterArticleHandler(c *gin.Context) {
 	)
 
 	w = c.Writer
-	if isErr := Validation(&w, c.Request, "POST", "application/json"); isErr {
-		return
-	}
-
 	if err = ParseRequestBody(&w, c.Request, &body); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return

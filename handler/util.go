@@ -31,30 +31,6 @@ func init() {
 	}
 }
 
-func Validation(w *http.ResponseWriter, r *http.Request, method string, contentType string) (isErr bool) {
-	isErr = true
-	if r.Method != method {
-		(*w).WriteHeader(http.StatusBadRequest)
-		logger.Printf("This is not %s request\n", method)
-		return
-	}
-
-	if r.Header.Get("Content-Type") != contentType {
-		(*w).WriteHeader(http.StatusBadRequest)
-		logger.Printf("Content-Type is not %s\n", contentType)
-		return
-	}
-
-	if l := r.ContentLength; l == 0 {
-		(*w).WriteHeader(http.StatusInternalServerError)
-		logger.Println("Content-Length is 0")
-		return
-	}
-
-	isErr = false
-	return
-}
-
 func ParseRequestBody(w *http.ResponseWriter, r *http.Request, entity *RequestBody) error {
 	var (
 		body []byte

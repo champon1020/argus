@@ -1,0 +1,171 @@
+openapi: 3.0.0
+
+info:
+  title: argus
+  description: My blog
+  version: 1.0.0
+
+paths:
+  /find/article/list:
+    get:
+      summary: Return a list of articles.
+      responses:
+        '200':
+          description: A JSON array of articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+  /find/article/list/title:
+    get:
+      summary: Return a list of article by title.
+      parameters:
+        - name: title
+          in: path
+          required: true
+          description: A title of article.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A JSON array of articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+  /find/article/list/create-date:
+    get:
+      summary: Return a list of article by title.
+      parameters:
+        - name: create_date
+          in: path
+          required: true
+          description: A created date of article.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON array of articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+  /find/article/list/category:
+    get:
+      summary: Return a list of article by title.
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: A category name which an article has.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON array of articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+  /find/category/list:
+    get:
+      summary: Return a list of categories.
+      responses:
+        '200':
+          description: A JSON array of cateogries.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+  /register/article:
+    post:
+      summary: Register new article.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                articles:
+                  $ref: '#/components/schemas/Article'
+      responses:
+        '200':
+          description: Success
+        '503':
+          description: Failed
+  /update/article:
+    put:
+      summary: Register new article.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                articles:
+                  $ref: '#/components/schemas/Article'
+      responses:
+        '200':
+          description: Success
+        '503':
+          description: Failed
+
+components:
+  schemas:
+    Article:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        create_date:
+          type: string
+        update_date:
+          type: string
+        content_url:
+          type: string
+        image_url:
+          type: string
+        private:
+          type: boolean
+    Category:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        article_num:
+          type: number

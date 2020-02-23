@@ -15,6 +15,10 @@ type QueryParam struct {
 	Article repository.Article
 }
 
+type ResponseType struct {
+	Articles []repository.Article `json:"articles"`
+}
+
 func parseQueryParam(param *QueryParam, c *gin.Context) (err error) {
 	param.Article.Id, err = strconv.Atoi(c.Query("id"))
 	param.Article.Title = c.Query("title")
@@ -31,13 +35,7 @@ func FindArticleHandler(c *gin.Context) {
 		param QueryParam
 		err   error
 		res   []repository.Article
-		w     http.ResponseWriter
 	)
-
-	w = c.Writer
-	if isErr := Validation(&w, c.Request, "GET", "application/json"); isErr {
-		return
-	}
 
 	if err = parseQueryParam(&param, c); err != nil {
 		logger.ErrorPrintf(err)
@@ -45,6 +43,7 @@ func FindArticleHandler(c *gin.Context) {
 		return
 	}
 
+	// debug
 	logger.Println(param)
 
 	if res, err = repository.FindArticleCmd(mysql, param.Article, 0); err != nil {
@@ -58,13 +57,7 @@ func FindCategoryHandler(c *gin.Context) {
 	var (
 		err error
 		res []repository.Category
-		w   http.ResponseWriter
 	)
-
-	w = c.Writer
-	if isErr := Validation(&w, c.Request, "GET", "application/json"); isErr {
-		return
-	}
 
 	if res, err = repository.FindCategoryCmd(mysql, repository.Category{}, 0); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
