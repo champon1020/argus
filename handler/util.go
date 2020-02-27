@@ -17,16 +17,17 @@ type RequestBody struct {
 }
 
 var (
-	logger argus.Logger
-	mysql  repository.MySQL
-	config argus.Config
-	DBNAME = "argus"
+	logger         argus.Logger
+	mysql          repository.MySQL
+	configurations argus.Configurations
+	config         argus.Config
+	DBNAME         = "argus"
 )
 
 func init() {
 	logger.NewLogger("[handler]")
-	config.Load()
-	if err := mysql.Connect(config.DevDb, DBNAME); err != nil {
+	config = configurations.Load()
+	if err := mysql.Connect(config.Db); err != nil {
 		log.Fatalf("%v\n", err)
 	}
 }
