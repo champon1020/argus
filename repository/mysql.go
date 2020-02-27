@@ -8,26 +8,27 @@ import (
 )
 
 var (
-	logger argus.Logger
-	config argus.Config
+	logger         argus.Logger
+	configurations argus.Configurations
+	config         argus.Config
 )
 
 func init() {
 	logger.NewLogger("[repository]")
-	config.Load()
+	config = configurations.Load()
 }
 
 type MySQL struct {
 	*sql.DB
 }
 
-func (mysql *MySQL) Connect(config argus.DbConf, dbName string) (err error) {
+func (mysql *MySQL) Connect(config argus.DbConf) (err error) {
 	dataSourceName :=
 		config.User + ":" +
 			config.Pass + "@tcp(" +
 			config.Host + ":" +
 			config.Port + ")/" +
-			dbName + "?parseTime=true"
+			config.DbName + "?parseTime=true"
 
 	logger.Printf("DataSource: %s\n", dataSourceName)
 	if mysql.DB, err = sql.Open("mysql", dataSourceName); err != nil {

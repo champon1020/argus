@@ -18,7 +18,8 @@ func init() {
 }
 
 func (l *Logger) NewLogger(prefix string) {
-	logfile, err := os.OpenFile("logs/debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logfileDir := os.Getenv("ARGUS_LOG_PATH")
+	logfile, err := os.OpenFile(logfileDir+"debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Printf("Unable to open log file: %s\n", err)
 		l.SetOutput(os.Stdout)
