@@ -6,6 +6,10 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/champon1020/argus/repository"
 
@@ -49,6 +53,28 @@ func ParseRequestBody(w *http.ResponseWriter, r *http.Request, entity *RequestBo
 		return err
 	}
 	return nil
+}
+
+func parseToJson(st interface{}, c *gin.Context) (res string, err error) {
+	var bytes []byte
+	if bytes, err = json.Marshal(&st); err != nil {
+		logger.ErrorPrintf(err)
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	res = string(bytes)
+	return
+}
+
+func parseQueryParam(param *QueryParam, c *gin.Context) (err error) {
+	param.Article.Id, err = strconv.Atoi(c.Query("id"))
+	param.Article.Title = c.Query("title")
+	param.Article.CreateDate, err = time.Parse(time.RFC3339, c.Query("create_date"))
+	param.Article.UpdateDate, err = time.Parse(time.RFC3339, c.Query("update_date"))
+	param.Article.ContentUrl = c.Query("content_url")
+	param.Article.ImageUrl = c.Query("image_url")
+	param.Article.Private, err = strconv.ParseBool(c.Query("private"))
+	return
 }
 
 func GenFlg(st interface{}, fieldNames ...string) (flg int) {
