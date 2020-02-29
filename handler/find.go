@@ -28,6 +28,7 @@ func FindArticleHandler(c *gin.Context) {
 		response string
 	)
 
+	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, repository.Article{}, 0); err != nil {
 		return
 	}
@@ -52,6 +53,7 @@ func FindArticleHandlerByTitle(c *gin.Context) {
 	argArticle.Title = c.Query("title")
 
 	argFlg = 1 << 2
+	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
 		return
 	}
@@ -74,6 +76,7 @@ func FindArticleHandlerByCreateDate(c *gin.Context) {
 	)
 
 	argFlg = 1 << 4
+	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
 		return
 	}
@@ -96,6 +99,7 @@ func FindArticleHandlerByCategory(c *gin.Context) {
 
 	// add parameter handling
 
+	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, 0); err != nil {
 		return
 	}
@@ -115,6 +119,7 @@ func FindCategoryHandler(c *gin.Context) {
 		response   string
 	)
 
+	mysql := repository.GlobalMysql
 	if categories, err = repository.FindCategoryCmd(mysql, repository.Category{}, 0); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return

@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -20,20 +19,10 @@ type RequestBody struct {
 	Article repository.Article `json:"article"`
 }
 
-var (
-	logger         argus.Logger
-	mysql          repository.MySQL
-	configurations argus.Configurations
-	config         argus.Config
-	DBNAME         = "argus"
-)
+var logger argus.Logger
 
 func init() {
 	logger.NewLogger("[handler]")
-	config = configurations.Load()
-	if err := mysql.Connect(config.Db); err != nil {
-		log.Fatalf("%v\n", err)
-	}
 }
 
 func ParseRequestBody(w *http.ResponseWriter, r *http.Request, entity *RequestBody) error {

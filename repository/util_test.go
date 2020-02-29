@@ -32,6 +32,8 @@ func TestGenArgsSliceIsLimit(t *testing.T) {
 		article        Article
 		configurations argus.Configurations
 	)
+	configurations.New("dev")
+
 	argsFlg = 1 << 1
 	article.Title = "test"
 	args := GenArgsSliceIsLimit(argsFlg, article, true)
@@ -45,7 +47,7 @@ func TestGenArgsSliceIsLimit(t *testing.T) {
 		t.Fatalf("value of args[0]: %v, actual: %v\n", args[0], actual1)
 	}
 
-	config := configurations.Load()
+	config := argus.GlobalConfig
 	actual2 := config.Web.MaxViewArticleNum
 	if args[1] != actual2 {
 		t.Fatalf("value of args[1]: %v, actual: %v\n", args[1], actual2)

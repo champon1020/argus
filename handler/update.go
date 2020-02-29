@@ -20,6 +20,7 @@ func UpdateArticleHandler(c *gin.Context) {
 		return
 	}
 
+	mysql := repository.GlobalMysql
 	if err = repository.UpdateArticleCmd(mysql, body.Article); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return
