@@ -1,18 +1,29 @@
 package main
 
 import (
+	"flag"
+
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/handler"
+	"github.com/champon1020/argus/repository"
 	"github.com/gin-gonic/gin"
 )
 
-var logger argus.Logger
+var (
+	logger  argus.Logger
+	configs argus.Configurations
+)
 
 func init() {
 	logger.NewLogger("[main]")
 }
 
 func main() {
+	flag.Parse()
+
+	configs.New(flag.Arg(0))
+	repository.NewMysql()
+
 	r := NewRouter()
 	r.Run(":8080")
 }

@@ -150,13 +150,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Category"
-        create_date:
+        createDate:
           type: string
-        update_date:
+        updateDate:
           type: string
-        content_url:
+        contentUrl:
           type: string
-        image_url:
+        imageUrl:
           type: string
         private:
           type: boolean
@@ -167,5 +167,5 @@ components:
           type: number
         name:
           type: string
-        article_num:
+        articleNum:
           type: number

@@ -10,10 +10,10 @@ type Article struct {
 	Id         int        `json:"id"`
 	Title      string     `json:"title"`
 	Categories []Category `json:"categories"`
-	CreateDate time.Time  `json:"create_date"`
-	UpdateDate time.Time  `json:"update_date"`
-	ContentUrl string     `json:"content_url"`
-	ImageUrl   string     `json:"image_url"`
+	CreateDate time.Time  `json:"createDate"`
+	UpdateDate time.Time  `json:"updateDate"`
+	ContentUrl string     `json:"contentUrl"`
+	ImageUrl   string     `json:"imageUrl"`
 	Private    bool       `json:"private"`
 }
 

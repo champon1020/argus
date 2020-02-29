@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/champon1020/argus"
 )
 
 func GenArgsSlice(argsFlg uint32, st interface{}) []interface{} {
@@ -23,7 +25,7 @@ func GenArgsSliceLogic(argsFlg uint32, st interface{}, isLimit bool) (args []int
 		}
 	}
 	if isLimit {
-		args = append(args, config.Web.MaxViewArticleNum)
+		args = append(args, argus.GlobalConfig.Web.MaxViewArticleNum)
 	}
 	return
 }

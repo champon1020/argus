@@ -21,6 +21,7 @@ func RegisterArticleHandler(c *gin.Context) {
 		return
 	}
 
+	mysql := repository.GlobalMysql
 	if err = repository.RegisterArticleCmd(mysql, body.Article); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return

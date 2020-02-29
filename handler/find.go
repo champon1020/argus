@@ -3,8 +3,6 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -19,90 +17,118 @@ type ResponseType struct {
 	Articles []repository.Article `json:"articles"`
 }
 
-func parseQueryParam(param *QueryParam, c *gin.Context) (err error) {
-	param.Article.Id, err = strconv.Atoi(c.Query("id"))
-	param.Article.Title = c.Query("title")
-	param.Article.CreateDate, err = time.Parse(time.RFC3339, c.Query("create_date"))
-	param.Article.UpdateDate, err = time.Parse(time.RFC3339, c.Query("update_date"))
-	param.Article.ContentUrl = c.Query("content_url")
-	param.Article.ImageUrl = c.Query("image_url")
-	param.Article.Private, err = strconv.ParseBool(c.Query("private"))
-	return
+type CategoryResponseType struct {
+	Categories []repository.Category `json:"categories"`
 }
 
 func FindArticleHandler(c *gin.Context) {
 	var (
-		err error
-		res []repository.Article
+		err      error
+		articles []repository.Article
+		response string
 	)
 
-	if res, err = repository.FindArticleCmd(mysql, repository.Article{}, 0); err != nil {
+	mysql := repository.GlobalMysql
+	if articles, err = repository.FindArticleCmd(mysql, repository.Article{}, 0); err != nil {
 		return
 	}
 
-	fmt.Fprint(c.Writer, res)
+	res := ResponseType{Articles: articles}
+	if response, err = parseToJson(&res, c); err != nil {
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
 }
 
 func FindArticleHandlerByTitle(c *gin.Context) {
 	var (
 		argArticle repository.Article
+		articles   []repository.Article
+		response   string
 		err        error
-		res        []repository.Article
 		argFlg     uint32
 	)
 
 	argArticle.Title = c.Query("title")
 
 	argFlg = 1 << 2
-	if res, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
+	mysql := repository.GlobalMysql
+	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
 		return
 	}
 
-	fmt.Fprint(c.Writer, res)
+	res := ResponseType{Articles: articles}
+	if response, err = parseToJson(&res, c); err != nil {
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
 }
 
 func FindArticleHandlerByCreateDate(c *gin.Context) {
 	var (
 		argArticle repository.Article
+		articles   []repository.Article
+		response   string
 		err        error
-		res        []repository.Article
 		argFlg     uint32
 	)
 
 	argFlg = 1 << 4
-	if res, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
+	mysql := repository.GlobalMysql
+	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
 		return
 	}
 
-	fmt.Fprint(c.Writer, res)
+	res := ResponseType{Articles: articles}
+	if response, err = parseToJson(&res, c); err != nil {
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
 }
 
 func FindArticleHandlerByCategory(c *gin.Context) {
 	var (
 		argArticle repository.Article
+		articles   []repository.Article
+		response   string
 		err        error
-		res        []repository.Article
 	)
 
 	// add parameter handling
 
-	if res, err = repository.FindArticleCmd(mysql, argArticle, 0); err != nil {
+	mysql := repository.GlobalMysql
+	if articles, err = repository.FindArticleCmd(mysql, argArticle, 0); err != nil {
 		return
 	}
 
-	fmt.Fprint(c.Writer, res)
+	res := ResponseType{Articles: articles}
+	if response, err = parseToJson(&res, c); err != nil {
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
 }
 
 func FindCategoryHandler(c *gin.Context) {
 	var (
-		err error
-		res []repository.Category
+		err        error
+		categories []repository.Category
+		response   string
 	)
 
-	if res, err = repository.FindCategoryCmd(mysql, repository.Category{}, 0); err != nil {
+	mysql := repository.GlobalMysql
+	if categories, err = repository.FindCategoryCmd(mysql, repository.Category{}, 0); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Fprint(c.Writer, res)
+	res := CategoryResponseType{Categories: categories}
+	if response, err = parseToJson(&res, c); err != nil {
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
 }

@@ -2,24 +2,29 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/champon1020/argus"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
-	logger         argus.Logger
-	configurations argus.Configurations
-	config         argus.Config
+	logger      argus.Logger
+	GlobalMysql MySQL
 )
 
 func init() {
 	logger.NewLogger("[repository]")
-	config = configurations.Load()
 }
 
 type MySQL struct {
 	*sql.DB
+}
+
+func NewMysql() {
+	if err := GlobalMysql.Connect(argus.GlobalConfig.Db); err != nil {
+		log.Fatalf("%v\n", err)
+	}
 }
 
 func (mysql *MySQL) Connect(config argus.DbConf) (err error) {
