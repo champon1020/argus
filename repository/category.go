@@ -57,13 +57,14 @@ func (category *Category) DeleteArticleCategoryByCategory(tx *sql.Tx) (err error
 	return
 }
 
-func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []Category, err error) {
-	args := GenArgsSlice(argsFlg, category)
-	whereQuery := GenArgsQuery(argsFlg, category)
-	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id"
+func (category *Category) FindArticleNumFromArticleCategory(db *sql.DB) (articleNum int, err error) {
+	cmd := "SELECT COUNT(article_id) FROM article_category WHERE category_id=?"
 
-	rows, err := db.Query(query, args...)
+	rows, err := db.Query(cmd, category.Id)
 	defer func() {
+		if rows == nil {
+			return
+		}
 		if err := rows.Close(); err != nil {
 			logger.ErrorPrintf(err)
 		}
@@ -80,13 +81,60 @@ func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories [
 	}
 
 	for rows.Next() {
-		var c Category
+		if err := rows.Scan(
+			&articleNum); err != nil {
+			logger.ErrorPrintf(err)
+		}
+	}
+	return
+}
+
+type CategoryResponse struct {
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	ArticleNum int    `json:"articleNum"`
+}
+
+func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []CategoryResponse, err error) {
+	args := GenArgsSlice(argsFlg, category)
+	whereQuery := GenArgsQuery(argsFlg, category)
+	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id"
+
+	rows, err := db.Query(query, args...)
+	defer func() {
+		if rows == nil {
+			return
+		}
+		if err := rows.Close(); err != nil {
+			logger.ErrorPrintf(err)
+		}
+	}()
+
+	if err != nil {
+		logger.ErrorPrintf(err)
+		return
+	}
+
+	if rows == nil {
+		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
+		return
+	}
+
+	for rows.Next() {
+		var (
+			c          Category
+			articleNum int
+		)
 		if err := rows.Scan(
 			&c.Id,
 			&c.Name); err != nil {
 			logger.ErrorPrintf(err)
 		}
-		categories = append(categories, c)
+		if articleNum, err = c.FindArticleNumFromArticleCategory(db); err != nil {
+			return
+		}
+
+		categories = append(categories, CategoryResponse{Id: c.Id, Name: c.Name, ArticleNum: articleNum})
 	}
 	return
 }

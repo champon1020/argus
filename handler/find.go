@@ -18,7 +18,7 @@ type ResponseType struct {
 }
 
 type CategoryResponseType struct {
-	Categories []repository.Category `json:"categories"`
+	Categories []repository.CategoryResponse `json:"categories"`
 }
 
 func FindArticleHandler(c *gin.Context) {
@@ -115,7 +115,7 @@ func FindArticleHandlerByCategory(c *gin.Context) {
 func FindCategoryHandler(c *gin.Context) {
 	var (
 		err        error
-		categories []repository.Category
+		categories []repository.CategoryResponse
 		response   string
 	)
 
