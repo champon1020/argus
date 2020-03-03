@@ -137,7 +137,7 @@ func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Art
 	return
 }
 
-func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories []Category, err error) {
+func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories []CategoryResponse, err error) {
 	categories, err = category.FindCategory(mysql.DB, argFlg)
 	return
 }

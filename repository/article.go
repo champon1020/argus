@@ -119,6 +119,9 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 
 	rows, err := db.Query(query, args...)
 	defer func() {
+		if rows == nil {
+			return
+		}
 		if err := rows.Close(); err != nil {
 			logger.ErrorPrintf(err)
 		}
@@ -167,6 +170,9 @@ func (article *Article) FindArticleCategory(db *sql.DB) (categories []Category, 
 
 	rows, err := db.Query(query, article.Id)
 	defer func() {
+		if rows == nil {
+			return
+		}
 		if err := rows.Close(); err != nil {
 			logger.ErrorPrintf(err)
 		}
