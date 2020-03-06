@@ -8,6 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type RequestBody struct {
+	Article  repository.Article `json:"article"`
+	Contents string             `json:"contents"`
+}
+
 func RegisterArticleHandler(c *gin.Context) {
 	var (
 		body RequestBody

@@ -28,10 +28,3 @@ CREATE TABLE IF NOT EXISTS article_category(
         references categories (id)
         on delete cascade on update cascade
 );
-
-CREATE TABLE IF NOT EXISTS authenticate(
-    id int not null primary key,
-    username varchar(50) not null,
-    password varchar(256) not null,
-    role varchar(32) not null
-);

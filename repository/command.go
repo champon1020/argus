@@ -3,6 +3,8 @@ package repository
 import (
 	"database/sql"
 	"sync"
+
+	"github.com/champon1020/argus/service"
 )
 
 /*
@@ -18,36 +20,26 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 		return
 	}
 
-	if err = CategoriesIdConverter(mysql, &article.Categories); err != nil {
+	var newCa []Category
+	if newCa, _, err = ExtractCategory(mysql.DB, article); err != nil {
 		return
 	}
+	if err = CategoriesIdConverter(mysql, &newCa); err != nil {
+		return
+	}
+	article.Categories = newCa
 
+	// Start transaction
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
-		wg := new(sync.WaitGroup)
-		wg.Add(3)
-
-		go func() {
-			defer wg.Done()
-			if err = article.InsertArticle(tx); err != nil {
-				return
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			if err = InsertCategories(tx, article.Categories); err != nil {
-				return
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			if err = article.InsertArticleCategory(tx); err != nil {
-				return
-			}
-		}()
-
-		wg.Wait()
+		if err = InsertCategories(tx, newCa); err != nil {
+			return
+		}
+		if err = article.InsertArticle(tx); err != nil {
+			return
+		}
+		if err = article.InsertArticleCategory(tx); err != nil {
+			return
+		}
 		return
 	})
 	return
@@ -63,30 +55,16 @@ Flow:
 	- Delete the pair of article_id and old category_ids.
 */
 func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
+	var newCa, delCa []Category
+	if newCa, delCa, err = ExtractCategory(mysql.DB, article); err != nil {
+		return
+	}
+	if err = CategoriesIdConverter(mysql, &newCa); err != nil {
+		return
+	}
+
+	// Start transaction
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
-		nowCategories, err := article.FindCategoryByArticleId(mysql.DB)
-		if err != nil {
-			return
-		}
-
-		cMap := map[string]Category{}
-		for _, c := range nowCategories {
-			cMap[c.Name] = c
-		}
-
-		var newCategories, delCategories []Category
-		for i := 0; i < len(article.Categories); i++ {
-			if _, ok := cMap[article.Categories[i].Name]; !ok {
-				newCategories = append(newCategories, article.Categories[i])
-				continue
-			}
-			delete(cMap, article.Categories[i].Name)
-		}
-
-		for _, c := range cMap {
-			delCategories = append(delCategories, c)
-		}
-
 		wg := new(sync.WaitGroup)
 		wg.Add(3)
 
@@ -101,33 +79,29 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		// insert new categories
 		go func() {
 			defer wg.Done()
-			if len(newCategories) > 0 {
-				if err = CategoriesIdConverter(mysql, &newCategories); err != nil {
-					return
-				}
-				a := Article{Id: article.Id, Categories: newCategories}
-				if err = InsertCategories(tx, newCategories); err != nil {
-					return
-				}
-				if err = a.InsertArticleCategory(tx); err != nil {
-					return
-				}
+			if err = CategoriesIdConverter(mysql, &newCa); err != nil {
+				return
+			}
+			a := Article{Id: article.Id, Categories: newCa}
+			if err = InsertCategories(tx, newCa); err != nil {
+				return
+			}
+			if err = a.InsertArticleCategory(tx); err != nil {
+				return
 			}
 		}()
 
 		// delete old categories
 		go func() {
 			defer wg.Done()
-			if len(delCategories) > 0 {
-				a := Article{Id: article.Id, Categories: delCategories}
-				if err = a.DeleteArticleCategoryByBoth(tx); err != nil {
-					return
-				}
+			a := Article{Id: article.Id, Categories: delCa}
+			if err = a.DeleteArticleCategoryByBoth(tx); err != nil {
+				return
 			}
 		}()
 		wg.Wait()
 
-		return err
+		return
 	})
 	return
 }
@@ -148,6 +122,7 @@ func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories 
 	return
 }
 
+// Insert category array to categories table.
 func InsertCategories(tx *sql.Tx, categories []Category) (err error) {
 	wg := new(sync.WaitGroup)
 	for _, c := range categories {
@@ -160,5 +135,51 @@ func InsertCategories(tx *sql.Tx, categories []Category) (err error) {
 		}()
 	}
 	wg.Wait()
+	return
+}
+
+// Extract new, exist, or deleted category
+// from category array found by article_id from article_category table.
+// - newCa: categories which are added to inserted or updated article
+// - delCa: categories which are removed from inserted or updated article
+func ExtractCategory(db *sql.DB, article Article) (newCa, delCa []Category, err error) {
+	var existCa, bufCa []Category
+	if existCa, err = article.FindCategoryByArticleId(db); err != nil {
+		return
+	}
+	if bufCa, delCa, err = ExtractNewAndDelCategory(article.Categories, existCa); err != nil {
+		return
+	}
+	for _, c := range bufCa {
+		var ca []CategoryResponse
+		if ca, err = c.FindCategory(db, service.GenFlg(Category{}, "Name")); err != nil {
+			return
+		}
+		if len(ca) == 0 {
+			continue
+		}
+		newCa = append(newCa, Category{Id: ca[0].Id, Name: ca[0].Name})
+	}
+	return
+}
+
+// Extract new, del category.
+func ExtractNewAndDelCategory(allCa, existCa []Category) (newCa, delCa []Category, err error) {
+	cMap := map[string]Category{}
+	for _, c := range existCa {
+		cMap[c.Name] = c
+	}
+
+	for i := 0; i < len(allCa); i++ {
+		if _, ok := cMap[allCa[i].Name]; !ok {
+			newCa = append(newCa, allCa[i])
+			continue
+		}
+		delete(cMap, allCa[i].Name)
+	}
+
+	for _, c := range cMap {
+		delCa = append(delCa, c)
+	}
 	return
 }

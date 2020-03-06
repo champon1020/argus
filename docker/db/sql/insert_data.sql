@@ -18,10 +18,3 @@ LOAD DATA LOCAL INFILE
     CHARACTER SET utf8
     FIELDS TERMINATED BY ','
     ENCLOSED BY '"';
-
-LOAD DATA LOCAL INFILE
-    "/docker/db/csv/authenticate.csv"
-    INTO TABLE authenticate
-    CHARACTER SET utf8
-    FIELDS TERMINATED BY ','
-    ENCLOSED BY '"';

@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/champon1020/argus/service"
+
 	"github.com/champon1020/argus/repository"
 )
 
@@ -80,9 +82,9 @@ func TestGenFlg_Title(t *testing.T) {
 	article := repository.Article{}
 	fieldName := "Title"
 
-	flg := GenFlg(article, fieldName)
+	flg := service.GenFlg(article, fieldName)
 
-	var actual uint32 = 4
+	var actual uint32 = 2
 	if flg != actual {
 		t.Errorf("mismatch flg: %v, actual: %v", actual, flg)
 	}
@@ -91,9 +93,9 @@ func TestGenFlg_Title(t *testing.T) {
 func TestGenFlg_Id_Title(t *testing.T) {
 	article := repository.Article{}
 
-	flg := GenFlg(article, "Id", "Title")
+	flg := service.GenFlg(article, "Id", "Title")
 
-	var actual uint32 = 6
+	var actual uint32 = 3
 	if flg != actual {
 		t.Errorf("mismatch flg: %v, actual: %v", actual, flg)
 	}

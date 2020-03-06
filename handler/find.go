@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/champon1020/argus/service"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/champon1020/argus/repository"
@@ -51,7 +53,7 @@ func FindArticleHandlerByTitle(c *gin.Context) {
 
 	argArticle.Title = c.Query("title")
 
-	argFlg = GenFlg(repository.Article{}, "Title")
+	argFlg = service.GenFlg(repository.Article{}, "Title")
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
 		(c.Writer).WriteHeader(http.StatusInternalServerError)
@@ -81,7 +83,7 @@ func FindArticleHandlerByCreateDate(c *gin.Context) {
 		return
 	}
 
-	argFlg = GenFlg(repository.Article{}, "create_date")
+	argFlg = service.GenFlg(repository.Article{}, "create_date")
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
 		(c.Writer).WriteHeader(http.StatusInternalServerError)
