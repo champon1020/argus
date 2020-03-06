@@ -156,7 +156,7 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 			&a.Private); err != nil {
 			logger.ErrorPrintf(err)
 		}
-		if a.Categories, err = a.FindArticleCategory(db); err != nil {
+		if a.Categories, err = a.FindCategoryByArticleId(db); err != nil {
 			logger.ErrorPrintf(err)
 			break
 		}
@@ -166,7 +166,7 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 }
 
 // Find categories from categories table which of column of article_id is equal to object.
-func (article *Article) FindArticleCategory(db *sql.DB) (categories []Category, err error) {
+func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Category, err error) {
 	query := "SELECT * FROM categories " +
 		"WHERE id IN (" +
 		"SELECT category_id FROM article_category " +

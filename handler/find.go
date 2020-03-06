@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -75,7 +76,12 @@ func FindArticleHandlerByCreateDate(c *gin.Context) {
 		argFlg     uint32
 	)
 
-	argFlg = GenFlg(repository.Article{}, "CreateDate")
+	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	argFlg = GenFlg(repository.Article{}, "create_date")
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
 		(c.Writer).WriteHeader(http.StatusInternalServerError)
@@ -93,16 +99,14 @@ func FindArticleHandlerByCreateDate(c *gin.Context) {
 
 func FindArticleHandlerByCategory(c *gin.Context) {
 	var (
-		argArticle repository.Article
-		articles   []repository.Article
-		response   string
-		err        error
+		articles []repository.Article
+		response string
+		err      error
 	)
 
-	// add parameter handling
-
+	categoryNames := c.QueryArray("category")
 	mysql := repository.GlobalMysql
-	if articles, err = repository.FindArticleCmd(mysql, argArticle, 0); err != nil {
+	if articles, err = repository.FindArticleByCategoryCmd(mysql, categoryNames); err != nil {
 		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}

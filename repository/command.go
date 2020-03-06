@@ -64,23 +64,23 @@ Flow:
 */
 func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
-		nowCategories, err := article.FindArticleCategory(mysql.DB)
+		nowCategories, err := article.FindCategoryByArticleId(mysql.DB)
 		if err != nil {
 			return
 		}
 
-		cMap := map[int]Category{}
+		cMap := map[string]Category{}
 		for _, c := range nowCategories {
-			cMap[c.Id] = c
+			cMap[c.Name] = c
 		}
 
 		var newCategories, delCategories []Category
 		for i := 0; i < len(article.Categories); i++ {
-			if _, ok := cMap[article.Categories[i].Id]; !ok {
+			if _, ok := cMap[article.Categories[i].Name]; !ok {
 				newCategories = append(newCategories, article.Categories[i])
 				continue
 			}
-			delete(cMap, article.Categories[i].Id)
+			delete(cMap, article.Categories[i].Name)
 		}
 
 		for _, c := range cMap {
@@ -134,6 +134,12 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 
 func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Article, err error) {
 	articles, err = article.FindArticle(mysql.DB, argFlg)
+	return
+}
+
+// Get articles by category.
+func FindArticleByCategoryCmd(mysql MySQL, categoryNames []string) (articles []Article, err error) {
+	articles, err = FindArticleByCategoryId(mysql.DB, categoryNames)
 	return
 }
 
