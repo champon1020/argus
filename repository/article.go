@@ -37,6 +37,7 @@ func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 	return
 }
 
+// Insert column to article_category table.
 func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 	cmd := "INSERT INTO article_category (article_id, category_id) " +
 		"VALUES (?, ?)"
@@ -84,6 +85,7 @@ func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 	return
 }
 
+// Remove column which of article_id is equal to object from article_category table.
 func (article *Article) DeleteArticleCategoryByArticle(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM article_category WHERE article_id=?"
 	if _, err = tx.Exec(cmd, article.Id); err != nil {
@@ -92,6 +94,7 @@ func (article *Article) DeleteArticleCategoryByArticle(tx *sql.Tx) (err error) {
 	return
 }
 
+// Remove column that both of article_id and category_id is equal to object.
 func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM article_category WHERE article_id=? AND category_id=?"
 
@@ -162,6 +165,7 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 	return
 }
 
+// Find categories from categories table which of column of article_id is equal to object.
 func (article *Article) FindArticleCategory(db *sql.DB) (categories []Category, err error) {
 	query := "SELECT * FROM categories " +
 		"WHERE id IN (" +

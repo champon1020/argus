@@ -5,10 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
-	"strconv"
-	"time"
-
-	"github.com/gin-gonic/gin"
 
 	"github.com/champon1020/argus/repository"
 
@@ -16,7 +12,8 @@ import (
 )
 
 type RequestBody struct {
-	Article repository.Article `json:"article"`
+	Article  repository.Article `json:"article"`
+	Contents string             `json:"contents"`
 }
 
 var logger argus.Logger
@@ -25,54 +22,41 @@ func init() {
 	logger.NewLogger("[handler]")
 }
 
-func ParseRequestBody(w *http.ResponseWriter, r *http.Request, entity *RequestBody) error {
+func ParseRequestBody(r *http.Request, reqBody *RequestBody) error {
 	var (
 		body []byte
 		err  error
 	)
+
 	if body, err = ioutil.ReadAll(r.Body); err != nil {
-		(*w).WriteHeader(http.StatusInternalServerError)
 		logger.Println("Unable to read request body")
 		return err
 	}
 
-	if err = json.Unmarshal(body, &entity); err != nil {
-		(*w).WriteHeader(http.StatusInternalServerError)
+	if err = json.Unmarshal(body, &reqBody); err != nil {
 		logger.Println("Json format is not comfortable")
 		return err
 	}
 	return nil
 }
 
-func parseToJson(st interface{}, c *gin.Context) (res string, err error) {
+func ParseToJson(st interface{}) (res string, err error) {
 	var bytes []byte
 	if bytes, err = json.Marshal(&st); err != nil {
 		logger.ErrorPrintf(err)
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	res = string(bytes)
 	return
 }
 
-func parseQueryParam(param *QueryParam, c *gin.Context) (err error) {
-	param.Article.Id, err = strconv.Atoi(c.Query("id"))
-	param.Article.Title = c.Query("title")
-	param.Article.CreateDate, err = time.Parse(time.RFC3339, c.Query("create_date"))
-	param.Article.UpdateDate, err = time.Parse(time.RFC3339, c.Query("update_date"))
-	param.Article.ContentUrl = c.Query("content_url")
-	param.Article.ImageUrl = c.Query("image_url")
-	param.Article.Private, err = strconv.ParseBool(c.Query("private"))
-	return
-}
-
-func GenFlg(st interface{}, fieldNames ...string) (flg int) {
+func GenFlg(st interface{}, fieldNames ...string) (flg uint32) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
 	for _, fn := range fieldNames {
 		for j := 0; j < t.NumField(); j++ {
-			if fn == v.Field(j).String() {
-				flg |= 1 << j
+			if fn == t.Field(j).Name {
+				flg |= 1 << (j + 1)
 			}
 		}
 	}

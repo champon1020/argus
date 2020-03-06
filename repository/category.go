@@ -48,6 +48,7 @@ func (category *Category) DeleteCategory(tx *sql.Tx) (err error) {
 	return
 }
 
+// Remove column which of category_id is equal to object from article_category table.
 func (category *Category) DeleteArticleCategoryByCategory(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM article_category WHERE category_id=?"
 	_, err = tx.Exec(cmd, category.Id)
@@ -57,6 +58,7 @@ func (category *Category) DeleteArticleCategoryByCategory(tx *sql.Tx) (err error
 	return
 }
 
+// Get the number of articles where category_id is equal to object.
 func (category *Category) FindArticleNumFromArticleCategory(db *sql.DB) (articleNum int, err error) {
 	cmd := "SELECT COUNT(article_id) FROM article_category WHERE category_id=?"
 
