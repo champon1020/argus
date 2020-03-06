@@ -3,15 +3,14 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/champon1020/argus/service"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/champon1020/argus/repository"
 )
-
-type QueryParam struct {
-	Article repository.Article
-}
 
 type ResponseType struct {
 	Articles []repository.Article `json:"articles"`
@@ -30,11 +29,13 @@ func FindArticleHandler(c *gin.Context) {
 
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, repository.Article{}, 0); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res := ResponseType{Articles: articles}
-	if response, err = parseToJson(&res, c); err != nil {
+	if response, err = ParseToJson(&res); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -52,14 +53,16 @@ func FindArticleHandlerByTitle(c *gin.Context) {
 
 	argArticle.Title = c.Query("title")
 
-	argFlg = 1 << 2
+	argFlg = service.GenFlg(repository.Article{}, "Title")
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res := ResponseType{Articles: articles}
-	if response, err = parseToJson(&res, c); err != nil {
+	if response, err = ParseToJson(&res); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -75,14 +78,21 @@ func FindArticleHandlerByCreateDate(c *gin.Context) {
 		argFlg     uint32
 	)
 
-	argFlg = 1 << 4
+	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	argFlg = service.GenFlg(repository.Article{}, "create_date")
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res := ResponseType{Articles: articles}
-	if response, err = parseToJson(&res, c); err != nil {
+	if response, err = ParseToJson(&res); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -91,21 +101,21 @@ func FindArticleHandlerByCreateDate(c *gin.Context) {
 
 func FindArticleHandlerByCategory(c *gin.Context) {
 	var (
-		argArticle repository.Article
-		articles   []repository.Article
-		response   string
-		err        error
+		articles []repository.Article
+		response string
+		err      error
 	)
 
-	// add parameter handling
-
+	categoryNames := c.QueryArray("category")
 	mysql := repository.GlobalMysql
-	if articles, err = repository.FindArticleCmd(mysql, argArticle, 0); err != nil {
+	if articles, err = repository.FindArticleByCategoryCmd(mysql, categoryNames); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res := ResponseType{Articles: articles}
-	if response, err = parseToJson(&res, c); err != nil {
+	if response, err = ParseToJson(&res); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -126,7 +136,8 @@ func FindCategoryHandler(c *gin.Context) {
 	}
 
 	res := CategoryResponseType{Categories: categories}
-	if response, err = parseToJson(&res, c); err != nil {
+	if response, err = ParseToJson(&res); err != nil {
+		(c.Writer).WriteHeader(http.StatusInternalServerError)
 		return
 	}
 

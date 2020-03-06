@@ -8,15 +8,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type RequestBody struct {
+	Article  repository.Article `json:"article"`
+	Contents string             `json:"contents"`
+}
+
 func RegisterArticleHandler(c *gin.Context) {
 	var (
 		body RequestBody
 		err  error
-		w    http.ResponseWriter
 	)
 
-	w = c.Writer
-	if err = ParseRequestBody(&w, c.Request, &body); err != nil {
+	if err = ParseRequestBody(c.Request, &body); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return
 	}

@@ -48,7 +48,8 @@ func (category *Category) DeleteCategory(tx *sql.Tx) (err error) {
 	return
 }
 
-func (category *Category) DeleteArticleCategoryByCategory(tx *sql.Tx) (err error) {
+// Remove column which of category_id is equal to object from article_category table.
+func (category *Category) DeleteArticleCategoryByCategoryId(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM article_category WHERE category_id=?"
 	_, err = tx.Exec(cmd, category.Id)
 	if err != nil {
@@ -57,7 +58,8 @@ func (category *Category) DeleteArticleCategoryByCategory(tx *sql.Tx) (err error
 	return
 }
 
-func (category *Category) FindArticleNumFromArticleCategory(db *sql.DB) (articleNum int, err error) {
+// Get the number of articles where category_id is equal to object.
+func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int, err error) {
 	cmd := "SELECT COUNT(article_id) FROM article_category WHERE category_id=?"
 
 	rows, err := db.Query(cmd, category.Id)
@@ -130,10 +132,9 @@ func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories [
 			&c.Name); err != nil {
 			logger.ErrorPrintf(err)
 		}
-		if articleNum, err = c.FindArticleNumFromArticleCategory(db); err != nil {
+		if articleNum, err = c.FindArticleNumByCategoryId(db); err != nil {
 			return
 		}
-
 		categories = append(categories, CategoryResponse{Id: c.Id, Name: c.Name, ArticleNum: articleNum})
 	}
 	return

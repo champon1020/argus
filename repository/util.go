@@ -61,6 +61,7 @@ func ToSnakeCase(str string) (snake string) {
 	return
 }
 
+// Get and Set empty and minimum article id.
 func ArticleIdConverter(mysql MySQL, article *Article) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "articles", 1); err != nil {
@@ -71,6 +72,7 @@ func ArticleIdConverter(mysql MySQL, article *Article) (err error) {
 	return
 }
 
+// Get and Set category empty minimum id.
 func CategoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "categories", len(*categories)); err != nil {
