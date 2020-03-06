@@ -74,7 +74,9 @@ paths:
           required: true
           description: A category name which an article has.
           schema:
-            type: string
+            type: array
+            items:
+              type: string
       responses:
         '200':
           description: A JSON array of articles.
@@ -112,8 +114,13 @@ paths:
             schema:
               type: object
               properties:
-                articles:
-                  $ref: '#/components/schemas/Article'
+                article:
+                  $ref: '#/components/schemas/RequestArticle'
+                contents:
+                  type: string
+              required:
+                - article
+                - contents
       responses:
         '200':
           description: Success
@@ -129,8 +136,13 @@ paths:
             schema:
               type: object
               properties:
-                articles:
-                  $ref: '#/components/schemas/Article'
+                article:
+                  $ref: '#/components/schemas/RequestArticle'
+                contents:
+                  type: string
+              required:
+                - article
+                - contents
       responses:
         '200':
           description: Success
@@ -160,6 +172,15 @@ components:
           type: string
         private:
           type: boolean
+      required:
+        - id
+        - title
+        - categories
+        - createDate
+        - updateDate
+        - contentUrl
+        - imageUrl
+        - private
     Category:
       type: object
       properties:
@@ -169,3 +190,45 @@ components:
           type: string
         articleNum:
           type: number
+      required:
+        - id
+        - name
+        - articleNum
+    RequestArticle:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+              name:
+                type: string
+            required:
+              - id
+              - name
+        createDate:
+          type: string
+        updateDate:
+          type: string
+        contentUrl:
+          type: string
+        imageUrl:
+          type: string
+        private:
+          type: boolean
+      required:
+        - id
+        - title
+        - categories
+        - createDate
+        - updateDate
+        - contentUrl
+        - imageUrl
+        - private
