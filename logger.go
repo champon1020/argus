@@ -44,21 +44,17 @@ func (l Logger) StackTrace() {
 }
 
 func (l Logger) ErrorPrintf(err error) {
-	l.StackTrace()
 	l.Printf("%v\n", err)
 }
 
 func (l Logger) ErrorMsgPrintf(msg string, err error) {
-	l.StackTrace()
 	l.Printf("%s: %v\n", msg, err)
 }
 
 func (l Logger) ErrorFatalf(err error) {
-	l.StackTrace()
 	l.Fatalf("%v\n", err)
 }
 
 func (l Logger) ErrorPanic(err error) {
-	l.StackTrace()
 	panic(err)
 }
