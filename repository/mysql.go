@@ -9,13 +9,15 @@ import (
 )
 
 var (
-	logger      argus.Logger
-	GlobalMysql MySQL
+	GlobalMysql  MySQL
+	Logger       = argus.Logger
+	Errors       = &argus.Errors
+	RuntimeError = argus.Error{Type: argus.DbRuntimeError}
+	CmdError     = argus.Error{Type: argus.DbCmdFailedError}
+	ScanError    = argus.Error{Type: argus.DbScanFailedError}
+	QueryError   = argus.Error{Type: argus.DbQueryFailedError}
+	CloseError   = argus.Error{Type: argus.DbCloseFailedError}
 )
-
-func init() {
-	logger.NewLogger("[repository]")
-}
 
 type MySQL struct {
 	*sql.DB
@@ -34,24 +36,22 @@ func (mysql *MySQL) Connect(config argus.DbConf) (err error) {
 			config.Host + ":" +
 			config.Port + ")/" +
 			config.DbName + "?parseTime=true"
+	Logger.Printf("DataSource: %s\n", dataSourceName)
 
-	logger.Printf("DataSource: %s\n", dataSourceName)
 	if mysql.DB, err = sql.Open("mysql", dataSourceName); err != nil {
-		logger.ErrorPrintf(err)
+		RuntimeError.SetErr(err).AppendTo(Errors)
 		return
 	}
-
 	mysql.SetMaxIdleConns(20)
 	mysql.SetConnMaxLifetime(1)
 	mysql.SetMaxOpenConns(10)
-
-	return nil
+	return
 }
 
 func (mysql *MySQL) Transact(txFunc func(*sql.Tx) error) (err error) {
-	tx, err := mysql.Begin()
-	if err != nil {
-		logger.ErrorPrintf(err)
+	var tx *sql.Tx
+	if tx, err = mysql.Begin(); err != nil {
+		RuntimeError.SetErr(err).AppendTo(Errors)
 		return
 	}
 
@@ -59,16 +59,24 @@ func (mysql *MySQL) Transact(txFunc func(*sql.Tx) error) (err error) {
 	defer func() {
 		if p := recover(); p != nil {
 			tx.Rollback()
-			logger.Printf("%v\n", p)
+			Logger.Printf("%v\n", p)
 			return
 		} else if err != nil {
 			tx.Rollback()
-			logger.ErrorPrintf(err)
+			Logger.Printf("%v", err)
 			return
 		} else {
 			err = tx.Commit()
 		}
 	}()
-
 	return
+}
+
+func RowsClose(rows *sql.Rows) {
+	if rows == nil {
+		return
+	}
+	if err := rows.Close(); err != nil {
+		CloseError.SetErr(err).AppendTo(Errors)
+	}
 }

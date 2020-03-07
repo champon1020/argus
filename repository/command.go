@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"sync"
 )
 
@@ -14,11 +15,10 @@ Flow:
 	- Insert the pair of article_id and category_ids.
 */
 func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
+	var newCa []Category
 	if err = ArticleIdConverter(mysql, &article); err != nil {
 		return
 	}
-
-	var newCa []Category
 	if newCa, _, err = ExtractCategory(mysql.DB, article); err != nil {
 		return
 	}
@@ -40,6 +40,8 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 		}
 		return
 	})
+	// End transaction
+
 	return
 }
 
@@ -63,6 +65,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 
 	// Start transaction
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
+		errCnt := 0
 		wg := new(sync.WaitGroup)
 		wg.Add(3)
 
@@ -70,7 +73,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		go func() {
 			defer wg.Done()
 			if err = article.UpdateArticle(tx); err != nil {
-				return
+				errCnt++
 			}
 		}()
 
@@ -78,14 +81,14 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		go func() {
 			defer wg.Done()
 			if err = CategoriesIdConverter(mysql, &newCa); err != nil {
-				return
+				errCnt++
 			}
 			a := Article{Id: article.Id, Categories: newCa}
 			if err = InsertCategories(tx, newCa); err != nil {
-				return
+				errCnt++
 			}
 			if err = a.InsertArticleCategory(tx); err != nil {
-				return
+				errCnt++
 			}
 		}()
 
@@ -94,13 +97,18 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 			defer wg.Done()
 			a := Article{Id: article.Id, Categories: delCa}
 			if err = a.DeleteArticleCategoryByBoth(tx); err != nil {
-				return
+				errCnt++
 			}
 		}()
 		wg.Wait()
 
+		if errCnt != 0 {
+			err = errors.New("error happened in UpdateArticleCmd()")
+		}
 		return
 	})
+	// End transaction
+
 	return
 }
 
@@ -122,16 +130,21 @@ func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories 
 
 // Insert category array to categories table.
 func InsertCategories(tx *sql.Tx, categories []Category) (err error) {
+	errCnt := 0
 	wg := new(sync.WaitGroup)
 	for _, c := range categories {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err = c.InsertCategory(tx); err != nil {
-				return
+			if err := c.InsertCategory(tx); err != nil {
+				errCnt++
 			}
 		}()
 	}
 	wg.Wait()
+
+	if errCnt != 0 {
+		err = errors.New("error happened in InsertCategories()")
+	}
 	return
 }

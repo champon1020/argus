@@ -20,28 +20,18 @@ func FindArticleByCategoryId(db *sql.DB, categoryNames []string) (articles []Art
 	}
 	query += "))"
 
-	rows, err := db.Query(query, args...)
-	defer func() {
-		if rows == nil {
-			return
-		}
-		if err := rows.Close(); err != nil {
-			logger.ErrorPrintf(err)
-		}
-	}()
-
-	if err != nil {
-		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
-		return
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, args...); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", args).
+			AppendTo(Errors)
 	}
 
-	if rows == nil {
-		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
-		return
-	}
-
+	var a Article
 	for rows.Next() {
-		var a Article
 		if err := rows.Scan(
 			&a.Id,
 			&a.Title,
@@ -49,11 +39,12 @@ func FindArticleByCategoryId(db *sql.DB, categoryNames []string) (articles []Art
 			&a.UpdateDate,
 			&a.ContentUrl,
 			&a.ImageUrl,
-			&a.Private); err != nil {
-			logger.ErrorPrintf(err)
+			&a.Private,
+		); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+			break
 		}
 		if a.Categories, err = a.FindCategoryByArticleId(db); err != nil {
-			logger.ErrorPrintf(err)
 			break
 		}
 		articles = append(articles, a)

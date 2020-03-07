@@ -18,11 +18,10 @@ var defaultErr Error = Error{
 
 func TestError_AppendTo(t *testing.T) {
 	var errs []Error
-	err := Error{
+	Error{
 		Err:  errors.New("test error"),
 		Type: IOFailedReadError,
-	}
-	err.AppendTo(&errs)
+	}.AppendTo(&errs)
 
 	assert.Equal(t, 1, len(errs))
 }

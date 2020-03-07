@@ -10,13 +10,9 @@ import (
 )
 
 var (
-	logger  argus.Logger
+	Logger  = argus.Logger
 	configs argus.Configurations
 )
-
-func init() {
-	logger.NewLogger("[main]")
-}
 
 func main() {
 	flag.Parse()

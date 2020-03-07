@@ -8,6 +8,7 @@ type ErrorType string
 
 const (
 	// database error types
+	DbRuntimeError     ErrorType = "DbRuntimeError"
 	DbScanFailedError  ErrorType = "DbScanFailedError"
 	DbCmdFailedError   ErrorType = "DbCmdFailedError"
 	DbQueryFailedError ErrorType = "DbQueryFailedError"
@@ -31,8 +32,14 @@ func (e Error) AppendTo(errs *[]Error) {
 	*errs = append(*errs, e)
 }
 
-func (e *Error) SetValues(key string, value string) {
+func (e *Error) SetErr(err error) *Error {
+	e.Err = err
+	return e
+}
+
+func (e *Error) SetValues(key string, value interface{}) *Error {
 	e.Values[key] = value
+	return e
 }
 
 func (e Error) String() string {
@@ -40,7 +47,7 @@ func (e Error) String() string {
 }
 
 func (e Error) Marshal() ([]byte, error) {
-	return json.Marshal(e.JSON())
+	return json.MarshalIndent(e.JSON(), "", "  ")
 }
 
 func (e Error) JSON() interface{} {
