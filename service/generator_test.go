@@ -1,4 +1,4 @@
-package repository
+package service
 
 import (
 	"testing"
@@ -7,14 +7,20 @@ import (
 	"github.com/champon1020/argus"
 )
 
-func TestGenArgsSlice(t *testing.T) {
+type Hoge struct {
+	Id    int
+	Title string
+	Date  time.Time
+}
+
+func TestGenArgsSliceLogic(t *testing.T) {
 	var (
 		argsFlg uint32
-		article Article
+		st      Hoge
 	)
-	argsFlg = 1 << 1
-	article.Title = "test"
-	args := GenArgsSlice(argsFlg, article)
+	argsFlg = GenFlg(st, "Title")
+	st.Title = "test"
+	args := GenArgsSliceLogic(argsFlg, st, false)
 
 	if len(args) != 1 {
 		t.Fatalf("length of args: %v\n", len(args))
@@ -26,17 +32,17 @@ func TestGenArgsSlice(t *testing.T) {
 	}
 }
 
-func TestGenArgsSliceIsLimit(t *testing.T) {
+func TestGenArgsSliceLogic_Limit(t *testing.T) {
 	var (
 		argsFlg        uint32
-		article        Article
+		st             Hoge
 		configurations argus.Configurations
 	)
 	configurations.New("dev")
 
-	argsFlg = 1 << 1
-	article.Title = "test"
-	args := GenArgsSliceIsLimit(argsFlg, article, true)
+	argsFlg = GenFlg(st, "Title")
+	st.Title = "test"
+	args := GenArgsSliceLogic(argsFlg, st, true)
 
 	if len(args) != 2 {
 		t.Fatalf("length of args: %v\n", len(args))
@@ -54,51 +60,38 @@ func TestGenArgsSliceIsLimit(t *testing.T) {
 	}
 }
 
-func TestGenArgsSliceLogicTitle(t *testing.T) {
+func TestGenArgsSliceLogic_Multi(t *testing.T) {
 	var (
 		argsFlg uint32
-		article Article
+		st      Hoge
 	)
-	argsFlg = 1 << 1
-	article.Title = "test"
-	args := GenArgsSliceLogic(argsFlg, article, false)
+	argsFlg = GenFlg(st, "Id", "Title")
+	st.Id = 1
+	st.Title = "test"
+	args := GenArgsSliceLogic(argsFlg, st, false)
 
-	if len(args) != 1 {
+	if len(args) != 2 {
 		t.Fatalf("length of args: %v\n", len(args))
 	}
 
-	actual := "test"
-	if args[0] != actual {
-		t.Fatalf("value of args[0]: %v, actual: %v\n", args[0], actual)
-	}
-}
-
-func TestGenArgsSliceLogicCreateDate(t *testing.T) {
-	var (
-		argsFlg uint32
-		article Article
-	)
-	argsFlg = 1 << 3
-	article.CreateDate, _ = time.Parse(time.RFC3339, "2006-01-02")
-	args := GenArgsSliceLogic(argsFlg, article, false)
-
-	if len(args) != 1 {
-		t.Fatalf("length of args: %v\n", len(args))
+	actual1 := 1
+	if args[0] != actual1 {
+		t.Fatalf("value of args[0]: %v, actual: %v\n", args[0], actual1)
 	}
 
-	actual, _ := time.Parse(time.RFC3339, "2006-01-02")
-	if args[0] != actual {
-		t.Fatalf("value of args[0]: %v, actual: %v\n", args[0], actual)
+	actual2 := "test"
+	if args[1] != actual2 {
+		t.Fatalf("value of args[1]: %v, actual: %v\n", args[0], actual2)
 	}
 }
 
 func TestGenArgsQuery(t *testing.T) {
 	var (
 		argsFlg uint32
-		article Article
+		st      Hoge
 	)
-	argsFlg = 1 << 1
-	args := GenArgsQuery(argsFlg, article)
+	argsFlg = GenFlg(st, "Title")
+	args := GenArgsQuery(argsFlg, st)
 
 	actual := "WHERE title=? "
 	if args != actual {
@@ -106,15 +99,15 @@ func TestGenArgsQuery(t *testing.T) {
 	}
 }
 
-func TestGenArgsQueryTwo(t *testing.T) {
+func TestGenArgsQuery_Multi(t *testing.T) {
 	var (
 		argsFlg uint32
-		article Article
+		st      Hoge
 	)
-	argsFlg = 1<<1 | 1<<3
-	args := GenArgsQuery(argsFlg, article)
+	argsFlg = GenFlg(st, "Title", "Date")
+	args := GenArgsQuery(argsFlg, st)
 
-	actual := "WHERE title=? AND create_date=? "
+	actual := "WHERE title=? AND date=? "
 	if args != actual {
 		t.Fatalf("value of args: %v, actual: %v\n", args, actual)
 	}
