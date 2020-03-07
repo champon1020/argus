@@ -22,17 +22,16 @@ func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 		"(id, title, create_date, update_date, content_url, image_url, private)" +
 		"VALUES (?, ?, ?, ?, ?, ?, ?)"
 
-	_, err = tx.Exec(cmd,
+	if _, err := tx.Exec(cmd,
 		article.Id,
 		article.Title,
 		article.CreateDate,
 		article.UpdateDate,
 		article.ContentUrl,
 		article.ImageUrl,
-		article.Private)
-
-	if err != nil {
-		logger.ErrorPrintf(err)
+		article.Private,
+	); err != nil {
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -48,8 +47,7 @@ func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 		go func() {
 			defer wg.Done()
 			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
-				logger.ErrorPrintf(err)
-				return
+				CmdError.SetErr(err).AppendTo(Errors)
 			}
 		}()
 	}
@@ -62,17 +60,16 @@ func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 		"SET title=?, create_date=?, update_date=?, content_url=?, image_url=?, private=? " +
 		"WHERE id=?"
 
-	_, err = tx.Exec(cmd,
+	if _, err = tx.Exec(cmd,
 		article.Title,
 		article.CreateDate,
 		article.UpdateDate,
 		article.ContentUrl,
 		article.ImageUrl,
 		article.Private,
-		article.Id)
-
-	if err != nil {
-		logger.ErrorPrintf(err)
+		article.Id,
+	); err != nil {
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -80,7 +77,7 @@ func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM articles WHERE id=?"
 	if _, err = tx.Exec(cmd, article.Id); err != nil {
-		logger.ErrorPrintf(err)
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -89,7 +86,7 @@ func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 func (article *Article) DeleteArticleCategoryByArticle(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM article_category WHERE article_id=?"
 	if _, err = tx.Exec(cmd, article.Id); err != nil {
-		logger.ErrorPrintf(err)
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -104,7 +101,7 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 		go func() {
 			defer wg.Done()
 			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
-				logger.ErrorPrintf(err)
+				CmdError.SetErr(err).AppendTo(Errors)
 			}
 		}()
 	}
@@ -120,32 +117,19 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 	whereQuery := GenArgsQuery(argsFlg, article)
 	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id LIMIT ?"
 
-	rows, err := db.Query(query, args...)
-	defer func() {
-		if rows == nil {
-			return
-		}
-		if err := rows.Close(); err != nil {
-			logger.ErrorPrintf(err)
-		}
-	}()
-
-	if err != nil {
-		logger.Printf("Query: %s\n", query)
-		logger.Printf("Args: %v\n", args)
-		logger.ErrorPrintf(err)
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, args...); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", args).
+			AppendTo(Errors)
 		return
 	}
 
-	if rows == nil {
-		logger.Printf("Query: %s\n", query)
-		logger.Printf("Args: %v\n", args)
-		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
-		return
-	}
-
+	var a Article
 	for rows.Next() {
-		var a Article
 		if err := rows.Scan(
 			&a.Id,
 			&a.Title,
@@ -153,11 +137,12 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 			&a.UpdateDate,
 			&a.ContentUrl,
 			&a.ImageUrl,
-			&a.Private); err != nil {
-			logger.ErrorPrintf(err)
+			&a.Private,
+		); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+			break
 		}
 		if a.Categories, err = a.FindCategoryByArticleId(db); err != nil {
-			logger.ErrorPrintf(err)
 			break
 		}
 		articles = append(articles, a)
@@ -172,32 +157,22 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 		"SELECT category_id FROM article_category " +
 		"WHERE article_id=?)"
 
-	rows, err := db.Query(query, article.Id)
-	defer func() {
-		if rows == nil {
-			return
-		}
-		if err := rows.Close(); err != nil {
-			logger.ErrorPrintf(err)
-		}
-	}()
-
-	if err != nil {
-		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
-		return
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, article.Id); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", article.Id).
+			AppendTo(Errors)
 	}
 
-	if rows == nil {
-		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
-		return
-	}
-
+	var c Category
 	for rows.Next() {
-		var c Category
 		if err := rows.Scan(
 			&c.Id,
 			&c.Name); err != nil {
-			logger.ErrorPrintf(err)
+			ScanError.SetErr(err).AppendTo(Errors)
 		}
 		categories = append(categories, c)
 	}

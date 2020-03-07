@@ -50,8 +50,8 @@ func (config *Configurations) New(args string) {
 func (config *Configurations) Load() {
 	row, err := ioutil.ReadFile(os.Getenv("GOPATH") + "/src/github.com/champon1020/argus/config.json")
 	if err != nil {
-		current, _ := os.Getwd()
-		logger.ErrorMsgPrintf(current, err)
+		//current, _ := os.Getwd()
+		//Logger.ErrorMsgPrintf(current, err)
 	}
 	json.Unmarshal(row, &config)
 }

@@ -18,6 +18,7 @@ func RegisterArticleHandler(c *gin.Context) {
 		body RequestBody
 		err  error
 	)
+	defer HandleError(Errors)
 
 	if err = ParseRequestBody(c.Request, &body); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)

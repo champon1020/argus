@@ -13,13 +13,12 @@ func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
 		"WHERE NOT EXISTS (" +
 		"SELECT name FROM categories WHERE name=?)"
 
-	_, err = tx.Exec(cmd,
+	if _, err = tx.Exec(cmd,
 		category.Id,
 		category.Name,
-		category.Name)
-
-	if err != nil {
-		logger.ErrorMsgPrintf("InsertCategory", err)
+		category.Name,
+	); err != nil {
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -29,21 +28,16 @@ func (category *Category) UpdateCategory(tx *sql.Tx) (err error) {
 		"SET name=? " +
 		"WHERE id=? "
 
-	_, err = tx.Exec(cmd,
-		category.Name,
-		category.Id)
-
-	if err != nil {
-		logger.ErrorPrintf(err)
+	if _, err = tx.Exec(cmd, category.Name, category.Id); err != nil {
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
 
 func (category *Category) DeleteCategory(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM categories WHERE id=?"
-	_, err = tx.Exec(cmd, category.Id)
-	if err != nil {
-		logger.ErrorPrintf(err)
+	if _, err = tx.Exec(cmd, category.Id); err != nil {
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -51,41 +45,30 @@ func (category *Category) DeleteCategory(tx *sql.Tx) (err error) {
 // Remove column which of category_id is equal to object from article_category table.
 func (category *Category) DeleteArticleCategoryByCategoryId(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM article_category WHERE category_id=?"
-	_, err = tx.Exec(cmd, category.Id)
-	if err != nil {
-		logger.ErrorPrintf(err)
+	if _, err = tx.Exec(cmd, category.Id); err != nil {
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
 
 // Get the number of articles where category_id is equal to object.
 func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int, err error) {
-	cmd := "SELECT COUNT(article_id) FROM article_category WHERE category_id=?"
+	query := "SELECT COUNT(article_id) FROM article_category WHERE category_id=?"
 
-	rows, err := db.Query(cmd, category.Id)
-	defer func() {
-		if rows == nil {
-			return
-		}
-		if err := rows.Close(); err != nil {
-			logger.ErrorPrintf(err)
-		}
-	}()
-
-	if err != nil {
-		logger.ErrorPrintf(err)
-		return
-	}
-
-	if rows == nil {
-		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
-		return
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, category.Id); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", category.Id).
+			AppendTo(Errors)
 	}
 
 	for rows.Next() {
-		if err := rows.Scan(
-			&articleNum); err != nil {
-			logger.ErrorPrintf(err)
+		if err := rows.Scan(&articleNum); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+			break
 		}
 	}
 	return
@@ -102,40 +85,32 @@ func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories [
 	whereQuery := GenArgsQuery(argsFlg, category)
 	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id"
 
-	rows, err := db.Query(query, args...)
-	defer func() {
-		if rows == nil {
-			return
-		}
-		if err := rows.Close(); err != nil {
-			logger.ErrorPrintf(err)
-		}
-	}()
-
-	if err != nil {
-		logger.ErrorPrintf(err)
-		return
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, args...); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", args).
+			AppendTo(Errors)
 	}
 
-	if rows == nil {
-		logger.ErrorMsgPrintf("Unable to scan rows because rows is nil", err)
-		return
-	}
-
+	var (
+		c          Category
+		articleNum int
+	)
 	for rows.Next() {
-		var (
-			c          Category
-			articleNum int
-		)
-		if err := rows.Scan(
-			&c.Id,
-			&c.Name); err != nil {
-			logger.ErrorPrintf(err)
+		if err := rows.Scan(&c.Id, &c.Name); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+			break
 		}
 		if articleNum, err = c.FindArticleNumByCategoryId(db); err != nil {
-			return
+			break
 		}
-		categories = append(categories, CategoryResponse{Id: c.Id, Name: c.Name, ArticleNum: articleNum})
+		categories = append(
+			categories,
+			CategoryResponse{Id: c.Id, Name: c.Name, ArticleNum: articleNum},
+		)
 	}
 	return
 }

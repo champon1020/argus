@@ -2,9 +2,8 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"sync"
-
-	"github.com/champon1020/argus/service"
 )
 
 /*
@@ -16,11 +15,10 @@ Flow:
 	- Insert the pair of article_id and category_ids.
 */
 func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
+	var newCa []Category
 	if err = ArticleIdConverter(mysql, &article); err != nil {
 		return
 	}
-
-	var newCa []Category
 	if newCa, _, err = ExtractCategory(mysql.DB, article); err != nil {
 		return
 	}
@@ -42,6 +40,8 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 		}
 		return
 	})
+	// End transaction
+
 	return
 }
 
@@ -65,6 +65,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 
 	// Start transaction
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
+		errCnt := 0
 		wg := new(sync.WaitGroup)
 		wg.Add(3)
 
@@ -72,7 +73,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		go func() {
 			defer wg.Done()
 			if err = article.UpdateArticle(tx); err != nil {
-				return
+				errCnt++
 			}
 		}()
 
@@ -80,14 +81,14 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		go func() {
 			defer wg.Done()
 			if err = CategoriesIdConverter(mysql, &newCa); err != nil {
-				return
+				errCnt++
 			}
 			a := Article{Id: article.Id, Categories: newCa}
 			if err = InsertCategories(tx, newCa); err != nil {
-				return
+				errCnt++
 			}
 			if err = a.InsertArticleCategory(tx); err != nil {
-				return
+				errCnt++
 			}
 		}()
 
@@ -96,13 +97,18 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 			defer wg.Done()
 			a := Article{Id: article.Id, Categories: delCa}
 			if err = a.DeleteArticleCategoryByBoth(tx); err != nil {
-				return
+				errCnt++
 			}
 		}()
 		wg.Wait()
 
+		if errCnt != 0 {
+			err = errors.New("error happened in UpdateArticleCmd()")
+		}
 		return
 	})
+	// End transaction
+
 	return
 }
 
@@ -124,62 +130,21 @@ func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories 
 
 // Insert category array to categories table.
 func InsertCategories(tx *sql.Tx, categories []Category) (err error) {
+	errCnt := 0
 	wg := new(sync.WaitGroup)
 	for _, c := range categories {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err = c.InsertCategory(tx); err != nil {
-				return
+			if err := c.InsertCategory(tx); err != nil {
+				errCnt++
 			}
 		}()
 	}
 	wg.Wait()
-	return
-}
 
-// Extract new, exist, or deleted category
-// from category array found by article_id from article_category table.
-// - newCa: categories which are added to inserted or updated article
-// - delCa: categories which are removed from inserted or updated article
-func ExtractCategory(db *sql.DB, article Article) (newCa, delCa []Category, err error) {
-	var existCa, bufCa []Category
-	if existCa, err = article.FindCategoryByArticleId(db); err != nil {
-		return
-	}
-	if bufCa, delCa, err = ExtractNewAndDelCategory(article.Categories, existCa); err != nil {
-		return
-	}
-	for _, c := range bufCa {
-		var ca []CategoryResponse
-		if ca, err = c.FindCategory(db, service.GenFlg(Category{}, "Name")); err != nil {
-			return
-		}
-		if len(ca) == 0 {
-			continue
-		}
-		newCa = append(newCa, Category{Id: ca[0].Id, Name: ca[0].Name})
-	}
-	return
-}
-
-// Extract new, del category.
-func ExtractNewAndDelCategory(allCa, existCa []Category) (newCa, delCa []Category, err error) {
-	cMap := map[string]Category{}
-	for _, c := range existCa {
-		cMap[c.Name] = c
-	}
-
-	for i := 0; i < len(allCa); i++ {
-		if _, ok := cMap[allCa[i].Name]; !ok {
-			newCa = append(newCa, allCa[i])
-			continue
-		}
-		delete(cMap, allCa[i].Name)
-	}
-
-	for _, c := range cMap {
-		delCa = append(delCa, c)
+	if errCnt != 0 {
+		err = errors.New("error happened in InsertCategories()")
 	}
 	return
 }

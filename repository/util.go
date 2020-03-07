@@ -1,64 +1,26 @@
 package repository
 
 import (
-	"reflect"
-	"regexp"
-	"strings"
+	"database/sql"
 
-	"github.com/champon1020/argus"
+	"github.com/champon1020/argus/service"
 )
 
+// Generate query from struct and argument flag.
+func GenArgsQuery(argsFlg uint32, st interface{}) string {
+	return service.GenArgsQuery(argsFlg, st)
+}
+
+// Generate arguments slice from struct and argument flag.
+// Default isLimit value is false.
 func GenArgsSlice(argsFlg uint32, st interface{}) []interface{} {
-	return GenArgsSliceLogic(argsFlg, st, false)
+	return service.GenArgsSliceLogic(argsFlg, st, false)
 }
 
+// Generate arguments slice from struct and argument flag.
+// IsLimit can be selected by user.
 func GenArgsSliceIsLimit(argsFlg uint32, st interface{}, isLimit bool) []interface{} {
-	return GenArgsSliceLogic(argsFlg, st, isLimit)
-}
-
-func GenArgsSliceLogic(argsFlg uint32, st interface{}, isLimit bool) (args []interface{}) {
-	v := reflect.Indirect(reflect.ValueOf(st))
-	t := v.Type()
-	for i := 0; i < t.NumField(); i++ {
-		if (1 << i & argsFlg) > 0 {
-			args = append(args, v.Field(i).Interface())
-		}
-	}
-	if isLimit {
-		args = append(args, argus.GlobalConfig.Web.MaxViewArticleNum)
-	}
-	return
-}
-
-func GenArgsQuery(argsFlg uint32, st interface{}) (query string) {
-	const initQuery = "WHERE "
-	query = initQuery
-	v := reflect.Indirect(reflect.ValueOf(st))
-	t := v.Type()
-	for i := 0; i < t.NumField(); i++ {
-		if (1 << i & argsFlg) > 0 {
-			if query != initQuery {
-				query += "AND "
-			}
-			query += ToSnakeCase(t.Field(i).Name) + "=" + "? "
-		}
-	}
-	if query == initQuery {
-		query = ""
-	}
-	return
-}
-
-var (
-	matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-	matchAllCap   = regexp.MustCompile("([a-z0-9])([A-Z])")
-)
-
-func ToSnakeCase(str string) (snake string) {
-	snake = matchFirstCap.ReplaceAllString(str, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	snake = strings.ToLower(snake)
-	return
+	return service.GenArgsSliceLogic(argsFlg, st, isLimit)
 }
 
 // Get and Set empty and minimum article id.
@@ -67,7 +29,6 @@ func ArticleIdConverter(mysql MySQL, article *Article) (err error) {
 	if idList, err = GetEmptyMinId(mysql.DB, "articles", 1); err != nil {
 		return
 	}
-
 	(*article).Id = idList[0]
 	return
 }
@@ -85,6 +46,78 @@ func CategoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
 			(*categories)[i].Id = idList[cur]
 			cur++
 		}
+	}
+	return
+}
+
+// Extract new, exist, or deleted category
+// from category array found by article_id from article_category table.
+// - newCa: categories which are added to inserted or updated article
+// - delCa: categories which are removed from inserted or updated article
+func ExtractCategory(db *sql.DB, article Article) (newCa, delCa []Category, err error) {
+	var existCa, bufCa []Category
+	if existCa, err = article.FindCategoryByArticleId(db); err != nil {
+		return
+	}
+	if bufCa, delCa, err = ExtractNewAndDelCategory(article.Categories, existCa); err != nil {
+		return
+	}
+	for _, c := range bufCa {
+		var ca []CategoryResponse
+		if ca, err = c.FindCategory(db, service.GenFlg(Category{}, "Name")); err != nil {
+			return
+		}
+		if len(ca) != 0 {
+			newCa = append(newCa, Category{Id: ca[0].Id, Name: ca[0].Name})
+		}
+	}
+	return
+}
+
+// Extract new, del category.
+func ExtractNewAndDelCategory(allCa, existCa []Category) (newCa, delCa []Category, err error) {
+	cMap := make(map[string]Category)
+	for _, c := range existCa {
+		cMap[c.Name] = c
+	}
+
+	for i := 0; i < len(allCa); i++ {
+		if _, ok := cMap[allCa[i].Name]; !ok {
+			newCa = append(newCa, allCa[i])
+			continue
+		}
+		delete(cMap, allCa[i].Name)
+	}
+
+	for _, c := range cMap {
+		delCa = append(delCa, c)
+	}
+	return
+}
+
+// Get minimum and empty column's id from selected table.
+func GetEmptyMinId(db *sql.DB, tableName string, numOfId int) (res []int, err error) {
+	query := "SELECT (id+1) FROM " + tableName + " " +
+		"WHERE (id+1) NOT IN " +
+		"(SELECT id FROM " + tableName + " ) LIMIT ?"
+
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, numOfId); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", numOfId).
+			AppendTo(Errors)
+	}
+
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+			break
+		}
+		res = append(res, id)
 	}
 	return
 }
