@@ -48,6 +48,9 @@ func (config *Configurations) New(args string) {
 }
 
 func (config *Configurations) Load() {
+	if os.Getenv("IS_TRAVIS") == "on" {
+		return
+	}
 	row, err := ioutil.ReadFile(os.Getenv("GOPATH") + "/src/github.com/champon1020/argus/config.json")
 	if err != nil {
 		current, _ := os.Getwd()

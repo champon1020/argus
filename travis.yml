@@ -16,6 +16,7 @@ env:
   global:
     - ARGUS_LOG_PATH=./logs/
     - ARGUS_ARTICLE=./sample/
+    - IS_TRAVIS=on
 
 script:
   - go test
