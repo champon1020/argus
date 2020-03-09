@@ -50,6 +50,7 @@ func CategoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
 	return
 }
 
+// Get and Set draft empty minimum id.
 func DraftIdConverter(mysql MySQL, draft *Draft) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "drafts", 1); err != nil {

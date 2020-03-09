@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/champon1020/argus/service"
+
 	"github.com/champon1020/argus/repository"
 	"github.com/gin-gonic/gin"
 )
@@ -36,19 +38,19 @@ func RegisterArticleHandler(c *gin.Context) {
 		return
 	}
 
-	fp := ResolveContentFilePath(body.Article.ContentHash, "articles")
+	fp := service.ResolveContentFilePath(body.Article.ContentHash, "articles")
 	article := repository.Article{
 		Id:          body.Article.Id,
 		Title:       body.Article.Title,
 		Categories:  body.Article.Categories,
 		CreateDate:  time.Now(),
 		UpdateDate:  time.Now(),
-		ContentHash: ConvertPathToFileName(fp),
+		ContentHash: service.ConvertPathToFileName(fp),
 		ImageHash:   body.Article.ImageHash,
 		Private:     body.Article.Private,
 	}
 
-	if err = OutputFile(fp, body.Contents); err != nil {
+	if err = service.OutputFile(fp, body.Contents); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -56,7 +58,7 @@ func RegisterArticleHandler(c *gin.Context) {
 	mysql := repository.GlobalMysql
 	if err = repository.RegisterArticleCmd(mysql, article); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		DeleteFile(fp)
+		service.DeleteFile(fp)
 		return
 	}
 

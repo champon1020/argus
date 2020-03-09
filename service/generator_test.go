@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/champon1020/argus/repository"
+
 	"github.com/champon1020/argus"
 )
 
@@ -11,6 +13,29 @@ type Hoge struct {
 	Id    int
 	Title string
 	Date  time.Time
+}
+
+func TestGenFlg_Title(t *testing.T) {
+	article := repository.Article{}
+	fieldName := "Title"
+
+	flg := GenFlg(article, fieldName)
+
+	var actual uint32 = 2
+	if flg != actual {
+		t.Errorf("mismatch flg: %v, actual: %v", actual, flg)
+	}
+}
+
+func TestGenFlg_Id_Title(t *testing.T) {
+	article := repository.Article{}
+
+	flg := GenFlg(article, "Id", "Title")
+
+	var actual uint32 = 3
+	if flg != actual {
+		t.Errorf("mismatch flg: %v, actual: %v", actual, flg)
+	}
 }
 
 func TestGenArgsSliceLogic(t *testing.T) {

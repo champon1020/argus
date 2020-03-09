@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/champon1020/argus/service"
+
 	"github.com/champon1020/argus/repository"
 
 	"github.com/gin-gonic/gin"
@@ -34,17 +36,17 @@ func DraftHandler(c *gin.Context) {
 		return
 	}
 
-	fp := ResolveContentFilePath(body.Article.ContentHash, "drafts")
+	fp := service.ResolveContentFilePath(body.Article.ContentHash, "drafts")
 	draft := repository.Draft{
 		Id:          body.Article.Id,
 		Title:       body.Article.Title,
 		Categories:  resolveToDraftCategories(body.Article.Categories),
 		UpdateDate:  time.Now(),
-		ContentHash: ConvertPathToFileName(fp),
+		ContentHash: service.ConvertPathToFileName(fp),
 		ImageHash:   body.Article.ImageHash,
 	}
 
-	if err = OutputFile(fp, body.Contents); err != nil {
+	if err = service.OutputFile(fp, body.Contents); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -52,7 +54,7 @@ func DraftHandler(c *gin.Context) {
 	mysql := repository.GlobalMysql
 	if err = repository.DraftCmd(mysql, draft); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		DeleteFile(fp)
+		service.DeleteFile(fp)
 		return
 	}
 
