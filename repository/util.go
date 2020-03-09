@@ -60,21 +60,12 @@ func ConvertDraftId(mysql MySQL, draft *Draft) (err error) {
 // - newCa: categories which are added to inserted or updated articles
 // - delCa: categories which are removed from inserted or updated articles
 func ExtractCategory(db *sql.DB, article Article) (newCa, delCa []Category, err error) {
-	var existCa, bufCa []Category
+	var existCa []Category
 	if existCa, err = article.FindCategoryByArticleId(db); err != nil {
 		return
 	}
-	if bufCa, delCa, err = ExtractNewAndDelCategory(article.Categories, existCa); err != nil {
+	if newCa, delCa, err = ExtractNewAndDelCategory(article.Categories, existCa); err != nil {
 		return
-	}
-	for _, c := range bufCa {
-		var ca []CategoryResponse
-		if ca, err = c.FindCategory(db, service.GenFlg(Category{}, "Name")); err != nil {
-			return
-		}
-		if len(ca) != 0 {
-			newCa = append(newCa, Category{Id: ca[0].Id, Name: ca[0].Name})
-		}
 	}
 	return
 }
@@ -104,7 +95,7 @@ func ExtractNewAndDelCategory(allCa, existCa []Category) (newCa, delCa []Categor
 func GetEmptyMinId(db *sql.DB, tableName string, numOfId int) (res []int, err error) {
 	query := "SELECT (id+1) FROM " + tableName + " " +
 		"WHERE (id+1) NOT IN " +
-		"(SELECT id FROM " + tableName + " ) LIMIT ?"
+		"(SELECT id FROM " + tableName + ") LIMIT ?"
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
