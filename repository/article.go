@@ -120,9 +120,9 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 // For Example, 'argFlg = 0101' means
 // it includes first and third fields of objects in where statement.
 func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Article, err error) {
-	args := GenArgsSliceIsLimit(argsFlg, article, true)
-	whereQuery := GenArgsQuery(argsFlg, article)
-	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id DESC LIMIT ?"
+	args := GenArgsSlice(argsFlg, article)
+	whereQuery, limitQuery := GenArgsQuery(argsFlg, article)
+	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id DESC " + limitQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

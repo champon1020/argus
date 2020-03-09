@@ -88,8 +88,8 @@ type CategoryResponse struct {
 
 func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []CategoryResponse, err error) {
 	args := GenArgsSlice(argsFlg, category)
-	whereQuery := GenArgsQuery(argsFlg, category)
-	query := "SELECT * FROM categories " + whereQuery
+	whereQuery, limitQuery := GenArgsQuery(argsFlg, category)
+	query := "SELECT * FROM categories " + whereQuery + limitQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

@@ -7,20 +7,15 @@ import (
 )
 
 // Generate query from struct and argument flag.
-func GenArgsQuery(argsFlg uint32, st interface{}) string {
+// If (flg & 1 << 31) > 0, limit query is on.
+func GenArgsQuery(argsFlg uint32, st interface{}) (string, string) {
 	return service.GenArgsQuery(argsFlg, st)
 }
 
 // Generate arguments slice from struct and argument flag.
-// Default isLimit value is false.
+// If (flg & 1 << 31) > 0, limit query is on.
 func GenArgsSlice(argsFlg uint32, st interface{}) []interface{} {
-	return service.GenArgsSliceLogic(argsFlg, st, false)
-}
-
-// Generate arguments slice from struct and argument flag.
-// IsLimit can be selected by user.
-func GenArgsSliceIsLimit(argsFlg uint32, st interface{}, isLimit bool) []interface{} {
-	return service.GenArgsSliceLogic(argsFlg, st, isLimit)
+	return service.GenArgsSliceLogic(argsFlg, st)
 }
 
 // Get and Set empty and minimum articles id.

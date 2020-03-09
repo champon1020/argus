@@ -153,8 +153,8 @@ func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Art
 }
 
 // Get articles by category.
-func FindArticleByCategoryCmd(mysql MySQL, categoryNames []string) (articles []Article, err error) {
-	articles, err = FindArticleByCategoryId(mysql.DB, categoryNames)
+func FindArticleByCategoryCmd(mysql MySQL, categoryNames []string, argFlg uint32) (articles []Article, err error) {
+	articles, err = FindArticleByCategoryId(mysql.DB, categoryNames, argFlg)
 	return
 }
 

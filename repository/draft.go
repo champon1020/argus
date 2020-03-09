@@ -65,9 +65,9 @@ func (draft *Draft) DeleteDraft(tx *sql.Tx) (err error) {
 }
 
 func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32) (drafts []Draft, err error) {
-	args := GenArgsSliceIsLimit(argsFlg, draft, true)
-	whereQuery := GenArgsQuery(argsFlg, draft)
-	query := "SELECT * FROM drafts " + whereQuery + "ORDER BY id DESC LIMIT ?"
+	args := GenArgsSlice(argsFlg, draft)
+	whereQuery, limitQuery := GenArgsQuery(argsFlg, draft)
+	query := "SELECT * FROM drafts " + whereQuery + "ORDER BY id DESC " + limitQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

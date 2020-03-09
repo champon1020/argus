@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/repository"
 	"github.com/champon1020/argus/service"
@@ -22,9 +24,7 @@ func TestGenFlg_Title(t *testing.T) {
 	flg := service.GenFlg(article, fieldName)
 
 	var actual uint32 = 2
-	if flg != actual {
-		t.Errorf("mismatch flg: %v, actual: %v", actual, flg)
-	}
+	assert.Equal(t, actual, flg)
 }
 
 func TestGenFlg_Id_Title(t *testing.T) {
@@ -33,9 +33,7 @@ func TestGenFlg_Id_Title(t *testing.T) {
 	flg := service.GenFlg(article, "Id", "Title")
 
 	var actual uint32 = 3
-	if flg != actual {
-		t.Errorf("mismatch flg: %v, actual: %v", actual, flg)
-	}
+	assert.Equal(t, actual, flg)
 }
 
 func TestGenArgsSliceLogic(t *testing.T) {
@@ -45,16 +43,14 @@ func TestGenArgsSliceLogic(t *testing.T) {
 	)
 	argsFlg = service.GenFlg(st, "Title")
 	st.Title = "test"
-	args := service.GenArgsSliceLogic(argsFlg, st, false)
+	args := service.GenArgsSliceLogic(argsFlg, st)
 
 	if len(args) != 1 {
 		t.Fatalf("length of args: %v\n", len(args))
 	}
 
 	actual := "test"
-	if args[0] != actual {
-		t.Fatalf("value of args[0]: %v, actual: %v\n", args[0], actual)
-	}
+	assert.Equal(t, actual, args[0])
 }
 
 func TestGenArgsSliceLogic_Limit(t *testing.T) {
@@ -65,24 +61,20 @@ func TestGenArgsSliceLogic_Limit(t *testing.T) {
 	)
 	configurations.New("dev")
 
-	argsFlg = service.GenFlg(st, "Title")
+	argsFlg = service.GenFlg(st, "Title", "Limit")
 	st.Title = "test"
-	args := service.GenArgsSliceLogic(argsFlg, st, true)
+	args := service.GenArgsSliceLogic(argsFlg, st)
 
 	if len(args) != 2 {
 		t.Fatalf("length of args: %v\n", len(args))
 	}
 
 	actual1 := "test"
-	if args[0] != actual1 {
-		t.Fatalf("value of args[0]: %v, actual: %v\n", args[0], actual1)
-	}
+	assert.Equal(t, actual1, args[0])
 
 	config := argus.GlobalConfig
 	actual2 := config.Web.MaxViewArticleNum
-	if args[1] != actual2 {
-		t.Fatalf("value of args[1]: %v, actual: %v\n", args[1], actual2)
-	}
+	assert.Equal(t, actual2, args[1])
 }
 
 func TestGenArgsSliceLogic_Multi(t *testing.T) {
@@ -93,21 +85,17 @@ func TestGenArgsSliceLogic_Multi(t *testing.T) {
 	argsFlg = service.GenFlg(st, "Id", "Title")
 	st.Id = 1
 	st.Title = "test"
-	args := service.GenArgsSliceLogic(argsFlg, st, false)
+	args := service.GenArgsSliceLogic(argsFlg, st)
 
 	if len(args) != 2 {
 		t.Fatalf("length of args: %v\n", len(args))
 	}
 
 	actual1 := 1
-	if args[0] != actual1 {
-		t.Fatalf("value of args[0]: %v, actual: %v\n", args[0], actual1)
-	}
+	assert.Equal(t, actual1, args[0])
 
 	actual2 := "test"
-	if args[1] != actual2 {
-		t.Fatalf("value of args[1]: %v, actual: %v\n", args[0], actual2)
-	}
+	assert.Equal(t, actual2, args[1])
 }
 
 func TestGenArgsQuery(t *testing.T) {
@@ -116,12 +104,10 @@ func TestGenArgsQuery(t *testing.T) {
 		st      Hoge
 	)
 	argsFlg = service.GenFlg(st, "Title")
-	args := service.GenArgsQuery(argsFlg, st)
+	args, limit := service.GenArgsQuery(argsFlg, st)
 
 	actual := "WHERE title=? "
-	if args != actual {
-		t.Fatalf("value of args: %v, actual: %v\n", args, actual)
-	}
+	assert.Equal(t, actual, args+limit)
 }
 
 func TestGenArgsQuery_Multi(t *testing.T) {
@@ -129,20 +115,16 @@ func TestGenArgsQuery_Multi(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argsFlg = service.GenFlg(st, "Title", "Date")
-	args := service.GenArgsQuery(argsFlg, st)
+	argsFlg = service.GenFlg(st, "Title", "Date", "Limit")
+	args, limit := service.GenArgsQuery(argsFlg, st)
 
-	actual := "WHERE title=? AND date=? "
-	if args != actual {
-		t.Fatalf("value of args: %v, actual: %v\n", args, actual)
-	}
+	actual := "WHERE title=? AND date=? LIMIT ? "
+	assert.Equal(t, actual, args+limit)
 }
 
 func TestToSnakeCase(t *testing.T) {
 	test := "TestTestTest012"
 	actual := "test_test_test012"
 	result := service.ToSnakeCase(test)
-	if result != actual {
-		t.Fatalf("result: %v, actual: %v\n", result, actual)
-	}
+	assert.Equal(t, actual, result)
 }
