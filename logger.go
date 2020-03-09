@@ -39,7 +39,7 @@ func (l *LogHandler) NewStd() {
 	l.SetOutput(os.Stdout)
 }
 
-func (l LogHandler) StackTrace() []string {
+func (l *LogHandler) StackTrace() []string {
 	c := 0
 	var stackTrace []string
 	for {
@@ -55,10 +55,10 @@ func (l LogHandler) StackTrace() []string {
 	return stackTrace
 }
 
-func (l LogHandler) Log() {
+func (l *LogHandler) Log() {
 }
 
-func (l LogHandler) ErrorLog(errs []Error) {
+func (l *LogHandler) ErrorLog(errs []Error) {
 	if len(errs) == 0 {
 		return
 	}

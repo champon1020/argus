@@ -30,7 +30,7 @@ func TestDraftHandler(t *testing.T) {
 
 	defer func() {
 		argus.StdLogger.ErrorLog(*Errors)
-		service.DeleteFile(service.ResolveContentFilePath("0123456789", "articles"))
+		service.DeleteFile(service.ResolveContentFilePath("0123456789", "drafts"))
 	}()
 
 	w := httptest.NewRecorder()

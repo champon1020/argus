@@ -1,0 +1,28 @@
+language: go
+
+matrix:
+  - go: 1.11.x
+    env: GO111MODULE=on
+  - go: 1.12.x
+    env: GO111MODULE=on
+  - go: 1.13.x
+  - go: 1.14.x
+  - go: master
+
+install:
+  - go mod download
+
+env:
+  global:
+    - ARGUS_LOG_PATH=./logs/
+    - ARGUS_ARTICLE=./sample/
+    - IS_TRAVIS=on
+
+branches:
+  only:
+    - master
+
+script:
+  - go test
+  - go fmt
+  - go vet
