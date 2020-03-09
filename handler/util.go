@@ -11,9 +11,9 @@ import (
 var (
 	Logger           = argus.Logger
 	Errors           = &argus.Errors
-	IOReadError      = argus.Error{Type: argus.IOFailedReadError}
-	IOMarshalError   = argus.Error{Type: argus.IOFailedMarshalError}
-	IOUnmarshalError = argus.Error{Type: argus.IOFailedUnmarshalError}
+	IOReadError      = argus.NewError(argus.IOFailedReadError)
+	IOMarshalError   = argus.NewError(argus.IOFailedMarshalError)
+	IOUnmarshalError = argus.NewError(argus.IOFailedUnmarshalError)
 )
 
 func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {

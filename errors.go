@@ -30,6 +30,10 @@ type Error struct {
 
 var Errors []Error
 
+func NewError(t ErrorType) Error {
+	return Error{Type: t, Values: make(map[string]interface{})}
+}
+
 func (e Error) AppendTo(errs *[]Error) {
 	*errs = append(*errs, e)
 }

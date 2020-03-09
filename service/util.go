@@ -11,8 +11,8 @@ import (
 var (
 	Logger        = argus.Logger
 	Errors        = &argus.Errors
-	IOWriteError  = argus.Error{Type: argus.IOFailedWriteError}
-	IORemoveError = argus.Error{Type: argus.IOFailedRemoveError}
+	IOWriteError  = argus.NewError(argus.IOFailedWriteError)
+	IORemoveError = argus.NewError(argus.IOFailedRemoveError)
 )
 
 // If contentHash is empty, generate hash from date.

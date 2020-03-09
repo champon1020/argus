@@ -12,22 +12,31 @@ type LogHandler struct {
 	log.Logger
 }
 
-var Logger LogHandler
+var (
+	Logger    LogHandler
+	StdLogger LogHandler
+)
 
 func init() {
-	Logger.NewLogger()
+	Logger.New()
+	StdLogger.NewStd()
 }
 
-func (l *LogHandler) NewLogger() {
+func (l *LogHandler) New() {
 	logfileDir := os.Getenv("ARGUS_LOG_PATH")
 	logfile, err := os.OpenFile(logfileDir+"debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	l.SetFlags(log.Ldate | log.Ltime)
 	if err != nil {
 		log.Printf("Unable to open log file: %s\n", err)
 		l.SetOutput(os.Stdout)
-	} else {
-		l.SetOutput(io.Writer(logfile))
+		return
 	}
+	l.SetOutput(io.Writer(logfile))
+}
+
+func (l *LogHandler) NewStd() {
 	l.SetFlags(log.Ldate | log.Ltime)
+	l.SetOutput(os.Stdout)
 }
 
 func (l LogHandler) StackTrace() []string {

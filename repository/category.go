@@ -65,6 +65,7 @@ func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int
 			SetValues("query", query).
 			SetValues("args", category.Id).
 			AppendTo(Errors)
+		return
 	}
 
 	for rows.Next() {
@@ -98,6 +99,7 @@ func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories [
 			SetValues("query", query).
 			SetValues("args", args).
 			AppendTo(Errors)
+		return
 	}
 
 	var (

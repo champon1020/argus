@@ -24,7 +24,7 @@ func GenArgsSliceIsLimit(argsFlg uint32, st interface{}, isLimit bool) []interfa
 }
 
 // Get and Set empty and minimum articles id.
-func ArticleIdConverter(mysql MySQL, article *Article) (err error) {
+func ConvertArticleId(mysql MySQL, article *Article) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "articles", 1); err != nil {
 		return
@@ -34,7 +34,7 @@ func ArticleIdConverter(mysql MySQL, article *Article) (err error) {
 }
 
 // Get and Set category empty minimum id.
-func CategoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
+func ConvertCategoriesId(mysql MySQL, categories *[]Category) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "categories", len(*categories)); err != nil {
 		return
@@ -51,7 +51,7 @@ func CategoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
 }
 
 // Get and Set draft empty minimum id.
-func DraftIdConverter(mysql MySQL, draft *Draft) (err error) {
+func ConvertDraftId(mysql MySQL, draft *Draft) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "drafts", 1); err != nil {
 		return
@@ -119,6 +119,7 @@ func GetEmptyMinId(db *sql.DB, tableName string, numOfId int) (res []int, err er
 			SetValues("query", query).
 			SetValues("args", numOfId).
 			AppendTo(Errors)
+		return
 	}
 
 	for rows.Next() {

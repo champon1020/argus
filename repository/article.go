@@ -172,6 +172,7 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 			SetValues("query", query).
 			SetValues("args", article.Id).
 			AppendTo(Errors)
+		return
 	}
 
 	var c Category

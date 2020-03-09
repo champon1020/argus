@@ -1,12 +1,12 @@
-package service
+package service_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/champon1020/argus/repository"
-
 	"github.com/champon1020/argus"
+	"github.com/champon1020/argus/repository"
+	"github.com/champon1020/argus/service"
 )
 
 type Hoge struct {
@@ -19,7 +19,7 @@ func TestGenFlg_Title(t *testing.T) {
 	article := repository.Article{}
 	fieldName := "Title"
 
-	flg := GenFlg(article, fieldName)
+	flg := service.GenFlg(article, fieldName)
 
 	var actual uint32 = 2
 	if flg != actual {
@@ -30,7 +30,7 @@ func TestGenFlg_Title(t *testing.T) {
 func TestGenFlg_Id_Title(t *testing.T) {
 	article := repository.Article{}
 
-	flg := GenFlg(article, "Id", "Title")
+	flg := service.GenFlg(article, "Id", "Title")
 
 	var actual uint32 = 3
 	if flg != actual {
@@ -43,9 +43,9 @@ func TestGenArgsSliceLogic(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argsFlg = GenFlg(st, "Title")
+	argsFlg = service.GenFlg(st, "Title")
 	st.Title = "test"
-	args := GenArgsSliceLogic(argsFlg, st, false)
+	args := service.GenArgsSliceLogic(argsFlg, st, false)
 
 	if len(args) != 1 {
 		t.Fatalf("length of args: %v\n", len(args))
@@ -65,9 +65,9 @@ func TestGenArgsSliceLogic_Limit(t *testing.T) {
 	)
 	configurations.New("dev")
 
-	argsFlg = GenFlg(st, "Title")
+	argsFlg = service.GenFlg(st, "Title")
 	st.Title = "test"
-	args := GenArgsSliceLogic(argsFlg, st, true)
+	args := service.GenArgsSliceLogic(argsFlg, st, true)
 
 	if len(args) != 2 {
 		t.Fatalf("length of args: %v\n", len(args))
@@ -90,10 +90,10 @@ func TestGenArgsSliceLogic_Multi(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argsFlg = GenFlg(st, "Id", "Title")
+	argsFlg = service.GenFlg(st, "Id", "Title")
 	st.Id = 1
 	st.Title = "test"
-	args := GenArgsSliceLogic(argsFlg, st, false)
+	args := service.GenArgsSliceLogic(argsFlg, st, false)
 
 	if len(args) != 2 {
 		t.Fatalf("length of args: %v\n", len(args))
@@ -115,8 +115,8 @@ func TestGenArgsQuery(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argsFlg = GenFlg(st, "Title")
-	args := GenArgsQuery(argsFlg, st)
+	argsFlg = service.GenFlg(st, "Title")
+	args := service.GenArgsQuery(argsFlg, st)
 
 	actual := "WHERE title=? "
 	if args != actual {
@@ -129,8 +129,8 @@ func TestGenArgsQuery_Multi(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argsFlg = GenFlg(st, "Title", "Date")
-	args := GenArgsQuery(argsFlg, st)
+	argsFlg = service.GenFlg(st, "Title", "Date")
+	args := service.GenArgsQuery(argsFlg, st)
 
 	actual := "WHERE title=? AND date=? "
 	if args != actual {
@@ -141,7 +141,7 @@ func TestGenArgsQuery_Multi(t *testing.T) {
 func TestToSnakeCase(t *testing.T) {
 	test := "TestTestTest012"
 	actual := "test_test_test012"
-	result := ToSnakeCase(test)
+	result := service.ToSnakeCase(test)
 	if result != actual {
 		t.Fatalf("result: %v, actual: %v\n", result, actual)
 	}
