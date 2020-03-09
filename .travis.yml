@@ -18,6 +18,10 @@ env:
     - ARGUS_ARTICLE=./sample/
     - IS_TRAVIS=on
 
+branches:
+  only:
+    - master
+
 script:
   - go test
   - go fmt
