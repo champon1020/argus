@@ -32,25 +32,25 @@ func NewRouter() *gin.Engine {
 
 	find := router.Group("/find")
 	{
-		find.GET("/article/list", handler.FindArticleHandler)
-		find.GET("/article/list/title", handler.FindArticleHandlerByTitle)
-		find.GET("/article/list/create-date", handler.FindArticleHandlerByCreateDate)
-		find.GET("/article/list/category", handler.FindArticleHandlerByCategory)
-		find.GET("/category/list", handler.FindCategoryHandler)
-		find.GET("/draft/list", handler.FindDraftHandler)
+		find.GET("/article/list", handler.FindArticleController)
+		find.GET("/article/list/title", handler.FindArticleByTitleController)
+		find.GET("/article/list/create-date", handler.FindArticleByCreateDateController)
+		find.GET("/article/list/category", handler.FindArticleByCategoryController)
+		find.GET("/category/list", handler.FindCategoryController)
+		find.GET("/draft/list", handler.FindDraftController)
 	}
 
 	register := router.Group("/register")
 	{
-		register.POST("/article", handler.RegisterArticleHandler)
+		register.POST("/article", handler.RegisterArticleController)
 	}
 
-	update := router.Group("/update", handler.UpdateArticleHandler)
+	update := router.Group("/update", handler.UpdateArticleController)
 	{
 		update.PUT("/article")
 	}
 
-	save := router.Group("/draft", handler.DraftHandler)
+	save := router.Group("/draft", handler.DraftController)
 	{
 		save.POST("/article")
 	}

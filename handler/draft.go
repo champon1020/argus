@@ -5,19 +5,17 @@ import (
 	"net/http"
 	"time"
 
+	repo "github.com/champon1020/argus/repository"
 	"github.com/champon1020/argus/service"
-
-	"github.com/champon1020/argus/repository"
-
 	"github.com/gin-gonic/gin"
 )
 
 type DraftRequestArticle struct {
-	Id          int                   `json:"id"`
-	Title       string                `json:"title"`
-	Categories  []repository.Category `json:"categories"`
-	ContentHash string                `json:"contentHash"`
-	ImageHash   string                `json:"imageHash"`
+	Id          int             `json:"id"`
+	Title       string          `json:"title"`
+	Categories  []repo.Category `json:"categories"`
+	ContentHash string          `json:"contentHash"`
+	ImageHash   string          `json:"imageHash"`
 }
 
 type DraftRequestBody struct {
@@ -25,7 +23,11 @@ type DraftRequestBody struct {
 	Contents string              `json:"contents"`
 }
 
-func DraftHandler(c *gin.Context) {
+func DraftController(c *gin.Context) {
+	DraftHandler(c, repo.DraftCommand)
+}
+
+func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) {
 	var (
 		body RequestBody
 		err  error
@@ -37,7 +39,7 @@ func DraftHandler(c *gin.Context) {
 	}
 
 	fp := service.ResolveContentFilePath(body.Article.ContentHash, "drafts")
-	draft := repository.Draft{
+	draft := repo.Draft{
 		Id:          body.Article.Id,
 		Title:       body.Article.Title,
 		Categories:  resolveToDraftCategories(body.Article.Categories),
@@ -51,8 +53,8 @@ func DraftHandler(c *gin.Context) {
 		return
 	}
 
-	mysql := repository.GlobalMysql
-	if err = repository.DraftCmd(mysql, draft); err != nil {
+	mysql := repo.GlobalMysql
+	if err = repoCmd(mysql, draft); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		service.DeleteFile(fp)
 		return
@@ -61,7 +63,7 @@ func DraftHandler(c *gin.Context) {
 	fmt.Fprint(c.Writer, http.StatusOK)
 }
 
-func resolveToDraftCategories(categories []repository.Category) string {
+func resolveToDraftCategories(categories []repo.Category) string {
 	res := ""
 	for i, c := range categories {
 		if i != 0 {
