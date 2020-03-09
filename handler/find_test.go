@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/champon1020/argus"
-
 	repo "github.com/champon1020/argus/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +24,10 @@ var (
 func TestFindArticleHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
-	ctx.Request = httptest.NewRequest("GET", "/find/article/list", nil)
+	ctx.Request = httptest.NewRequest(
+		"GET",
+		"/find/article/list",
+		nil)
 
 	repoCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articles []repo.Article, _ error) {
 		articles = append(articles, repo.Article{

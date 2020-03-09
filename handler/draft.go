@@ -29,11 +29,11 @@ func DraftController(c *gin.Context) {
 
 func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) {
 	var (
-		body RequestBody
+		body DraftRequestBody
 		err  error
 	)
 
-	if err = ParseRequestBody(c.Request, &body); err != nil {
+	if err = ParseDraftRequestBody(c.Request, &body); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}

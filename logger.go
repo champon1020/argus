@@ -59,6 +59,9 @@ func (l LogHandler) Log() {
 }
 
 func (l LogHandler) ErrorLog(errs []Error) {
+	if len(errs) == 0 {
+		return
+	}
 	var rows []string
 	for _, v := range errs {
 		j, ok := v.Marshal()
