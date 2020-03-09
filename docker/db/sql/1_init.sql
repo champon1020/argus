@@ -6,9 +6,18 @@ CREATE TABLE IF NOT EXISTS articles(
     title varchar(256) not null,
     create_date datetime not null,
     update_date datetime not null,
-    content_url varchar(512) not null,
-    image_url varchar(512) not null,
+    content_hash varchar(512) not null,
+    image_hash varchar(512) not null,
     private int default 0
+);
+
+CREATE TABLE IF NOT EXISTS drafts(
+    id int primary key not null,
+    title varchar(256) not null,
+    categories varchar(256) not null,
+    update_date datetime not null,
+    content_hash varchar(512) not null,
+    image_hash varchar(512) not null
 );
 
 CREATE TABLE IF NOT EXISTS categories(

@@ -37,8 +37,8 @@ func FindArticleByCategoryId(db *sql.DB, categoryNames []string) (articles []Art
 			&a.Title,
 			&a.CreateDate,
 			&a.UpdateDate,
-			&a.ContentUrl,
-			&a.ImageUrl,
+			&a.ContentHash,
+			&a.ImageHash,
 			&a.Private,
 		); err != nil {
 			ScanError.SetErr(err).AppendTo(Errors)

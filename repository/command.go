@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	"errors"
 	"sync"
+
+	"github.com/champon1020/argus/service"
 )
 
 /*
 Flow:
-	- Convert article id.
-	- Insert article.
-	- Sample new categories from article.Categories.
+	- Convert articles id.
+	- Insert articles.
+	- Sample new categories from articles.Categories.
 	- Insert new categories.
 	- Insert the pair of article_id and category_ids.
 */
@@ -27,8 +29,18 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 	}
 	article.Categories = newCa
 
+	var d []Draft
+	flg := service.GenFlg(Draft{}, "ContentHash")
+	draft := Draft{ContentHash: article.ContentHash}
+	if d, err = draft.FindDrafts(mysql.DB, flg); err != nil {
+		return
+	}
+
 	// Start transaction
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
+		if len(d) > 0 {
+			d[0].DeleteDraft(tx)
+		}
 		if err = InsertCategories(tx, newCa); err != nil {
 			return
 		}
@@ -49,7 +61,7 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 Flow:
 	- Get categories by article_id.
 	- Classify categories to new and old.
-	- Update article.
+	- Update articles.
 	- Insert new categories.
 	- Insert the pair of article_id and new category_ids.
 	- Delete the pair of article_id and old category_ids.
@@ -69,7 +81,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		wg := new(sync.WaitGroup)
 		wg.Add(3)
 
-		// update article
+		// update articles
 		go func() {
 			defer wg.Done()
 			if err = article.UpdateArticle(tx); err != nil {
@@ -112,6 +124,29 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 	return
 }
 
+func DraftCmd(mysql MySQL, draft Draft) (err error) {
+	var d []Draft
+	flg := service.GenFlg(Draft{}, "ContentHash")
+	if d, err = draft.FindDrafts(mysql.DB, flg); err != nil {
+		return
+	}
+
+	err = mysql.Transact(func(tx *sql.Tx) (err error) {
+		if len(d) == 0 {
+			if err = DraftIdConverter(mysql, &draft); err != nil {
+				return
+			}
+			if err = draft.InsertDraft(tx); err != nil {
+				return
+			}
+			return
+		}
+		err = draft.UpdateDraft(tx)
+		return
+	})
+	return
+}
+
 func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Article, err error) {
 	articles, err = article.FindArticle(mysql.DB, argFlg)
 	return
@@ -125,6 +160,11 @@ func FindArticleByCategoryCmd(mysql MySQL, categoryNames []string) (articles []A
 
 func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories []CategoryResponse, err error) {
 	categories, err = category.FindCategory(mysql.DB, argFlg)
+	return
+}
+
+func FindDraftCmd(mysql MySQL, draft Draft, argFlg uint32) (drafts []Draft, err error) {
+	drafts, err = draft.FindDrafts(mysql.DB, argFlg)
 	return
 }
 

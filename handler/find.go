@@ -16,10 +16,6 @@ type ResponseType struct {
 	Articles []repository.Article `json:"articles"`
 }
 
-type CategoryResponseType struct {
-	Categories []repository.CategoryResponse `json:"categories"`
-}
-
 func FindArticleHandler(c *gin.Context) {
 	var (
 		err      error
@@ -29,13 +25,13 @@ func FindArticleHandler(c *gin.Context) {
 
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, repository.Article{}, 0); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res := ResponseType{Articles: articles}
 	if response, err = ParseToJson(&res); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -56,13 +52,13 @@ func FindArticleHandlerByTitle(c *gin.Context) {
 	argFlg = service.GenFlg(repository.Article{}, "Title")
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res := ResponseType{Articles: articles}
 	if response, err = ParseToJson(&res); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -79,20 +75,20 @@ func FindArticleHandlerByCreateDate(c *gin.Context) {
 	)
 
 	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	argFlg = service.GenFlg(repository.Article{}, "create_date")
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res := ResponseType{Articles: articles}
 	if response, err = ParseToJson(&res); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -109,35 +105,67 @@ func FindArticleHandlerByCategory(c *gin.Context) {
 	categoryNames := c.QueryArray("category")
 	mysql := repository.GlobalMysql
 	if articles, err = repository.FindArticleByCategoryCmd(mysql, categoryNames); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res := ResponseType{Articles: articles}
 	if response, err = ParseToJson(&res); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	fmt.Fprint(c.Writer, response)
 }
 
+// Response type of Category
+type CategoryResponseType struct {
+	Categories []repository.CategoryResponse `json:"categories"`
+}
+
 func FindCategoryHandler(c *gin.Context) {
 	var (
-		err        error
 		categories []repository.CategoryResponse
 		response   string
+		err        error
 	)
 
 	mysql := repository.GlobalMysql
 	if categories, err = repository.FindCategoryCmd(mysql, repository.Category{}, 0); err != nil {
-		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res := CategoryResponseType{Categories: categories}
 	if response, err = ParseToJson(&res); err != nil {
-		(c.Writer).WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
+}
+
+// Response type of Draft
+type DraftResponseType struct {
+	Drafts []repository.Draft `json:"drafts"`
+}
+
+func FindDraftHandler(c *gin.Context) {
+	var (
+		drafts   []repository.Draft
+		response string
+		err      error
+	)
+
+	mysql := repository.GlobalMysql
+	if drafts, err = repository.FindDraftCmd(mysql, repository.Draft{}, 0); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	res := DraftResponseType{Drafts: drafts}
+	if response, err = ParseToJson(&res); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 

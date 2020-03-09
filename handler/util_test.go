@@ -3,8 +3,11 @@ package handler
 import (
 	"bytes"
 	"net/http"
+	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/champon1020/argus/service"
 
@@ -24,10 +27,8 @@ func TestParseRequestBody(t *testing.T) {
 					"name": "test_test"
 				}
 			],
-			"createDate": "2018-01-02T00:00:00+09:00",
-			"updateDate": "2018-01-03T00:00:00+09:00",
-			"contentUrl": "http://localhost:2000/",
-			"imageUrl": "http://localhost:1000/",
+			"contentHash": "http://localhost:2000/",
+			"imageHash": "http://localhost:1000/",
 			"private": false
 		},
 		"contents": "<div>ok</div>"
@@ -52,22 +53,22 @@ func TestParseRequestBody(t *testing.T) {
 		t.Errorf("mismatch category id: %v, but actual: %v", 1, body.Article.Categories[0].Id)
 	}
 
-	loc, _ := time.LoadLocation("Asia/Tokyo")
-	createDate := time.Date(2018, 1, 2, 0, 0, 0, 0, loc)
-	if !body.Article.CreateDate.Equal(createDate) {
-		t.Errorf("mismatch create date: %v, but actual: %v", createDate, body.Article.CreateDate)
-	}
+	//loc, _ := time.LoadLocation("Asia/Tokyo")
+	//createDate := time.Date(2018, 1, 2, 0, 0, 0, 0, loc)
+	//if !body.Article.CreateDate.Equal(createDate) {
+	//	t.Errorf("mismatch create date: %v, but actual: %v", createDate, body.Article.CreateDate)
+	//}
+	//
+	//updateDate := time.Date(2018, 1, 3, 0, 0, 0, 0, loc)
+	//if !body.Article.UpdateDate.Equal(updateDate) {
+	//	t.Errorf("mismatch update date: %v, but actual: %v", updateDate, body.Article.UpdateDate)
+	//}
 
-	updateDate := time.Date(2018, 1, 3, 0, 0, 0, 0, loc)
-	if !body.Article.UpdateDate.Equal(updateDate) {
-		t.Errorf("mismatch update date: %v, but actual: %v", updateDate, body.Article.UpdateDate)
+	if body.Article.ContentHash != "http://localhost:2000/" {
+		t.Errorf("mismatch content url: %v, but actual: %v", "http://localhost:2000/", body.Article.ContentHash)
 	}
-
-	if body.Article.ContentUrl != "http://localhost:2000/" {
-		t.Errorf("mismatch content url: %v, but actual: %v", "http://localhost:2000/", body.Article.ContentUrl)
-	}
-	if body.Article.ImageUrl != "http://localhost:1000/" {
-		t.Errorf("mismatch image url: %v, but actual: %v", "http://localhost:1000/", body.Article.ImageUrl)
+	if body.Article.ImageHash != "http://localhost:1000/" {
+		t.Errorf("mismatch image url: %v, but actual: %v", "http://localhost:1000/", body.Article.ImageHash)
 	}
 	if body.Article.Private != false {
 		t.Errorf("mismatch category id: %v, but actual: %v", false, body.Article.Private)
@@ -99,4 +100,29 @@ func TestGenFlg_Id_Title(t *testing.T) {
 	if flg != actual {
 		t.Errorf("mismatch flg: %v, actual: %v", actual, flg)
 	}
+}
+
+func TestResolveContentHash(t *testing.T) {
+	contentHash := "article"
+	fn := ResolveContentHash(contentHash)
+	assert.Equal(t, "article", fn)
+
+	contentHash = ""
+	fn = ResolveContentHash(contentHash)
+	today := time.Now()
+	tStr := today.Format("20060102150405")
+	assert.Equal(t, string([]rune(tStr)[:6]), string([]rune(fn)[:6]))
+}
+
+func TestResolveContentFilePath(t *testing.T) {
+	contentHash := "test"
+	dirName := "articles"
+	path := ResolveContentFilePath(contentHash, dirName)
+	assert.Equal(t, os.Getenv("ARGUS_ARTICLE")+"/articles/test", path)
+}
+
+func TestConvertPathToFileName(t *testing.T) {
+	path := "/this/is/test/article"
+	fn := ConvertPathToFileName(path)
+	assert.Equal(t, "article", fn)
 }

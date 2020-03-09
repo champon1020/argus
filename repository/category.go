@@ -2,6 +2,8 @@ package repository
 
 import "database/sql"
 
+// Id: primary key
+// Name: category name
 type Category struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
@@ -74,6 +76,9 @@ func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int
 	return
 }
 
+// This is article category struct which is used only response.
+// Difference of normal category struct is that this has property of 'ArticleNum'.
+// ArticleNum is the number of articles related to this category.
 type CategoryResponse struct {
 	Id         int    `json:"id"`
 	Name       string `json:"name"`
@@ -83,7 +88,7 @@ type CategoryResponse struct {
 func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []CategoryResponse, err error) {
 	args := GenArgsSlice(argsFlg, category)
 	whereQuery := GenArgsQuery(argsFlg, category)
-	query := "SELECT * FROM categories " + whereQuery + "ORDER BY id"
+	query := "SELECT * FROM categories " + whereQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
