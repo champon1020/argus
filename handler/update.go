@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/champon1020/argus/service"
+
 	"github.com/champon1020/argus/repository"
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +22,7 @@ func UpdateArticleHandler(c *gin.Context) {
 		return
 	}
 
-	fp := ResolveContentFilePath(body.Article.ContentHash, "articles")
+	fp := service.ResolveContentFilePath(body.Article.ContentHash, "articles")
 	article := repository.Article{
 		Id:          body.Article.Id,
 		Title:       body.Article.Title,
@@ -31,7 +33,7 @@ func UpdateArticleHandler(c *gin.Context) {
 		Private:     body.Article.Private,
 	}
 
-	if err = OutputFile(fp, body.Contents); err != nil {
+	if err = service.OutputFile(fp, body.Contents); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -39,7 +41,7 @@ func UpdateArticleHandler(c *gin.Context) {
 	mysql := repository.GlobalMysql
 	if err = repository.UpdateArticleCmd(mysql, article); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		DeleteFile(fp)
+		service.DeleteFile(fp)
 		return
 	}
 	fmt.Fprint(c.Writer, http.StatusOK)

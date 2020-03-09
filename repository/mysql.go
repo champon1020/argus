@@ -12,11 +12,11 @@ var (
 	GlobalMysql  MySQL
 	Logger       = argus.Logger
 	Errors       = &argus.Errors
-	RuntimeError = argus.Error{Type: argus.DbRuntimeError}
-	CmdError     = argus.Error{Type: argus.DbCmdFailedError}
-	ScanError    = argus.Error{Type: argus.DbScanFailedError}
-	QueryError   = argus.Error{Type: argus.DbQueryFailedError}
-	CloseError   = argus.Error{Type: argus.DbCloseFailedError}
+	RuntimeError = argus.NewError(argus.DbRuntimeError)
+	CmdError     = argus.NewError(argus.DbCmdFailedError)
+	ScanError    = argus.NewError(argus.DbScanFailedError)
+	QueryError   = argus.NewError(argus.DbQueryFailedError)
+	CloseError   = argus.NewError(argus.DbCloseFailedError)
 )
 
 type MySQL struct {

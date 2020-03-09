@@ -7,24 +7,19 @@ import (
 )
 
 // Generate query from struct and argument flag.
-func GenArgsQuery(argsFlg uint32, st interface{}) string {
+// If (flg & 1 << 31) > 0, limit query is on.
+func GenArgsQuery(argsFlg uint32, st interface{}) (string, string) {
 	return service.GenArgsQuery(argsFlg, st)
 }
 
 // Generate arguments slice from struct and argument flag.
-// Default isLimit value is false.
+// If (flg & 1 << 31) > 0, limit query is on.
 func GenArgsSlice(argsFlg uint32, st interface{}) []interface{} {
-	return service.GenArgsSliceLogic(argsFlg, st, false)
-}
-
-// Generate arguments slice from struct and argument flag.
-// IsLimit can be selected by user.
-func GenArgsSliceIsLimit(argsFlg uint32, st interface{}, isLimit bool) []interface{} {
-	return service.GenArgsSliceLogic(argsFlg, st, isLimit)
+	return service.GenArgsSliceLogic(argsFlg, st)
 }
 
 // Get and Set empty and minimum articles id.
-func ArticleIdConverter(mysql MySQL, article *Article) (err error) {
+func ConvertArticleId(mysql MySQL, article *Article) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "articles", 1); err != nil {
 		return
@@ -34,7 +29,7 @@ func ArticleIdConverter(mysql MySQL, article *Article) (err error) {
 }
 
 // Get and Set category empty minimum id.
-func CategoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
+func ConvertCategoriesId(mysql MySQL, categories *[]Category) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "categories", len(*categories)); err != nil {
 		return
@@ -50,7 +45,8 @@ func CategoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
 	return
 }
 
-func DraftIdConverter(mysql MySQL, draft *Draft) (err error) {
+// Get and Set draft empty minimum id.
+func ConvertDraftId(mysql MySQL, draft *Draft) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "drafts", 1); err != nil {
 		return
@@ -118,6 +114,7 @@ func GetEmptyMinId(db *sql.DB, tableName string, numOfId int) (res []int, err er
 			SetValues("query", query).
 			SetValues("args", numOfId).
 			AppendTo(Errors)
+		return
 	}
 
 	for rows.Next() {

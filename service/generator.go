@@ -12,6 +12,10 @@ func GenFlg(st interface{}, fieldNames ...string) (flg uint32) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
 	for _, fn := range fieldNames {
+		if fn == "Limit" {
+			flg |= 1 << 31
+			continue
+		}
 		for j := 0; j < t.NumField(); j++ {
 			if fn == t.Field(j).Name {
 				flg |= 1 << j
@@ -21,7 +25,7 @@ func GenFlg(st interface{}, fieldNames ...string) (flg uint32) {
 	return
 }
 
-func GenArgsSliceLogic(argsFlg uint32, st interface{}, isLimit bool) (args []interface{}) {
+func GenArgsSliceLogic(argsFlg uint32, st interface{}) (args []interface{}) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
@@ -29,13 +33,13 @@ func GenArgsSliceLogic(argsFlg uint32, st interface{}, isLimit bool) (args []int
 			args = append(args, v.Field(i).Interface())
 		}
 	}
-	if isLimit {
+	if (1 << 31 & argsFlg) > 0 {
 		args = append(args, argus.GlobalConfig.Web.MaxViewArticleNum)
 	}
 	return
 }
 
-func GenArgsQuery(argsFlg uint32, st interface{}) (query string) {
+func GenArgsQuery(argsFlg uint32, st interface{}) (query string, limit string) {
 	const initQuery = "WHERE "
 	query = initQuery
 	v := reflect.Indirect(reflect.ValueOf(st))
@@ -47,6 +51,9 @@ func GenArgsQuery(argsFlg uint32, st interface{}) (query string) {
 			}
 			query += ToSnakeCase(t.Field(i).Name) + "=" + "? "
 		}
+	}
+	if (1 << 31 & argsFlg) > 0 {
+		limit = "LIMIT ? "
 	}
 	if query == initQuery {
 		query = ""

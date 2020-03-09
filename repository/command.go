@@ -18,13 +18,13 @@ Flow:
 */
 func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 	var newCa []Category
-	if err = ArticleIdConverter(mysql, &article); err != nil {
+	if err = ConvertArticleId(mysql, &article); err != nil {
 		return
 	}
 	if newCa, _, err = ExtractCategory(mysql.DB, article); err != nil {
 		return
 	}
-	if err = CategoriesIdConverter(mysql, &newCa); err != nil {
+	if err = ConvertCategoriesId(mysql, &newCa); err != nil {
 		return
 	}
 	article.Categories = newCa
@@ -71,7 +71,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 	if newCa, delCa, err = ExtractCategory(mysql.DB, article); err != nil {
 		return
 	}
-	if err = CategoriesIdConverter(mysql, &newCa); err != nil {
+	if err = ConvertCategoriesId(mysql, &newCa); err != nil {
 		return
 	}
 
@@ -92,7 +92,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		// insert new categories
 		go func() {
 			defer wg.Done()
-			if err = CategoriesIdConverter(mysql, &newCa); err != nil {
+			if err = ConvertCategoriesId(mysql, &newCa); err != nil {
 				errCnt++
 			}
 			a := Article{Id: article.Id, Categories: newCa}
@@ -133,7 +133,7 @@ func DraftCmd(mysql MySQL, draft Draft) (err error) {
 
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
 		if len(d) == 0 {
-			if err = DraftIdConverter(mysql, &draft); err != nil {
+			if err = ConvertDraftId(mysql, &draft); err != nil {
 				return
 			}
 			if err = draft.InsertDraft(tx); err != nil {
@@ -153,8 +153,8 @@ func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Art
 }
 
 // Get articles by category.
-func FindArticleByCategoryCmd(mysql MySQL, categoryNames []string) (articles []Article, err error) {
-	articles, err = FindArticleByCategoryId(mysql.DB, categoryNames)
+func FindArticleByCategoryCmd(mysql MySQL, categoryNames []string, argFlg uint32) (articles []Article, err error) {
+	articles, err = FindArticleByCategoryId(mysql.DB, categoryNames, argFlg)
 	return
 }
 
