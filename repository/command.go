@@ -8,6 +8,8 @@ import (
 	"github.com/champon1020/argus/service"
 )
 
+type RegisterArticleCmd func(MySQL, Article) error
+
 /*
 Flow:
 	- Convert articles id.
@@ -16,7 +18,7 @@ Flow:
 	- Insert new categories.
 	- Insert the pair of article_id and category_ids.
 */
-func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
+func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 	var newCa []Category
 	if err = ConvertArticleId(mysql, &article); err != nil {
 		return
@@ -57,6 +59,8 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 	return
 }
 
+type UpdateArticleCmd func(MySQL, Article) error
+
 /*
 Flow:
 	- Get categories by article_id.
@@ -66,7 +70,7 @@ Flow:
 	- Insert the pair of article_id and new category_ids.
 	- Delete the pair of article_id and old category_ids.
 */
-func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
+func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 	var newCa, delCa []Category
 	if newCa, delCa, err = ExtractCategory(mysql.DB, article); err != nil {
 		return
@@ -124,7 +128,9 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 	return
 }
 
-func DraftCmd(mysql MySQL, draft Draft) (err error) {
+type DraftCmd func(MySQL, Draft) error
+
+func DraftCommand(mysql MySQL, draft Draft) (err error) {
 	var d []Draft
 	flg := service.GenFlg(Draft{}, "ContentHash")
 	if d, err = draft.FindDrafts(mysql.DB, flg); err != nil {
@@ -147,23 +153,31 @@ func DraftCmd(mysql MySQL, draft Draft) (err error) {
 	return
 }
 
-func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Article, err error) {
+type FindArticleCmd func(MySQL, Article, uint32) ([]Article, error)
+
+func FindArticleCommand(mysql MySQL, article Article, argFlg uint32) (articles []Article, err error) {
 	articles, err = article.FindArticle(mysql.DB, argFlg)
 	return
 }
 
+type FindArticleByCategoryCmd func(MySQL, []string, uint32) ([]Article, error)
+
 // Get articles by category.
-func FindArticleByCategoryCmd(mysql MySQL, categoryNames []string, argFlg uint32) (articles []Article, err error) {
+func FindArticleByCategoryCommand(mysql MySQL, categoryNames []string, argFlg uint32) (articles []Article, err error) {
 	articles, err = FindArticleByCategoryId(mysql.DB, categoryNames, argFlg)
 	return
 }
 
-func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories []CategoryResponse, err error) {
+type FindCategoryCmd func(MySQL, Category, uint32) ([]CategoryResponse, error)
+
+func FindCategoryCommand(mysql MySQL, category Category, argFlg uint32) (categories []CategoryResponse, err error) {
 	categories, err = category.FindCategory(mysql.DB, argFlg)
 	return
 }
 
-func FindDraftCmd(mysql MySQL, draft Draft, argFlg uint32) (drafts []Draft, err error) {
+type FindDraftCmd func(MySQL, Draft, uint32) ([]Draft, error)
+
+func FindDraftCommand(mysql MySQL, draft Draft, argFlg uint32) (drafts []Draft, err error) {
 	drafts, err = draft.FindDrafts(mysql.DB, argFlg)
 	return
 }

@@ -5,28 +5,30 @@ import (
 	"net/http"
 	"time"
 
+	repo "github.com/champon1020/argus/repository"
 	"github.com/champon1020/argus/service"
-
 	"github.com/gin-gonic/gin"
-
-	"github.com/champon1020/argus/repository"
 )
 
 type ResponseType struct {
-	Articles []repository.Article `json:"articles"`
+	Articles []repo.Article `json:"articles"`
 }
 
-func FindArticleHandler(c *gin.Context) {
+func FindArticleController(c *gin.Context) {
+	FindArticleHandler(c, repo.FindArticleCommand)
+}
+
+func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	var (
-		articles []repository.Article
+		articles []repo.Article
 		response string
 		argFlg   uint32
 		err      error
 	)
 
-	mysql := repository.GlobalMysql
-	argFlg = service.GenFlg(repository.Article{}, "Limit")
-	if articles, err = repository.FindArticleCmd(mysql, repository.Article{}, argFlg); err != nil {
+	mysql := repo.GlobalMysql
+	argFlg = service.GenFlg(repo.Article{}, "Limit")
+	if articles, err = repoCmd(mysql, repo.Article{}, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -40,10 +42,14 @@ func FindArticleHandler(c *gin.Context) {
 	fmt.Fprint(c.Writer, response)
 }
 
-func FindArticleHandlerByTitle(c *gin.Context) {
+func FindArticleByTitleController(c *gin.Context) {
+	FindArticleByTitleHandler(c, repo.FindArticleCommand)
+}
+
+func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	var (
-		argArticle repository.Article
-		articles   []repository.Article
+		argArticle repo.Article
+		articles   []repo.Article
 		response   string
 		argFlg     uint32
 		err        error
@@ -51,9 +57,9 @@ func FindArticleHandlerByTitle(c *gin.Context) {
 
 	argArticle.Title = c.Query("title")
 
-	mysql := repository.GlobalMysql
-	argFlg = service.GenFlg(repository.Article{}, "Title", "Limit")
-	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
+	mysql := repo.GlobalMysql
+	argFlg = service.GenFlg(repo.Article{}, "Title", "Limit")
+	if articles, err = repoCmd(mysql, argArticle, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -67,10 +73,14 @@ func FindArticleHandlerByTitle(c *gin.Context) {
 	fmt.Fprint(c.Writer, response)
 }
 
-func FindArticleHandlerByCreateDate(c *gin.Context) {
+func FindArticleByCreateDateController(c *gin.Context) {
+	FindArticleByCreateDateHandler(c, repo.FindArticleCommand)
+}
+
+func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	var (
-		argArticle repository.Article
-		articles   []repository.Article
+		argArticle repo.Article
+		articles   []repo.Article
 		response   string
 		argFlg     uint32
 		err        error
@@ -78,12 +88,13 @@ func FindArticleHandlerByCreateDate(c *gin.Context) {
 
 	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
+		TimeParseError.SetErr(err).AppendTo(Errors)
 		return
 	}
 
-	argFlg = service.GenFlg(repository.Article{}, "CreateDate", "Limit")
-	mysql := repository.GlobalMysql
-	if articles, err = repository.FindArticleCmd(mysql, argArticle, argFlg); err != nil {
+	argFlg = service.GenFlg(repo.Article{}, "CreateDate", "Limit")
+	mysql := repo.GlobalMysql
+	if articles, err = repoCmd(mysql, argArticle, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -97,18 +108,22 @@ func FindArticleHandlerByCreateDate(c *gin.Context) {
 	fmt.Fprint(c.Writer, response)
 }
 
-func FindArticleHandlerByCategory(c *gin.Context) {
+func FindArticleByCategoryController(c *gin.Context) {
+	FindArticleByCategoryHandler(c, repo.FindArticleByCategoryCommand)
+}
+
+func FindArticleByCategoryHandler(c *gin.Context, repoCmd repo.FindArticleByCategoryCmd) {
 	var (
-		articles []repository.Article
+		articles []repo.Article
 		response string
 		argFlg   uint32
 		err      error
 	)
 
 	categoryNames := c.QueryArray("category")
-	mysql := repository.GlobalMysql
-	argFlg = service.GenFlg(repository.Article{}, "Limit")
-	if articles, err = repository.FindArticleByCategoryCmd(mysql, categoryNames, argFlg); err != nil {
+	mysql := repo.GlobalMysql
+	argFlg = service.GenFlg(repo.Article{}, "Limit")
+	if articles, err = repoCmd(mysql, categoryNames, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -124,20 +139,24 @@ func FindArticleHandlerByCategory(c *gin.Context) {
 
 // Response type of Category
 type CategoryResponseType struct {
-	Categories []repository.CategoryResponse `json:"categories"`
+	Categories []repo.CategoryResponse `json:"categories"`
 }
 
-func FindCategoryHandler(c *gin.Context) {
+func FindCategoryController(c *gin.Context) {
+	FindCategoryHandler(c, repo.FindCategoryCommand)
+}
+
+func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) {
 	var (
-		categories []repository.CategoryResponse
+		categories []repo.CategoryResponse
 		response   string
 		argFlg     uint32
 		err        error
 	)
 
-	mysql := repository.GlobalMysql
-	argFlg = service.GenFlg(repository.Category{}, "Limit")
-	if categories, err = repository.FindCategoryCmd(mysql, repository.Category{}, argFlg); err != nil {
+	mysql := repo.GlobalMysql
+	argFlg = service.GenFlg(repo.Category{}, "Limit")
+	if categories, err = repoCmd(mysql, repo.Category{}, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -153,20 +172,24 @@ func FindCategoryHandler(c *gin.Context) {
 
 // Response type of Draft
 type DraftResponseType struct {
-	Drafts []repository.Draft `json:"drafts"`
+	Drafts []repo.Draft `json:"drafts"`
 }
 
-func FindDraftHandler(c *gin.Context) {
+func FindDraftController(c *gin.Context) {
+	FindDraftHandler(c, repo.FindDraftCommand)
+}
+
+func FindDraftHandler(c *gin.Context, repoCmd repo.FindDraftCmd) {
 	var (
-		drafts   []repository.Draft
+		drafts   []repo.Draft
 		response string
 		argFlg   uint32
 		err      error
 	)
 
-	mysql := repository.GlobalMysql
-	argFlg = service.GenFlg(repository.Draft{}, "Limit")
-	if drafts, err = repository.FindDraftCmd(mysql, repository.Draft{}, argFlg); err != nil {
+	mysql := repo.GlobalMysql
+	argFlg = service.GenFlg(repo.Draft{}, "Limit")
+	if drafts, err = repoCmd(mysql, repo.Draft{}, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}

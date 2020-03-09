@@ -4,11 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/repository"
 	"github.com/champon1020/argus/service"
+	"github.com/stretchr/testify/assert"
 )
 
 type Hoge struct {

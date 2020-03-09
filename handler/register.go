@@ -5,21 +5,20 @@ import (
 	"net/http"
 	"time"
 
+	repo "github.com/champon1020/argus/repository"
 	"github.com/champon1020/argus/service"
-
-	"github.com/champon1020/argus/repository"
 	"github.com/gin-gonic/gin"
 )
 
 // Property of 'categories' has -1 of id absolutely.
 // This is because client side cannot fetch categories information interactively,
 type RequestArticle struct {
-	Id          int                   `json:"id"`
-	Title       string                `json:"title"`
-	Categories  []repository.Category `json:"categories"`
-	ContentHash string                `json:"contentHash"`
-	ImageHash   string                `json:"imageHash"`
-	Private     bool                  `json:"private"`
+	Id          int             `json:"id"`
+	Title       string          `json:"title"`
+	Categories  []repo.Category `json:"categories"`
+	ContentHash string          `json:"contentHash"`
+	ImageHash   string          `json:"imageHash"`
+	Private     bool            `json:"private"`
 }
 
 type RequestBody struct {
@@ -27,7 +26,11 @@ type RequestBody struct {
 	Contents string         `json:"contents"`
 }
 
-func RegisterArticleHandler(c *gin.Context) {
+func RegisterArticleController(c *gin.Context) {
+	RegisterArticleHandler(c, repo.RegisterArticleCommand)
+}
+
+func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) {
 	var (
 		body RequestBody
 		err  error
@@ -39,7 +42,7 @@ func RegisterArticleHandler(c *gin.Context) {
 	}
 
 	fp := service.ResolveContentFilePath(body.Article.ContentHash, "articles")
-	article := repository.Article{
+	article := repo.Article{
 		Id:          body.Article.Id,
 		Title:       body.Article.Title,
 		Categories:  body.Article.Categories,
@@ -55,8 +58,8 @@ func RegisterArticleHandler(c *gin.Context) {
 		return
 	}
 
-	mysql := repository.GlobalMysql
-	if err = repository.RegisterArticleCmd(mysql, article); err != nil {
+	mysql := repo.GlobalMysql
+	if err = repoCmd(mysql, article); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		service.DeleteFile(fp)
 		return

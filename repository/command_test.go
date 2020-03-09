@@ -5,13 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/champon1020/argus/service"
-
-	"github.com/stretchr/testify/assert"
-
-	"github.com/champon1020/argus"
-
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/champon1020/argus"
+	"github.com/champon1020/argus/service"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -47,7 +44,7 @@ func TestRegisterArticleCmd(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta(
 		"SELECT (id+1) FROM articles " +
 			"WHERE (id+1) NOT IN " +
-			"(SELECT id FROM articles ) LIMIT ?")).
+			"(SELECT id FROM articles) LIMIT ?")).
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
@@ -61,24 +58,12 @@ func TestRegisterArticleCmd(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "c1"))
 
-	// FindCategory() with category name
-	// Called by repository/util.go: ExtractCategory()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM categories WHERE name=?")).
-		WithArgs("c2").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(2, "c2"))
-
-	// FindArticleNumByCategoryId()
-	// Called by category.go: FindCategory()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(article_id) FROM article_category WHERE category_id=?")).
-		WithArgs(2).
-		WillReturnRows(sqlmock.NewRows([]string{"articleNum"}).AddRow(1))
-
 	// GetMinId() with categories table
 	// Called by repository/util.go: ConvertCategoriesId()
 	mock.ExpectQuery(regexp.QuoteMeta(
 		"SELECT (id+1) FROM categories " +
 			"WHERE (id+1) NOT IN " +
-			"(SELECT id FROM categories ) LIMIT ?")).
+			"(SELECT id FROM categories) LIMIT ?")).
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1).AddRow(2))
 
@@ -108,12 +93,12 @@ func TestRegisterArticleCmd(t *testing.T) {
 	// Commit
 	mock.ExpectCommit()
 
-	if err := RegisterArticleCmd(mysql, article); err != nil {
+	if err := RegisterArticleCommand(mysql, article); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Errorf("error was occured in testing function\n")
+		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("different from expectation")
+		t.Fatalf("different from expectation")
 	}
 }
 
@@ -146,7 +131,7 @@ func TestDraftCmd_Insert(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta(
 		"SELECT (id+1) FROM drafts " +
 			"WHERE (id+1) NOT IN " +
-			"(SELECT id FROM drafts ) LIMIT ?")).
+			"(SELECT id FROM drafts) LIMIT ?")).
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
@@ -157,12 +142,12 @@ func TestDraftCmd_Insert(t *testing.T) {
 
 	mock.ExpectCommit()
 
-	if err := DraftCmd(mysql, draft); err != nil {
+	if err := DraftCommand(mysql, draft); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Errorf("error was occured in testing function\n")
+		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("different from expectation")
+		t.Fatalf("different from expectation")
 	}
 }
 
@@ -201,12 +186,12 @@ func TestDraftCmd_Update(t *testing.T) {
 
 	mock.ExpectCommit()
 
-	if err := DraftCmd(mysql, draft); err != nil {
+	if err := DraftCommand(mysql, draft); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Errorf("error was occured in testing function\n")
+		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("different from expectation")
+		t.Fatalf("different from expectation")
 	}
 }
 
@@ -240,15 +225,15 @@ func TestFindArticleCmd_All(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "c1"))
 
-	articles, err := FindArticleCmd(mysql, article, argFlg)
+	articles, err := FindArticleCommand(mysql, article, argFlg)
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Errorf("error was occured in testing function\n")
+		t.Fatalf("error was occured in testing function\n")
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("different from expectation")
+		t.Fatalf("different from expectation")
 	}
 	if len(articles) == 0 {
 		t.Fatalf("get empty artilces")
@@ -290,7 +275,7 @@ func TestFindArticleCmd_Title(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "c1"))
 
-	articles, err := FindArticleCmd(mysql, article, argFlg)
+	articles, err := FindArticleCommand(mysql, article, argFlg)
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -347,7 +332,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 				"id", "name",
 			}).AddRow(1, "c1"))
 
-	articles, err := FindArticleByCategoryCmd(mysql, categoryNames, argFlg)
+	articles, err := FindArticleByCategoryCommand(mysql, categoryNames, argFlg)
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -389,7 +374,7 @@ func TestFindCategoryCmd(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"articleNum"}).
 			AddRow(3))
 
-	categories, err := FindCategoryCmd(mysql, category, 0)
+	categories, err := FindCategoryCommand(mysql, category, 0)
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -425,7 +410,7 @@ func TestFindDraftCmd(t *testing.T) {
 				"id", "title", "categories", "update_date", "content_hash", "image_hsah",
 			}).AddRow(1, "draft", "c1&c2", testTime, "0123456789", "9876543210"))
 
-	if _, err := FindDraftCmd(mysql, draft, argFlg); err != nil {
+	if _, err := FindDraftCommand(mysql, draft, argFlg); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}

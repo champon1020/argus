@@ -20,6 +20,9 @@ const (
 	IOFailedRemoveError    ErrorType = "IOFailedRemoveError"
 	IOFailedMarshalError   ErrorType = "IOFailedMarshalError"
 	IOFailedUnmarshalError ErrorType = "IOFailedUnmarshalError"
+
+	// time error types
+	TimeFailedParseError ErrorType = "TimeFailedParseError"
 )
 
 type Error struct {
