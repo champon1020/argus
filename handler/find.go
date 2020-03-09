@@ -43,10 +43,10 @@ func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 }
 
 func FindArticleByTitleController(c *gin.Context) {
-	FindArticleHandlerByTitle(c, repo.FindArticleCommand)
+	FindArticleByTitleHandler(c, repo.FindArticleCommand)
 }
 
-func FindArticleHandlerByTitle(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	var (
 		argArticle repo.Article
 		articles   []repo.Article
@@ -74,10 +74,10 @@ func FindArticleHandlerByTitle(c *gin.Context, repoCmd repo.FindArticleCmd) {
 }
 
 func FindArticleByCreateDateController(c *gin.Context) {
-	FindArticleHandlerByCreateDate(c, repo.FindArticleCommand)
+	FindArticleByCreateDateHandler(c, repo.FindArticleCommand)
 }
 
-func FindArticleHandlerByCreateDate(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	var (
 		argArticle repo.Article
 		articles   []repo.Article
@@ -88,6 +88,7 @@ func FindArticleHandlerByCreateDate(c *gin.Context, repoCmd repo.FindArticleCmd)
 
 	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
+		TimeParseError.SetErr(err).AppendTo(Errors)
 		return
 	}
 
@@ -108,10 +109,10 @@ func FindArticleHandlerByCreateDate(c *gin.Context, repoCmd repo.FindArticleCmd)
 }
 
 func FindArticleByCategoryController(c *gin.Context) {
-	FindArticleHandlerByCategory(c, repo.FindArticleByCategoryCommand)
+	FindArticleByCategoryHandler(c, repo.FindArticleByCategoryCommand)
 }
 
-func FindArticleHandlerByCategory(c *gin.Context, repoCmd repo.FindArticleByCategoryCmd) {
+func FindArticleByCategoryHandler(c *gin.Context, repoCmd repo.FindArticleByCategoryCmd) {
 	var (
 		articles []repo.Article
 		response string

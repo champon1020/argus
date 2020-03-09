@@ -14,6 +14,7 @@ var (
 	IOReadError      = argus.NewError(argus.IOFailedReadError)
 	IOMarshalError   = argus.NewError(argus.IOFailedMarshalError)
 	IOUnmarshalError = argus.NewError(argus.IOFailedUnmarshalError)
+	TimeParseError   = argus.NewError(argus.TimeFailedParseError)
 )
 
 func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {
