@@ -19,7 +19,7 @@ func UpdateArticleHandler(c *gin.Context) {
 		return
 	}
 
-	fp := ResolveContentFilePath(body.Article.ContentUrl, "articles")
+	fp := ResolveContentFilePath(body.Article.ContentHash, "articles")
 	if err = OutputFile(fp, body.Contents); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return

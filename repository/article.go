@@ -7,14 +7,14 @@ import (
 )
 
 type Article struct {
-	Id         int        `json:"id"`
-	Title      string     `json:"title"`
-	Categories []Category `json:"categories"`
-	CreateDate time.Time  `json:"createDate"`
-	UpdateDate time.Time  `json:"updateDate"`
-	ContentUrl string     `json:"contentUrl"`
-	ImageUrl   string     `json:"imageUrl"`
-	Private    bool       `json:"private"`
+	Id          int        `json:"id"`
+	Title       string     `json:"title"`
+	Categories  []Category `json:"categories"`
+	CreateDate  time.Time  `json:"createDate"`
+	UpdateDate  time.Time  `json:"updateDate"`
+	ContentHash string     `json:"contentHash"`
+	ImageHash   string     `json:"imageHash"`
+	Private     bool       `json:"private"`
 }
 
 func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
@@ -27,8 +27,8 @@ func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 		article.Title,
 		article.CreateDate,
 		article.UpdateDate,
-		article.ContentUrl,
-		article.ImageUrl,
+		article.ContentHash,
+		article.ImageHash,
 		article.Private,
 	); err != nil {
 		CmdError.SetErr(err).AppendTo(Errors)
@@ -64,8 +64,8 @@ func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 		article.Title,
 		article.CreateDate,
 		article.UpdateDate,
-		article.ContentUrl,
-		article.ImageUrl,
+		article.ContentHash,
+		article.ImageHash,
 		article.Private,
 		article.Id,
 	); err != nil {
@@ -135,8 +135,8 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 			&a.Title,
 			&a.CreateDate,
 			&a.UpdateDate,
-			&a.ContentUrl,
-			&a.ImageUrl,
+			&a.ContentHash,
+			&a.ImageHash,
 			&a.Private,
 		); err != nil {
 			ScanError.SetErr(err).AppendTo(Errors)

@@ -24,8 +24,8 @@ func RegisterArticleHandler(c *gin.Context) {
 		return
 	}
 
-	fp := ResolveContentFilePath(body.Article.ContentUrl, "articles")
-	body.Article.ContentUrl = ConvertPathToFileName(fp)
+	fp := ResolveContentFilePath(body.Article.ContentHash, "articles")
+	body.Article.ContentHash = ConvertPathToFileName(fp)
 	if err = OutputFile(fp, body.Contents); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
 		return

@@ -29,8 +29,8 @@ func TestParseRequestBody(t *testing.T) {
 			],
 			"createDate": "2018-01-02T00:00:00+09:00",
 			"updateDate": "2018-01-03T00:00:00+09:00",
-			"contentUrl": "http://localhost:2000/",
-			"imageUrl": "http://localhost:1000/",
+			"contentHash": "http://localhost:2000/",
+			"imageHash": "http://localhost:1000/",
 			"private": false
 		},
 		"contents": "<div>ok</div>"
@@ -66,11 +66,11 @@ func TestParseRequestBody(t *testing.T) {
 		t.Errorf("mismatch update date: %v, but actual: %v", updateDate, body.Article.UpdateDate)
 	}
 
-	if body.Article.ContentUrl != "http://localhost:2000/" {
-		t.Errorf("mismatch content url: %v, but actual: %v", "http://localhost:2000/", body.Article.ContentUrl)
+	if body.Article.ContentHash != "http://localhost:2000/" {
+		t.Errorf("mismatch content url: %v, but actual: %v", "http://localhost:2000/", body.Article.ContentHash)
 	}
-	if body.Article.ImageUrl != "http://localhost:1000/" {
-		t.Errorf("mismatch image url: %v, but actual: %v", "http://localhost:1000/", body.Article.ImageUrl)
+	if body.Article.ImageHash != "http://localhost:1000/" {
+		t.Errorf("mismatch image url: %v, but actual: %v", "http://localhost:1000/", body.Article.ImageHash)
 	}
 	if body.Article.Private != false {
 		t.Errorf("mismatch category id: %v, but actual: %v", false, body.Article.Private)

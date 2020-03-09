@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS articles(
     create_date datetime not null,
     update_date datetime not null,
     content_hash varchar(512) not null,
-    image_url varchar(512) not null,
+    image_hash varchar(512) not null,
     private int default 0
 );
 
