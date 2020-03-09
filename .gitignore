@@ -5,3 +5,4 @@ config.json
 script/**
 logs/debug.log
 *.sh
+sample/

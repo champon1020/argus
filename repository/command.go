@@ -8,9 +8,9 @@ import (
 
 /*
 Flow:
-	- Convert article id.
-	- Insert article.
-	- Sample new categories from article.Categories.
+	- Convert articles id.
+	- Insert articles.
+	- Sample new categories from articles.Categories.
 	- Insert new categories.
 	- Insert the pair of article_id and category_ids.
 */
@@ -49,7 +49,7 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 Flow:
 	- Get categories by article_id.
 	- Classify categories to new and old.
-	- Update article.
+	- Update articles.
 	- Insert new categories.
 	- Insert the pair of article_id and new category_ids.
 	- Delete the pair of article_id and old category_ids.
@@ -69,7 +69,7 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 		wg := new(sync.WaitGroup)
 		wg.Add(3)
 
-		// update article
+		// update articles
 		go func() {
 			defer wg.Done()
 			if err = article.UpdateArticle(tx); err != nil {

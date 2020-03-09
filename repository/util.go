@@ -23,7 +23,7 @@ func GenArgsSliceIsLimit(argsFlg uint32, st interface{}, isLimit bool) []interfa
 	return service.GenArgsSliceLogic(argsFlg, st, isLimit)
 }
 
-// Get and Set empty and minimum article id.
+// Get and Set empty and minimum articles id.
 func ArticleIdConverter(mysql MySQL, article *Article) (err error) {
 	var idList []int
 	if idList, err = GetEmptyMinId(mysql.DB, "articles", 1); err != nil {
@@ -52,8 +52,8 @@ func CategoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
 
 // Extract new, exist, or deleted category
 // from category array found by article_id from article_category table.
-// - newCa: categories which are added to inserted or updated article
-// - delCa: categories which are removed from inserted or updated article
+// - newCa: categories which are added to inserted or updated articles
+// - delCa: categories which are removed from inserted or updated articles
 func ExtractCategory(db *sql.DB, article Article) (newCa, delCa []Category, err error) {
 	var existCa, bufCa []Category
 	if existCa, err = article.FindCategoryByArticleId(db); err != nil {

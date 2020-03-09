@@ -19,9 +19,16 @@ func UpdateArticleHandler(c *gin.Context) {
 		return
 	}
 
+	fp := ResolveContentFilePath(body.Article.ContentUrl, "articles")
+	if err = OutputFile(fp, body.Contents); err != nil {
+		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+		return
+	}
+
 	mysql := repository.GlobalMysql
 	if err = repository.UpdateArticleCmd(mysql, body.Article); err != nil {
 		fmt.Fprint(c.Writer, http.StatusInternalServerError)
+		DeleteFile(fp)
 		return
 	}
 	fmt.Fprint(c.Writer, http.StatusOK)

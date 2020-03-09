@@ -23,12 +23,12 @@ paths:
                       $ref: '#/components/schemas/Article'
   /find/article/list/title:
     get:
-      summary: Return a list of article by title.
+      summary: Return a list of articles by title.
       parameters:
         - name: title
           in: path
           required: true
-          description: A title of article.
+          description: A title of articles.
           schema:
             type: number
       responses:
@@ -45,12 +45,12 @@ paths:
                       $ref: '#/components/schemas/Article'
   /find/article/list/create-date:
     get:
-      summary: Return a list of article by title.
+      summary: Return a list of articles by title.
       parameters:
         - name: create_date
           in: path
           required: true
-          description: A created date of article.
+          description: A created date of articles.
           schema:
             type: string
       responses:
@@ -67,12 +67,12 @@ paths:
                       $ref: '#/components/schemas/Article'
   /find/article/list/category:
     get:
-      summary: Return a list of article by title.
+      summary: Return a list of articles by title.
       parameters:
         - name: category
           in: path
           required: true
-          description: A category name which an article has.
+          description: A category name which an articles has.
           schema:
             type: array
             items:
@@ -106,7 +106,7 @@ paths:
                       $ref: '#/components/schemas/Category'
   /register/article:
     post:
-      summary: Register new article.
+      summary: Register new articles.
       requestBody:
         required: true
         content:
@@ -119,7 +119,7 @@ paths:
                 contents:
                   type: string
               required:
-                - article
+                - articles
                 - contents
       responses:
         '200':
@@ -128,7 +128,7 @@ paths:
           description: Failed
   /update/article:
     put:
-      summary: Register new article.
+      summary: Register new articles.
       requestBody:
         required: true
         content:
@@ -141,7 +141,7 @@ paths:
                 contents:
                   type: string
               required:
-                - article
+                - articles
                 - contents
       responses:
         '200':

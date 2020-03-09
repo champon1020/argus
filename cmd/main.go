@@ -11,6 +11,7 @@ import (
 
 var (
 	Logger  = argus.Logger
+	Errors  = &argus.Errors
 	configs argus.Configurations
 )
 
@@ -26,6 +27,7 @@ func main() {
 
 func NewRouter() *gin.Engine {
 	router := gin.Default()
+	router.Use(HandleError())
 
 	find := router.Group("/find")
 	{
@@ -46,5 +48,20 @@ func NewRouter() *gin.Engine {
 		update.PUT("/article")
 	}
 
+	save := router.Group("/draft", handler.SaveArticleHandler)
+	{
+		save.POST("/article")
+	}
+
 	return router
+}
+
+func HandleError() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+		if len(*Errors) != 0 {
+			Logger.ErrorLog(*Errors)
+			*Errors = []argus.Error{}
+		}
+	}
 }

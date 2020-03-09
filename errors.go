@@ -16,6 +16,8 @@ const (
 
 	// io or json error types
 	IOFailedReadError      ErrorType = "IOFailedReadError"
+	IOFailedWriteError     ErrorType = "IOFailedWriteError"
+	IOFailedRemoveError    ErrorType = "IOFailedRemoveError"
 	IOFailedMarshalError   ErrorType = "IOFailedMarshalError"
 	IOFailedUnmarshalError ErrorType = "IOFailedUnmarshalError"
 )
