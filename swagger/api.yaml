@@ -194,6 +194,28 @@ components:
         - id
         - name
         - articleNum
+    Draft:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        categories:
+          type: string
+        updateDate:
+          type: string
+        contentHash:
+          type: string
+        imageHash:
+          type: string
+      required:
+        - id
+        - title
+        - categories
+        - updateDate
+        - contentHash
+        - imageHash
     RequestArticle:
       type: object
       properties:
@@ -213,10 +235,6 @@ components:
             required:
               - id
               - name
-        createDate:
-          type: string
-        updateDate:
-          type: string
         contentHash:
           type: string
         imageHash:
@@ -227,8 +245,25 @@ components:
         - id
         - title
         - categories
-        - createDate
-        - updateDate
         - contentHash
         - imageHash
         - private
+    RequestDraft:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        categories:
+          type: string
+        contentHash:
+          type: string
+        imageHash:
+          type: string
+      required:
+        - id
+        - title
+        - categories
+        - contentHash
+        - imageHash

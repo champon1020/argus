@@ -6,6 +6,13 @@ LOAD DATA LOCAL INFILE
     ENCLOSED BY '"';
 
 LOAD DATA LOCAL INFILE
+    "/docker/db/csv/drafts.csv"
+    INTO TABLE drafts
+    CHARACTER SET utf8
+    FIELDS TERMINATED BY ','
+    ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE
     "/docker/db/csv/categories.csv"
     INTO TABLE categories
     CHARACTER SET utf8

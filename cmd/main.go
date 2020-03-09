@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"net/http"
 
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/handler"
@@ -36,6 +37,7 @@ func NewRouter() *gin.Engine {
 		find.GET("/article/list/create-date", handler.FindArticleHandlerByCreateDate)
 		find.GET("/article/list/category", handler.FindArticleHandlerByCategory)
 		find.GET("/category/list", handler.FindCategoryHandler)
+		find.GET("/draft/list", handler.FindDraftHandler)
 	}
 
 	register := router.Group("/register")
@@ -48,7 +50,7 @@ func NewRouter() *gin.Engine {
 		update.PUT("/article")
 	}
 
-	save := router.Group("/draft", handler.SaveArticleHandler)
+	save := router.Group("/draft", handler.DraftHandler)
 	{
 		save.POST("/article")
 	}
@@ -62,6 +64,7 @@ func HandleError() gin.HandlerFunc {
 		if len(*Errors) != 0 {
 			Logger.ErrorLog(*Errors)
 			*Errors = []argus.Error{}
+			(c.Writer).WriteHeader(http.StatusInternalServerError)
 		}
 	}
 }

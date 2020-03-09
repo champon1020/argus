@@ -11,6 +11,15 @@ CREATE TABLE IF NOT EXISTS articles(
     private int default 0
 );
 
+CREATE TABLE IF NOT EXISTS drafts(
+    id int primary key not null,
+    title varchar(256) not null,
+    categories varchar(256) not null,
+    update_date datetime not null,
+    content_hash varchar(512) not null,
+    image_hash varchar(512) not null
+);
+
 CREATE TABLE IF NOT EXISTS categories(
     id int not null primary key,
     name varchar(128) not null

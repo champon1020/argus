@@ -27,8 +27,6 @@ func TestParseRequestBody(t *testing.T) {
 					"name": "test_test"
 				}
 			],
-			"createDate": "2018-01-02T00:00:00+09:00",
-			"updateDate": "2018-01-03T00:00:00+09:00",
 			"contentHash": "http://localhost:2000/",
 			"imageHash": "http://localhost:1000/",
 			"private": false
@@ -55,16 +53,16 @@ func TestParseRequestBody(t *testing.T) {
 		t.Errorf("mismatch category id: %v, but actual: %v", 1, body.Article.Categories[0].Id)
 	}
 
-	loc, _ := time.LoadLocation("Asia/Tokyo")
-	createDate := time.Date(2018, 1, 2, 0, 0, 0, 0, loc)
-	if !body.Article.CreateDate.Equal(createDate) {
-		t.Errorf("mismatch create date: %v, but actual: %v", createDate, body.Article.CreateDate)
-	}
-
-	updateDate := time.Date(2018, 1, 3, 0, 0, 0, 0, loc)
-	if !body.Article.UpdateDate.Equal(updateDate) {
-		t.Errorf("mismatch update date: %v, but actual: %v", updateDate, body.Article.UpdateDate)
-	}
+	//loc, _ := time.LoadLocation("Asia/Tokyo")
+	//createDate := time.Date(2018, 1, 2, 0, 0, 0, 0, loc)
+	//if !body.Article.CreateDate.Equal(createDate) {
+	//	t.Errorf("mismatch create date: %v, but actual: %v", createDate, body.Article.CreateDate)
+	//}
+	//
+	//updateDate := time.Date(2018, 1, 3, 0, 0, 0, 0, loc)
+	//if !body.Article.UpdateDate.Equal(updateDate) {
+	//	t.Errorf("mismatch update date: %v, but actual: %v", updateDate, body.Article.UpdateDate)
+	//}
 
 	if body.Article.ContentHash != "http://localhost:2000/" {
 		t.Errorf("mismatch content url: %v, but actual: %v", "http://localhost:2000/", body.Article.ContentHash)

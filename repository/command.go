@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"sync"
+
+	"github.com/champon1020/argus/service"
 )
 
 /*
@@ -27,8 +29,18 @@ func RegisterArticleCmd(mysql MySQL, article Article) (err error) {
 	}
 	article.Categories = newCa
 
+	var d []Draft
+	flg := service.GenFlg(Draft{}, "ContentHash")
+	draft := Draft{ContentHash: article.ContentHash}
+	if d, err = draft.FindDrafts(mysql.DB, flg); err != nil {
+		return
+	}
+
 	// Start transaction
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
+		if len(d) > 0 {
+			d[0].DeleteDraft(tx)
+		}
 		if err = InsertCategories(tx, newCa); err != nil {
 			return
 		}
@@ -112,6 +124,29 @@ func UpdateArticleCmd(mysql MySQL, article Article) (err error) {
 	return
 }
 
+func DraftCmd(mysql MySQL, draft Draft) (err error) {
+	var d []Draft
+	flg := service.GenFlg(Draft{}, "ContentHash")
+	if d, err = draft.FindDrafts(mysql.DB, flg); err != nil {
+		return
+	}
+
+	err = mysql.Transact(func(tx *sql.Tx) (err error) {
+		if len(d) == 0 {
+			if err = DraftIdConverter(mysql, &draft); err != nil {
+				return
+			}
+			if err = draft.InsertDraft(tx); err != nil {
+				return
+			}
+			return
+		}
+		err = draft.UpdateDraft(tx)
+		return
+	})
+	return
+}
+
 func FindArticleCmd(mysql MySQL, article Article, argFlg uint32) (articles []Article, err error) {
 	articles, err = article.FindArticle(mysql.DB, argFlg)
 	return
@@ -125,6 +160,11 @@ func FindArticleByCategoryCmd(mysql MySQL, categoryNames []string) (articles []A
 
 func FindCategoryCmd(mysql MySQL, category Category, argFlg uint32) (categories []CategoryResponse, err error) {
 	categories, err = category.FindCategory(mysql.DB, argFlg)
+	return
+}
+
+func FindDraftCmd(mysql MySQL, draft Draft, argFlg uint32) (drafts []Draft, err error) {
+	drafts, err = draft.FindDrafts(mysql.DB, argFlg)
 	return
 }
 

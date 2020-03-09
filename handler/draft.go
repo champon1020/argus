@@ -6,26 +6,24 @@ import (
 	"time"
 
 	"github.com/champon1020/argus/repository"
+
 	"github.com/gin-gonic/gin"
 )
 
-// Property of 'categories' has -1 of id absolutely.
-// This is because client side cannot fetch categories information interactively,
-type RequestArticle struct {
+type DraftRequestArticle struct {
 	Id          int                   `json:"id"`
 	Title       string                `json:"title"`
 	Categories  []repository.Category `json:"categories"`
 	ContentHash string                `json:"contentHash"`
 	ImageHash   string                `json:"imageHash"`
-	Private     bool                  `json:"private"`
 }
 
-type RequestBody struct {
-	Article  RequestArticle `json:"article"`
-	Contents string         `json:"contents"`
+type DraftRequestBody struct {
+	Article  DraftRequestArticle `json:"article"`
+	Contents string              `json:"contents"`
 }
 
-func RegisterArticleHandler(c *gin.Context) {
+func DraftHandler(c *gin.Context) {
 	var (
 		body RequestBody
 		err  error
@@ -36,16 +34,14 @@ func RegisterArticleHandler(c *gin.Context) {
 		return
 	}
 
-	fp := ResolveContentFilePath(body.Article.ContentHash, "articles")
-	article := repository.Article{
+	fp := ResolveContentFilePath(body.Article.ContentHash, "drafts")
+	draft := repository.Draft{
 		Id:          body.Article.Id,
 		Title:       body.Article.Title,
-		Categories:  body.Article.Categories,
-		CreateDate:  time.Now(),
+		Categories:  resolveToDraftCategories(body.Article.Categories),
 		UpdateDate:  time.Now(),
 		ContentHash: ConvertPathToFileName(fp),
 		ImageHash:   body.Article.ImageHash,
-		Private:     body.Article.Private,
 	}
 
 	if err = OutputFile(fp, body.Contents); err != nil {
@@ -54,11 +50,22 @@ func RegisterArticleHandler(c *gin.Context) {
 	}
 
 	mysql := repository.GlobalMysql
-	if err = repository.RegisterArticleCmd(mysql, article); err != nil {
+	if err = repository.DraftCmd(mysql, draft); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		DeleteFile(fp)
 		return
 	}
 
 	fmt.Fprint(c.Writer, http.StatusOK)
+}
+
+func resolveToDraftCategories(categories []repository.Category) string {
+	res := ""
+	for i, c := range categories {
+		if i != 0 {
+			res += "&"
+		}
+		res += c.Name
+	}
+	return res
 }

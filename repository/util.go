@@ -50,6 +50,15 @@ func CategoriesIdConverter(mysql MySQL, categories *[]Category) (err error) {
 	return
 }
 
+func DraftIdConverter(mysql MySQL, draft *Draft) (err error) {
+	var idList []int
+	if idList, err = GetEmptyMinId(mysql.DB, "drafts", 1); err != nil {
+		return
+	}
+	(*draft).Id = idList[0]
+	return
+}
+
 // Extract new, exist, or deleted category
 // from category array found by article_id from article_category table.
 // - newCa: categories which are added to inserted or updated articles

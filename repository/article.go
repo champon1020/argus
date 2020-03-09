@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+// Id: primary key
+// Title: article title
+// Categories: categories of article
+// CreateDate: created date
+// UpdateDate: last updated date
+// ContentHash: content file name (html file)
+// ImageHash: image file name
+// private: this article is whether public or not
 type Article struct {
 	Id          int        `json:"id"`
 	Title       string     `json:"title"`
@@ -19,7 +27,7 @@ type Article struct {
 
 func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 	cmd := "INSERT INTO articles " +
-		"(id, title, create_date, update_date, content_url, image_url, private)" +
+		"(id, title, create_date, update_date, content_hash, image_hash, private)" +
 		"VALUES (?, ?, ?, ?, ?, ?, ?)"
 
 	if _, err := tx.Exec(cmd,
@@ -57,12 +65,11 @@ func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 
 func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 	cmd := "UPDATE articles " +
-		"SET title=?, create_date=?, update_date=?, content_url=?, image_url=?, private=? " +
+		"SET title=?, update_date=?, content_hash=?, image_hash=?, private=? " +
 		"WHERE id=?"
 
 	if _, err = tx.Exec(cmd,
 		article.Title,
-		article.CreateDate,
 		article.UpdateDate,
 		article.ContentHash,
 		article.ImageHash,
@@ -115,7 +122,7 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Article, err error) {
 	args := GenArgsSliceIsLimit(argsFlg, article, true)
 	whereQuery := GenArgsQuery(argsFlg, article)
-	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id LIMIT ?"
+	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id DESC LIMIT ?"
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -155,7 +162,7 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 	query := "SELECT * FROM categories " +
 		"WHERE id IN (" +
 		"SELECT category_id FROM article_category " +
-		"WHERE article_id=?)"
+		"WHERE article_id=?) ORDER BY name"
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
