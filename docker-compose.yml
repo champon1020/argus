@@ -12,9 +12,9 @@ services:
     ports:
       - "43306:3306"
     volumes:
-      - "./docker/db/data:/docker/db/csv"
-      - "./docker/db/sql:/docker-entrypoint-initdb.d"
-      - "./docker/db/custom.cnf:/etc/mysql/conf.d/custom.cnf"
+      - "./docker/db/common/script:/docker-entrypoint-initdb.d"
+      - "./docker/db/common/custom.cnf:/etc/mysql/conf.d/custom.cnf"
+      - "./docker/db/common/data:/docker/db/csv"
 
   swagger-ui:
     image: swaggerapi/swagger-ui

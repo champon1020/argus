@@ -1,5 +1,6 @@
 CREATE DATABASE IF NOT EXISTS argus;
-USE argus;
+CREATE DATABASE IF NOT EXISTS argus_test;
+USE argus_test;
 
 CREATE TABLE IF NOT EXISTS articles(
     id int primary key not null,
@@ -37,3 +38,10 @@ CREATE TABLE IF NOT EXISTS article_category(
         references categories (id)
         on delete cascade on update cascade
 );
+
+USE argus;
+
+CREATE TABLE articles LIKE argus_test.articles;
+CREATE TABLE drafts LIKE argus_test.drafts;
+CREATE TABLE categories LIKE argus_test.categories;
+CREATE TABLE article_category LIKE argus_test.article_category;
