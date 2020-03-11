@@ -1,3 +1,5 @@
+USE argus_test;
+
 LOAD DATA LOCAL INFILE
     "/docker/db/csv/articles.csv"
     INTO TABLE articles
