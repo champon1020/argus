@@ -7,6 +7,9 @@ import (
 type ErrorType string
 
 const (
+	// basic error
+	BasicError ErrorType = "BasicError"
+
 	// database error types
 	DbRuntimeError     ErrorType = "DbRuntimeError"
 	DbScanFailedError  ErrorType = "DbScanFailedError"

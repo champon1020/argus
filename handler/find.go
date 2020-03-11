@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	repo "github.com/champon1020/argus/repository"
@@ -29,6 +30,41 @@ func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	mysql := repo.GlobalMysql
 	argFlg = service.GenFlg(repo.Article{}, "Limit")
 	if articles, err = repoCmd(mysql, repo.Article{}, argFlg); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	res := ResponseType{Articles: articles}
+	if response, err = ParseToJson(&res); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
+}
+
+func FindArticleByIdController(c *gin.Context) {
+	FindArticleByIdHandler(c, repo.FindArticleCommand)
+}
+
+func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
+	var (
+		argArticle repo.Article
+		articles   []repo.Article
+		response   string
+		argFlg     uint32
+		err        error
+	)
+
+	if argArticle.Id, err = strconv.Atoi(c.Query("id")); err != nil {
+		BasicError.SetErr(err).AppendTo(Errors)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	mysql := repo.GlobalMysql
+	argFlg = service.GenFlg(repo.Article{}, "Id", "Limit")
+	if articles, err = repoCmd(mysql, argArticle, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
