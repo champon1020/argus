@@ -12,6 +12,7 @@ import (
 var (
 	Logger           = argus.Logger
 	Errors           = &argus.Errors
+	BasicError       = argus.NewError(argus.BasicError)
 	IOReadError      = argus.NewError(argus.IOFailedReadError)
 	IOMarshalError   = argus.NewError(argus.IOFailedMarshalError)
 	IOUnmarshalError = argus.NewError(argus.IOFailedUnmarshalError)

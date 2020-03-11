@@ -6,7 +6,7 @@ info:
   version: 1.0.0
 
 paths:
-  /find/article/list:
+  /api/find/article/list:
     get:
       summary: Return a list of articles.
       responses:
@@ -21,7 +21,9 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-  /find/article/list/title:
+                required:
+                  - articles
+  /api/find/article/list/title:
     get:
       summary: Return a list of articles by title.
       parameters:
@@ -43,7 +45,9 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-  /find/article/list/create-date:
+                required:
+                  - articles
+  /api/find/article/list/create-date:
     get:
       summary: Return a list of articles by title.
       parameters:
@@ -65,7 +69,9 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-  /find/article/list/category:
+                required:
+                  - articles
+  /api/find/article/list/category:
     get:
       summary: Return a list of articles by title.
       parameters:
@@ -89,7 +95,9 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-  /find/category/list:
+                required:
+                  - articles
+  /api/find/category/list:
     get:
       summary: Return a list of categories.
       responses:
@@ -104,9 +112,28 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Category'
-  /register/article:
+                required:
+                  - categories
+  /api/find/draft/list:
+    get:
+      summary: Return a list of drafts.
+      responses:
+        '200':
+          description: A JSON array of drafts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  drafts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Draft'
+                required:
+                  - drafts
+  /api/register/article:
     post:
-      summary: Register new articles.
+      summary: Register new article.
       requestBody:
         required: true
         content:
@@ -119,16 +146,16 @@ paths:
                 contents:
                   type: string
               required:
-                - articles
+                - article
                 - contents
       responses:
         '200':
           description: Success
         '503':
           description: Failed
-  /update/article:
+  /api/update/article:
     put:
-      summary: Register new articles.
+      summary: Update article.
       requestBody:
         required: true
         content:
@@ -141,12 +168,33 @@ paths:
                 contents:
                   type: string
               required:
-                - articles
+                - article
                 - contents
       responses:
         '200':
           description: Success
         '503':
+          description: Failed
+  /api/draft/article:
+    post:
+      summary: Draft article.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                article:
+                  $ref: '#/components/schemas/RequestDraft'
+                contents:
+                  type: string
+              required:
+                - article
+                - contents
+      responses:
+        '200':
+          description: Success
+        '500':
           description: Failed
 
 components:
@@ -213,7 +261,6 @@ components:
         - id
         - title
         - categories
-        - updateDate
         - contentHash
         - imageHash
     RequestArticle:

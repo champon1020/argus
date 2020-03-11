@@ -84,6 +84,69 @@ func TestFindArticleHandler(t *testing.T) {
 	buf.Reset()
 }
 
+func TestFindArticleByIdHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(
+		"GET",
+		"/find/article/list/id?id=2",
+		nil)
+
+	repoCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articles []repo.Article, _ error) {
+		articles = append(articles, repo.Article{
+			Id:    2,
+			Title: "test",
+			Categories: []repo.Category{
+				{1, "c1"},
+			},
+			CreateDate:  testTime,
+			UpdateDate:  testTime,
+			ContentHash: "0123456789",
+			ImageHash:   "9876543210",
+			Private:     false,
+		})
+		return
+	}
+
+	expectedBody := `{
+	"articles": [
+		{
+			"id": 2,
+			"title": "test",
+			"categories": [
+				{
+					"id": 1,
+					"name": "c1"
+				}
+			],
+			"createDate": "2020-03-09T00:00:00+09:00",
+			"updateDate": "2020-03-09T00:00:00+09:00",
+			"contentHash": "0123456789",
+			"imageHash": "9876543210",
+			"private": false
+		}
+	]
+}`
+
+	var (
+		buf  bytes.Buffer
+		res  *http.Response
+		body []byte
+	)
+
+	FindArticleByIdHandler(ctx, repoCmdMock)
+	res = w.Result()
+	assert.Equal(t, res.StatusCode, 200)
+
+	body, _ = ioutil.ReadAll(res.Body)
+	if err := json.Indent(&buf, body, "", "	"); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("Unable to indent json string: %v\n", err)
+	}
+	assert.Equal(t, expectedBody, buf.String())
+	buf.Reset()
+}
+
 func TestFindArticleByTitleHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
