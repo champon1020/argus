@@ -29,10 +29,8 @@ func NewLogger() *LogHandler {
 		logFile *os.File
 		err     error
 	)
-	if logFile, err = os.OpenFile(
-		EnvVars.Get("log")+"/debug.log",
-		os.O_CREATE|os.O_WRONLY|os.O_APPEND,
-		0666,
+	if logFile, err = os.Create(
+		EnvVars.Get("log") + "/debug.log",
 	); err != nil {
 		StdLogger.Fatalf("Unable to open log file: %s\n", err)
 	}

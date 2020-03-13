@@ -13,11 +13,10 @@ install:
   - go mod download
 
 env:
-  global:
-    - ARGUS_LOG_PATH=./logs
-    - ARGUS_RESOURCE_PATH=./sample
-    - ARGUS_CONFIG_PATH=./config.json
-    - IS_TRAVIS=on
+  - ARGUS_LOG_PATH=./logs
+  - ARGUS_RESOURCE_PATH=./sample
+  - ARGUS_CONFIG_PATH=./config.json
+  - IS_TRAVIS=on
 
 branches:
   only:
