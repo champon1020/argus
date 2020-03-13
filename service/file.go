@@ -64,7 +64,7 @@ func SaveMultipartFiles(path string, fileHeaders []*multipart.FileHeader) (err e
 			return
 		}
 
-		fn := path + "/" + fh.Filename
+		fn := path + fh.Filename
 		if err = OutputFile(fn, body); err != nil {
 			return
 		}

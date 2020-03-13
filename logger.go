@@ -18,12 +18,12 @@ var (
 )
 
 func init() {
-	StdLogger = NewStdLogger()
 	EnvVars = NewEnv()
-	Logger = NewLogger()
+	StdLogger = *NewStdLogger()
+	Logger = *NewLogger()
 }
 
-func NewLogger() LogHandler {
+func NewLogger() *LogHandler {
 	l := new(LogHandler)
 	var (
 		logFile *os.File
@@ -38,14 +38,14 @@ func NewLogger() LogHandler {
 	}
 	l.SetFlags(log.Ldate | log.Ltime)
 	l.SetOutput(io.Writer(logFile))
-	return *l
+	return l
 }
 
-func NewStdLogger() LogHandler {
+func NewStdLogger() *LogHandler {
 	l := new(LogHandler)
 	l.SetFlags(log.Ldate | log.Ltime)
 	l.SetOutput(os.Stdout)
-	return *l
+	return l
 }
 
 func (l *LogHandler) StackTrace() []string {
