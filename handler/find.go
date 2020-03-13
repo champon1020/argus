@@ -3,8 +3,12 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/champon1020/argus"
 
 	repo "github.com/champon1020/argus/repository"
 	"github.com/champon1020/argus/service"
@@ -224,6 +228,63 @@ func FindDraftHandler(c *gin.Context, repoCmd repo.FindDraftCmd) {
 	}
 
 	res := DraftResponseType{Drafts: drafts}
+	if response, err = ParseToJson(&res); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
+}
+
+// Response type of Image
+type ImageResponseType struct {
+	Images []string `json:"images"`
+	Next   bool     `json:"next"`
+}
+
+func FindImageController(c *gin.Context) {
+	FindImageHandler(c)
+}
+
+func FindImageHandler(c *gin.Context) {
+	var (
+		res       ImageResponseType
+		response  string
+		files     []os.FileInfo
+		fileNames []string
+		p         int
+		err       error
+	)
+
+	if p, err = strconv.Atoi(c.Query("p")); err != nil {
+		BasicError.SetErr(err).AppendTo(Errors)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	dirPath := filepath.Join(argus.EnvVars.Get("resource"), "images")
+	if files, err = service.GetFileList(dirPath); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewImageNum
+	if offset >= len(files) {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		argus.Logger.Println("Exceed the number of existing files")
+		return
+	}
+
+	for i := offset; i < len(files); i++ {
+		if i >= argus.GlobalConfig.Web.MaxViewImageNum {
+			res.Next = true
+			break
+		}
+		fileNames = append(fileNames, files[i].Name())
+	}
+
+	res.Images = fileNames
+
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return

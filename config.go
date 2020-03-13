@@ -16,6 +16,7 @@ type DbConf struct {
 
 type WebConf struct {
 	MaxViewArticleNum int `json:"maxViewArticleNum"`
+	MaxViewImageNum   int `json:"maxViewImageNum"`
 }
 
 type Config struct {
