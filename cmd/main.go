@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/champon1020/argus/repository"
+
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/handler"
-	"github.com/champon1020/argus/repository"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -18,11 +19,16 @@ var (
 	configs argus.Configurations
 )
 
-func main() {
-	flag.Parse()
-
+func init() {
+	argus.EnvVars = argus.NewEnv()
+	Logger.New()
+	argus.StdLogger.NewStd()
 	configs.New(flag.Arg(0))
 	repository.NewMysql()
+}
+
+func main() {
+	flag.Parse()
 
 	r := NewRouter()
 	r.Run(":8080")
@@ -52,21 +58,28 @@ func NewRouter() *gin.Engine {
 		find.GET("/article/list/category", handler.FindArticleByCategoryController)
 		find.GET("/category/list", handler.FindCategoryController)
 		find.GET("/draft/list", handler.FindDraftController)
+		find.GET("/image/list")
 	}
 
 	register := router.Group("/api/register")
 	{
 		register.POST("/article", handler.RegisterArticleController)
+		register.POST("/image", handler.RegisterImageController)
 	}
 
-	update := router.Group("/api/update", handler.UpdateArticleController)
+	update := router.Group("/api/update")
 	{
-		update.PUT("/article")
+		update.PUT("/article", handler.UpdateArticleController)
 	}
 
-	save := router.Group("/api/draft", handler.DraftController)
+	delete := router.Group("/api/delete")
 	{
-		save.POST("/article")
+		delete.DELETE("/image")
+	}
+
+	draft := router.Group("/api/draft")
+	{
+		draft.POST("/article", handler.DraftController)
 	}
 
 	return router

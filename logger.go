@@ -17,13 +17,8 @@ var (
 	StdLogger LogHandler
 )
 
-func init() {
-	Logger.New()
-	StdLogger.NewStd()
-}
-
 func (l *LogHandler) New() {
-	logfileDir := os.Getenv("ARGUS_LOG_PATH")
+	logfileDir := EnvVars.Get("log")
 	logfile, err := os.OpenFile(logfileDir+"debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	l.SetFlags(log.Ldate | log.Ltime)
 	if err != nil {

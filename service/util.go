@@ -1,7 +1,6 @@
 package service
 
 import (
-	"os"
 	"strings"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 var (
 	Logger        = argus.Logger
 	Errors        = &argus.Errors
+	IOReadError   = argus.NewError(argus.IOFailedReadError)
 	IOWriteError  = argus.NewError(argus.IOFailedWriteError)
 	IORemoveError = argus.NewError(argus.IOFailedRemoveError)
 )
@@ -28,8 +28,7 @@ func ResolveContentHash(contentHash string) string {
 // Get file path uri from hash(fine name) and dir name.
 func ResolveContentFilePath(contentHash string, dirName string) string {
 	fn := ResolveContentHash(contentHash)
-	basePath := os.Getenv("ARGUS_ARTICLE")
-	return basePath + "/" + dirName + "/" + fn
+	return argus.EnvVars.Get("resources") + "/" + dirName + "/" + fn
 }
 
 // Get only fine name from path(uri or url).
@@ -40,27 +39,4 @@ func ConvertPathToFileName(path string) string {
 	seps := strings.Split(path, "/")
 	fileName := seps[len(seps)-1]
 	return fileName
-}
-
-func OutputFile(path string, content string) (err error) {
-	var file *os.File
-	if file, err = os.Create(path); err != nil {
-		IOWriteError.SetErr(err).AppendTo(Errors)
-		return
-	}
-	defer file.Close()
-	file.Write(([]byte)(content))
-	return
-}
-
-func DeleteFile(path string) (err error) {
-	if _, err := os.Stat(path); err != nil {
-		Logger.Println("No such file: [handler.util] DeleteFile()")
-		return err
-	}
-	if err := os.Remove(path); err != nil {
-		IORemoveError.SetErr(err).AppendTo(Errors)
-		return err
-	}
-	return
 }

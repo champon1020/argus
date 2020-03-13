@@ -48,7 +48,7 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) {
 		ImageHash:   body.Article.ImageHash,
 	}
 
-	if err = service.OutputFile(fp, body.Contents); err != nil {
+	if err = service.OutputFile(fp, []byte(body.Contents)); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
