@@ -2,7 +2,6 @@ package argus
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -30,32 +29,47 @@ type Configurations struct {
 	Dev     Config `json:"dev"`
 }
 
-var GlobalConfig Config
+var (
+	GlobalConfig    Config
+	ConfigLoadError = NewError(ConfigFailedLoadError)
+)
 
-func (config *Configurations) New(args string) {
-	config.Load()
-
-	if args == "" {
-		GlobalConfig = config.Deploy
-	} else if args == "stg" {
-		GlobalConfig = config.Staging
-	} else if args == "dev" {
-		GlobalConfig = config.Dev
-	} else {
-		fmt.Printf("%s is not confortable, required '' or 'stg' or 'dev'.\n", args)
-		os.Exit(0)
+func NewConfig(args string) Config {
+	configurations := new(Configurations)
+	if err := configurations.load(); err != nil {
+		StdLogger.ErrorLog(Errors)
+		os.Exit(1)
 	}
+
+	config := new(Config)
+	if args == "" {
+		*config = configurations.Deploy
+	} else if args == "stg" {
+		*config = configurations.Staging
+	} else if args == "dev" {
+		*config = configurations.Dev
+	} else {
+		StdLogger.Fatalf("%s is not confortable, required '' or 'stg' or 'dev'.\n", args)
+	}
+	return *config
 }
 
-func (config *Configurations) Load() {
+func (config *Configurations) load() (err error) {
 	if os.Getenv("IS_TRAVIS") == "on" {
 		return
 	}
-	row, err := ioutil.ReadFile(os.Getenv("GOPATH") + "/src/github.com/champon1020/argus/config.json")
-	if err != nil {
+
+	var row []byte
+	configPath := EnvVars.Get("config")
+	if row, err = ioutil.ReadFile(configPath); err != nil {
 		current, _ := os.Getwd()
-		Logger.Println(current)
-		Logger.Println("log path")
+		ConfigLoadError.
+			SetErr(err).
+			SetValues("current path", current).
+			AppendTo(&Errors)
+		return
 	}
+
 	json.Unmarshal(row, &config)
+	return
 }

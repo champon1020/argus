@@ -54,11 +54,10 @@ func TestGenArgsSliceLogic(t *testing.T) {
 
 func TestGenArgsSliceLogic_Limit(t *testing.T) {
 	var (
-		argsFlg        uint32
-		st             Hoge
-		configurations argus.Configurations
+		argsFlg uint32
+		st      Hoge
 	)
-	configurations.New("dev")
+	argus.GlobalConfig = argus.NewConfig("dev")
 
 	argsFlg = service.GenFlg(st, "Title", "Limit")
 	st.Title = "test"

@@ -14,8 +14,9 @@ install:
 
 env:
   global:
-    - ARGUS_LOG_PATH=./logs/
-    - ARGUS_ARTICLE=./sample/
+    - ARGUS_LOG_PATH=./logs
+    - ARGUS_RESOURCE_PATH=./sample
+    - ARGUS_CONFIG_PATH=./config.json
     - IS_TRAVIS=on
 
 branches:

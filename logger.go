@@ -18,25 +18,36 @@ var (
 )
 
 func init() {
-	Logger.New()
-	StdLogger.NewStd()
+	EnvVars = NewEnv()
+	StdLogger = *NewStdLogger()
+	Logger = *NewLogger()
 }
 
-func (l *LogHandler) New() {
-	logfileDir := os.Getenv("ARGUS_LOG_PATH")
-	logfile, err := os.OpenFile(logfileDir+"debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+func NewLogger() *LogHandler {
+	l := new(LogHandler)
+	var (
+		logFile *os.File
+		err     error
+	)
 	l.SetFlags(log.Ldate | log.Ltime)
-	if err != nil {
-		log.Printf("Unable to open log file: %s\n", err)
+	if EnvVars.Get("travis") == "on" {
 		l.SetOutput(os.Stdout)
-		return
+		return l
 	}
-	l.SetOutput(io.Writer(logfile))
+	if logFile, err = os.Create(
+		EnvVars.Get("log") + "/debug.log",
+	); err != nil {
+		StdLogger.Fatalf("Unable to open log file: %s\n", err)
+	}
+	l.SetOutput(io.Writer(logFile))
+	return l
 }
 
-func (l *LogHandler) NewStd() {
+func NewStdLogger() *LogHandler {
+	l := new(LogHandler)
 	l.SetFlags(log.Ldate | log.Ltime)
 	l.SetOutput(os.Stdout)
+	return l
 }
 
 func (l *LogHandler) StackTrace() []string {

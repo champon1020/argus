@@ -2,8 +2,11 @@ package handler
 
 import (
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"time"
+
+	"github.com/champon1020/argus"
 
 	repo "github.com/champon1020/argus/repository"
 	"github.com/champon1020/argus/service"
@@ -53,15 +56,40 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) {
 		Private:     body.Article.Private,
 	}
 
-	if err = service.OutputFile(fp, body.Contents); err != nil {
+	if err = service.OutputFile(fp, []byte(body.Contents)); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	mysql := repo.GlobalMysql
-	if err = repoCmd(mysql, article); err != nil {
+	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		service.DeleteFile(fp)
+		return
+	}
+
+	fmt.Fprint(c.Writer, http.StatusOK)
+}
+
+func RegisterImageController(c *gin.Context) {
+	RegisterImageHandler(c)
+}
+
+func RegisterImageHandler(c *gin.Context) {
+	var (
+		form *multipart.Form
+		err  error
+	)
+
+	if form, err = c.MultipartForm(); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		BasicError.SetErr(err).AppendTo(Errors)
+		return
+	}
+
+	fileHeaders := form.File["images"]
+	path := argus.EnvVars.Get("resources") + "/"
+	if err = service.SaveMultipartFiles(path, fileHeaders); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 

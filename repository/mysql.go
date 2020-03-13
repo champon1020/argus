@@ -2,15 +2,13 @@ package repository
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/champon1020/argus"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
-	GlobalMysql  MySQL
-	Logger       = argus.Logger
+	GlobalMysql  *MySQL
 	Errors       = &argus.Errors
 	RuntimeError = argus.NewError(argus.DbRuntimeError)
 	CmdError     = argus.NewError(argus.DbCmdFailedError)
@@ -23,10 +21,12 @@ type MySQL struct {
 	*sql.DB
 }
 
-func NewMysql() {
-	if err := GlobalMysql.Connect(argus.GlobalConfig.Db); err != nil {
-		log.Fatalf("%v\n", err)
+func NewMysql() *MySQL {
+	mysql := new(MySQL)
+	if err := mysql.Connect(argus.GlobalConfig.Db); err != nil {
+		argus.StdLogger.Fatalf("%v\n", err)
 	}
+	return mysql
 }
 
 func (mysql *MySQL) Connect(config argus.DbConf) (err error) {
@@ -36,7 +36,7 @@ func (mysql *MySQL) Connect(config argus.DbConf) (err error) {
 			config.Host + ":" +
 			config.Port + ")/" +
 			config.DbName + "?parseTime=true"
-	Logger.Printf("DataSource: %s\n", dataSourceName)
+	argus.Logger.Printf("DataSource: %s\n", dataSourceName)
 
 	if mysql.DB, err = sql.Open("mysql", dataSourceName); err != nil {
 		RuntimeError.SetErr(err).AppendTo(Errors)
@@ -59,11 +59,11 @@ func (mysql *MySQL) Transact(txFunc func(*sql.Tx) error) (err error) {
 	defer func() {
 		if p := recover(); p != nil {
 			tx.Rollback()
-			Logger.Printf("%v\n", p)
+			argus.Logger.Printf("%v\n", p)
 			return
 		} else if err != nil {
 			tx.Rollback()
-			Logger.Printf("%v", err)
+			argus.Logger.Printf("%v", err)
 			return
 		} else {
 			err = tx.Commit()

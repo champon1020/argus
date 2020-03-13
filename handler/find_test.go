@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
@@ -20,6 +21,14 @@ var (
 	loc, _   = time.LoadLocation("Asia/Tokyo")
 	testTime = time.Date(2020, 3, 9, 0, 0, 0, 0, loc)
 )
+
+func TestMain(m *testing.M) {
+	argus.GlobalConfig = argus.NewConfig("dev")
+	repo.GlobalMysql = repo.NewMysql()
+
+	ret := m.Run()
+	os.Exit(ret)
+}
 
 func TestFindArticleHandler(t *testing.T) {
 	w := httptest.NewRecorder()

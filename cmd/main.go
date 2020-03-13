@@ -13,19 +13,17 @@ import (
 )
 
 var (
-	Logger  = argus.Logger
-	Errors  = &argus.Errors
-	configs argus.Configurations
+	Logger = argus.Logger
+	Errors = &argus.Errors
 )
 
 func main() {
 	flag.Parse()
-
-	configs.New(flag.Arg(0))
-	repository.NewMysql()
+	argus.GlobalConfig = argus.NewConfig(flag.Arg(0))
+	repository.GlobalMysql = repository.NewMysql()
 
 	r := NewRouter()
-	r.Run(":8080")
+	_ = r.Run(":8080")
 }
 
 func NewRouter() *gin.Engine {
@@ -52,21 +50,28 @@ func NewRouter() *gin.Engine {
 		find.GET("/article/list/category", handler.FindArticleByCategoryController)
 		find.GET("/category/list", handler.FindCategoryController)
 		find.GET("/draft/list", handler.FindDraftController)
+		find.GET("/image/list")
 	}
 
 	register := router.Group("/api/register")
 	{
 		register.POST("/article", handler.RegisterArticleController)
+		register.POST("/image", handler.RegisterImageController)
 	}
 
-	update := router.Group("/api/update", handler.UpdateArticleController)
+	update := router.Group("/api/update")
 	{
-		update.PUT("/article")
+		update.PUT("/article", handler.UpdateArticleController)
 	}
 
-	save := router.Group("/api/draft", handler.DraftController)
+	delete := router.Group("/api/delete")
 	{
-		save.POST("/article")
+		delete.DELETE("/image")
+	}
+
+	draft := router.Group("/api/draft")
+	{
+		draft.POST("/article", handler.DraftController)
 	}
 
 	return router

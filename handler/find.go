@@ -27,9 +27,8 @@ func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 		err      error
 	)
 
-	mysql := repo.GlobalMysql
 	argFlg = service.GenFlg(repo.Article{}, "Limit")
-	if articles, err = repoCmd(mysql, repo.Article{}, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -62,9 +61,8 @@ func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 		return
 	}
 
-	mysql := repo.GlobalMysql
 	argFlg = service.GenFlg(repo.Article{}, "Id", "Limit")
-	if articles, err = repoCmd(mysql, argArticle, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -93,9 +91,8 @@ func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 
 	argArticle.Title = c.Query("title")
 
-	mysql := repo.GlobalMysql
 	argFlg = service.GenFlg(repo.Article{}, "Title", "Limit")
-	if articles, err = repoCmd(mysql, argArticle, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -129,8 +126,7 @@ func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd)
 	}
 
 	argFlg = service.GenFlg(repo.Article{}, "CreateDate", "Limit")
-	mysql := repo.GlobalMysql
-	if articles, err = repoCmd(mysql, argArticle, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -157,9 +153,8 @@ func FindArticleByCategoryHandler(c *gin.Context, repoCmd repo.FindArticleByCate
 	)
 
 	categoryNames := c.QueryArray("category")
-	mysql := repo.GlobalMysql
 	argFlg = service.GenFlg(repo.Article{}, "Limit")
-	if articles, err = repoCmd(mysql, categoryNames, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -190,9 +185,8 @@ func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) {
 		err        error
 	)
 
-	mysql := repo.GlobalMysql
 	argFlg = service.GenFlg(repo.Category{}, "Limit")
-	if categories, err = repoCmd(mysql, repo.Category{}, argFlg); err != nil {
+	if categories, err = repoCmd(*repo.GlobalMysql, repo.Category{}, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -223,9 +217,8 @@ func FindDraftHandler(c *gin.Context, repoCmd repo.FindDraftCmd) {
 		err      error
 	)
 
-	mysql := repo.GlobalMysql
 	argFlg = service.GenFlg(repo.Draft{}, "Limit")
-	if drafts, err = repoCmd(mysql, repo.Draft{}, argFlg); err != nil {
+	if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argFlg); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}

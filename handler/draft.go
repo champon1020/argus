@@ -48,13 +48,12 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) {
 		ImageHash:   body.Article.ImageHash,
 	}
 
-	if err = service.OutputFile(fp, body.Contents); err != nil {
+	if err = service.OutputFile(fp, []byte(body.Contents)); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	mysql := repo.GlobalMysql
-	if err = repoCmd(mysql, draft); err != nil {
+	if err = repoCmd(*repo.GlobalMysql, draft); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		service.DeleteFile(fp)
 		return

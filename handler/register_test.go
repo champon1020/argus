@@ -55,6 +55,11 @@ func TestRegisterArticleHandler(t *testing.T) {
 	RegisterArticleHandler(ctx, repoCmdMock)
 	res = w.Result()
 	assert.Equal(t, res.StatusCode, 200)
+
+	// see details in debug.log
+	if len(*Errors) != 0 {
+		argus.Logger.ErrorLog(*Errors)
+	}
 	assert.Equal(t, len(*Errors), 0)
 	*Errors = []argus.Error{}
 }
