@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
@@ -20,6 +21,14 @@ var (
 	loc, _   = time.LoadLocation("Asia/Tokyo")
 	testTime = time.Date(2020, 3, 9, 0, 0, 0, 0, loc)
 )
+
+func TestMain(m *testing.M) {
+	argus.GlobalConfig = argus.NewConfig("dev")
+	repo.GlobalMysql = repo.NewMysql()
+
+	ret := m.Run()
+	os.Exit(ret)
+}
 
 func TestFindArticleHandler(t *testing.T) {
 	w := httptest.NewRecorder()
@@ -77,7 +86,7 @@ func TestFindArticleHandler(t *testing.T) {
 
 	body, _ = ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("Unable to indent json string: %v\n", err)
 	}
 	assert.Equal(t, expectedBody, buf.String())
@@ -140,7 +149,7 @@ func TestFindArticleByIdHandler(t *testing.T) {
 
 	body, _ = ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("Unable to indent json string: %v\n", err)
 	}
 	assert.Equal(t, expectedBody, buf.String())
@@ -207,7 +216,7 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 
 	body, _ = ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("Unable to indent json string: %v\n", err)
 	}
 	assert.Equal(t, expectedBody, buf.String())
@@ -274,7 +283,7 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 
 	body, _ = ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("Unable to indent json string: %v\n", err)
 	}
 	assert.Equal(t, expectedBody, buf.String())
@@ -348,7 +357,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 
 	body, _ = ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("Unable to indent json string: %v\n", err)
 	}
 	assert.Equal(t, expectedBody, buf.String())
@@ -394,7 +403,7 @@ func TestFindCategoryHandler(t *testing.T) {
 
 	body, _ = ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("Unable to indent json string: %v\n", err)
 	}
 	assert.Equal(t, expectedBody, buf.String())
@@ -446,7 +455,7 @@ func TestFindDraftHandler(t *testing.T) {
 
 	body, _ = ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("Unable to indent json string: %v\n", err)
 	}
 	assert.Equal(t, expectedBody, buf.String())

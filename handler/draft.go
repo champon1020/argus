@@ -53,8 +53,7 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) {
 		return
 	}
 
-	mysql := repo.GlobalMysql
-	if err = repoCmd(mysql, draft); err != nil {
+	if err = repoCmd(*repo.GlobalMysql, draft); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		service.DeleteFile(fp)
 		return

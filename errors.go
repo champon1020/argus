@@ -26,6 +26,9 @@ const (
 
 	// time error types
 	TimeFailedParseError ErrorType = "TimeFailedParseError"
+
+	// argus pkg errors
+	ConfigFailedLoadError ErrorType = "ConfigFailedLoadError"
 )
 
 type Error struct {

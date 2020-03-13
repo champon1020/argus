@@ -5,11 +5,13 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"os"
+
+	"github.com/champon1020/argus"
 )
 
 func ReadBody(r io.Reader) (body []byte, err error) {
 	if body, err = ioutil.ReadAll(r); err != nil {
-		IOReadError.SetErr(err).AppendTo(Errors)
+		IOReadError.SetErr(err).AppendTo(&Errors)
 	}
 	return
 }
@@ -19,7 +21,7 @@ func ReadBody(r io.Reader) (body []byte, err error) {
 func OutputFile(path string, body []byte) (err error) {
 	var file *os.File
 	if file, err = os.Create(path); err != nil {
-		IOWriteError.SetErr(err).AppendTo(Errors)
+		IOWriteError.SetErr(err).AppendTo(&Errors)
 		return
 	}
 	defer file.Close()
@@ -31,11 +33,11 @@ func OutputFile(path string, body []byte) (err error) {
 // If not exist, add error.
 func DeleteFile(path string) (err error) {
 	if _, err := os.Stat(path); err != nil {
-		Logger.Println("No such file: [handler.util] DeleteFile()")
+		argus.Logger.Println("No such file: [handler.util] DeleteFile()")
 		return err
 	}
 	if err := os.Remove(path); err != nil {
-		IORemoveError.SetErr(err).AppendTo(Errors)
+		IORemoveError.SetErr(err).AppendTo(&Errors)
 		return err
 	}
 	return

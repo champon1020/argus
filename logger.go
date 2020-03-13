@@ -17,21 +17,35 @@ var (
 	StdLogger LogHandler
 )
 
-func (l *LogHandler) New() {
-	logfileDir := EnvVars.Get("log")
-	logfile, err := os.OpenFile(logfileDir+"debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	l.SetFlags(log.Ldate | log.Ltime)
-	if err != nil {
-		log.Printf("Unable to open log file: %s\n", err)
-		l.SetOutput(os.Stdout)
-		return
-	}
-	l.SetOutput(io.Writer(logfile))
+func init() {
+	StdLogger = NewStdLogger()
+	EnvVars = NewEnv()
+	Logger = NewLogger()
 }
 
-func (l *LogHandler) NewStd() {
+func NewLogger() LogHandler {
+	l := new(LogHandler)
+	var (
+		logFile *os.File
+		err     error
+	)
+	if logFile, err = os.OpenFile(
+		EnvVars.Get("log")+"/debug.log",
+		os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+		0666,
+	); err != nil {
+		StdLogger.Fatalf("Unable to open log file: %s\n", err)
+	}
+	l.SetFlags(log.Ldate | log.Ltime)
+	l.SetOutput(io.Writer(logFile))
+	return *l
+}
+
+func NewStdLogger() LogHandler {
+	l := new(LogHandler)
 	l.SetFlags(log.Ldate | log.Ltime)
 	l.SetOutput(os.Stdout)
+	return *l
 }
 
 func (l *LogHandler) StackTrace() []string {

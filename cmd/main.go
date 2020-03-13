@@ -5,33 +5,25 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/champon1020/argus/repository"
-
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/handler"
+	"github.com/champon1020/argus/repository"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	Logger  = argus.Logger
-	Errors  = &argus.Errors
-	configs argus.Configurations
+	Logger = argus.Logger
+	Errors = &argus.Errors
 )
-
-func init() {
-	argus.EnvVars = argus.NewEnv()
-	Logger.New()
-	argus.StdLogger.NewStd()
-	configs.New(flag.Arg(0))
-	repository.NewMysql()
-}
 
 func main() {
 	flag.Parse()
+	argus.GlobalConfig = argus.NewConfig(flag.Arg(0))
+	repository.GlobalMysql = repository.NewMysql()
 
 	r := NewRouter()
-	r.Run(":8080")
+	_ = r.Run(":8080")
 }
 
 func NewRouter() *gin.Engine {

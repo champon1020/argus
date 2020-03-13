@@ -61,8 +61,7 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) {
 		return
 	}
 
-	mysql := repo.GlobalMysql
-	if err = repoCmd(mysql, article); err != nil {
+	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		service.DeleteFile(fp)
 		return
@@ -83,7 +82,7 @@ func RegisterImageHandler(c *gin.Context) {
 
 	if form, err = c.MultipartForm(); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		BasicError.SetErr(err).AppendTo(Errors)
+		BasicError.SetErr(err).AppendTo(&Errors)
 		return
 	}
 

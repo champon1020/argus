@@ -104,14 +104,14 @@ func GetEmptyMinId(db *sql.DB, tableName string, numOfId int) (res []int, err er
 			SetErr(err).
 			SetValues("query", query).
 			SetValues("args", numOfId).
-			AppendTo(Errors)
+			AppendTo(&Errors)
 		return
 	}
 
 	for rows.Next() {
 		var id int
 		if err := rows.Scan(&id); err != nil {
-			ScanError.SetErr(err).AppendTo(Errors)
+			ScanError.SetErr(err).AppendTo(&Errors)
 			break
 		}
 		res = append(res, id)

@@ -20,7 +20,7 @@ func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
 		category.Name,
 		category.Name,
 	); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
+		CmdError.SetErr(err).AppendTo(&Errors)
 	}
 	return
 }
@@ -31,7 +31,7 @@ func (category *Category) UpdateCategory(tx *sql.Tx) (err error) {
 		"WHERE id=? "
 
 	if _, err = tx.Exec(cmd, category.Name, category.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
+		CmdError.SetErr(err).AppendTo(&Errors)
 	}
 	return
 }
@@ -39,7 +39,7 @@ func (category *Category) UpdateCategory(tx *sql.Tx) (err error) {
 func (category *Category) DeleteCategory(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM categories WHERE id=?"
 	if _, err = tx.Exec(cmd, category.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
+		CmdError.SetErr(err).AppendTo(&Errors)
 	}
 	return
 }
@@ -48,7 +48,7 @@ func (category *Category) DeleteCategory(tx *sql.Tx) (err error) {
 func (category *Category) DeleteArticleCategoryByCategoryId(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM article_category WHERE category_id=?"
 	if _, err = tx.Exec(cmd, category.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
+		CmdError.SetErr(err).AppendTo(&Errors)
 	}
 	return
 }
@@ -64,13 +64,13 @@ func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int
 			SetErr(err).
 			SetValues("query", query).
 			SetValues("args", category.Id).
-			AppendTo(Errors)
+			AppendTo(&Errors)
 		return
 	}
 
 	for rows.Next() {
 		if err := rows.Scan(&articleNum); err != nil {
-			ScanError.SetErr(err).AppendTo(Errors)
+			ScanError.SetErr(err).AppendTo(&Errors)
 			break
 		}
 	}
@@ -98,7 +98,7 @@ func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories [
 			SetErr(err).
 			SetValues("query", query).
 			SetValues("args", args).
-			AppendTo(Errors)
+			AppendTo(&Errors)
 		return
 	}
 
@@ -108,7 +108,7 @@ func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories [
 	)
 	for rows.Next() {
 		if err := rows.Scan(&c.Id, &c.Name); err != nil {
-			ScanError.SetErr(err).AppendTo(Errors)
+			ScanError.SetErr(err).AppendTo(&Errors)
 			break
 		}
 		if articleNum, err = c.FindArticleNumByCategoryId(db); err != nil {

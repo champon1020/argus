@@ -31,7 +31,7 @@ func FindArticleByCategoryId(db *sql.DB, categoryNames []string, argsFlg uint32)
 			SetErr(err).
 			SetValues("query", query).
 			SetValues("args", args).
-			AppendTo(Errors)
+			AppendTo(&Errors)
 		return
 	}
 
@@ -46,7 +46,7 @@ func FindArticleByCategoryId(db *sql.DB, categoryNames []string, argsFlg uint32)
 			&a.ImageHash,
 			&a.Private,
 		); err != nil {
-			ScanError.SetErr(err).AppendTo(Errors)
+			ScanError.SetErr(err).AppendTo(&Errors)
 			break
 		}
 		if a.Categories, err = a.FindCategoryByArticleId(db); err != nil {

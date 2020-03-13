@@ -28,7 +28,7 @@ func TestConvertArticleId(t *testing.T) {
 
 	article := Article{Id: -1}
 	if err := ConvertArticleId(mysql, &article); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -61,7 +61,7 @@ func TestConvertCategoriesId(t *testing.T) {
 		{Id: -1},
 	}
 	if err := ConvertCategoriesId(mysql, &categories); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -91,7 +91,7 @@ func TestConvertDraftId(t *testing.T) {
 
 	draft := Draft{Id: -1}
 	if err := ConvertDraftId(mysql, &draft); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -127,10 +127,10 @@ func TestExtractCategory(t *testing.T) {
 		},
 	}
 	newCa, delCa, err := ExtractCategory(db, article)
-	Logger.Println(newCa)
-	Logger.Println(delCa)
+	argus.Logger.Println(newCa)
+	argus.Logger.Println(delCa)
 	if err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -163,7 +163,7 @@ func TestExtractNewAndDelCategory(t *testing.T) {
 		err          error
 	)
 	if newCa, delCa, err = ExtractNewAndDelCategory(allCa, existCa); err != nil {
-		argus.StdLogger.ErrorLog(*Errors)
+		argus.StdLogger.ErrorLog(Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if len(newCa) == 0 {

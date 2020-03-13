@@ -8,8 +8,7 @@ import (
 )
 
 var (
-	Logger        = argus.Logger
-	Errors        = &argus.Errors
+	Errors        = argus.Errors
 	IOReadError   = argus.NewError(argus.IOFailedReadError)
 	IOWriteError  = argus.NewError(argus.IOFailedWriteError)
 	IORemoveError = argus.NewError(argus.IOFailedRemoveError)
