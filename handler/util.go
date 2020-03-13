@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	Errors           = argus.Errors
+	Errors           = &argus.Errors
 	BasicError       = argus.NewError(argus.BasicError)
 	IOMarshalError   = argus.NewError(argus.IOFailedMarshalError)
 	IOUnmarshalError = argus.NewError(argus.IOFailedUnmarshalError)
@@ -23,7 +23,7 @@ func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {
 		return
 	}
 	if err = json.Unmarshal(body, &reqBody); err != nil {
-		IOUnmarshalError.SetErr(err).AppendTo(&Errors)
+		IOUnmarshalError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -34,7 +34,7 @@ func ParseDraftRequestBody(r *http.Request, reqBody *DraftRequestBody) (err erro
 		return
 	}
 	if err = json.Unmarshal(body, &reqBody); err != nil {
-		IOUnmarshalError.SetErr(err).AppendTo(&Errors)
+		IOUnmarshalError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -42,7 +42,7 @@ func ParseDraftRequestBody(r *http.Request, reqBody *DraftRequestBody) (err erro
 func ParseToJson(st interface{}) (res string, err error) {
 	var bytes []byte
 	if bytes, err = json.Marshal(&st); err != nil {
-		IOMarshalError.SetErr(err).AppendTo(&Errors)
+		IOMarshalError.SetErr(err).AppendTo(Errors)
 		return
 	}
 	res = string(bytes)

@@ -18,6 +18,8 @@ const (
 	DbCloseFailedError ErrorType = "DbCloseFailedError"
 
 	// io or json error types
+	IOFailedOpenError      ErrorType = "IOFailedOpenError"
+	IOFailedCloseError     ErrorType = "IOFailedCloseError"
 	IOFailedReadError      ErrorType = "IOFailedReadError"
 	IOFailedWriteError     ErrorType = "IOFailedWriteError"
 	IOFailedRemoveError    ErrorType = "IOFailedRemoveError"
@@ -29,6 +31,9 @@ const (
 
 	// argus pkg errors
 	ConfigFailedLoadError ErrorType = "ConfigFailedLoadError"
+
+	// multi format data
+	MultiFormatFailedOpenError ErrorType = "MultiFormatFailedOpenError"
 )
 
 type Error struct {

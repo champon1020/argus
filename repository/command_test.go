@@ -94,7 +94,7 @@ func TestRegisterArticleCmd(t *testing.T) {
 	mock.ExpectCommit()
 
 	if err := RegisterArticleCommand(mysql, article); err != nil {
-		argus.StdLogger.ErrorLog(Errors)
+		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -143,7 +143,7 @@ func TestDraftCmd_Insert(t *testing.T) {
 	mock.ExpectCommit()
 
 	if err := DraftCommand(mysql, draft); err != nil {
-		argus.StdLogger.ErrorLog(Errors)
+		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -187,7 +187,7 @@ func TestDraftCmd_Update(t *testing.T) {
 	mock.ExpectCommit()
 
 	if err := DraftCommand(mysql, draft); err != nil {
-		argus.StdLogger.ErrorLog(Errors)
+		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -228,7 +228,7 @@ func TestFindArticleCmd_All(t *testing.T) {
 	articles, err := FindArticleCommand(mysql, article, argFlg)
 
 	if err != nil {
-		argus.StdLogger.ErrorLog(Errors)
+		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 
@@ -278,7 +278,7 @@ func TestFindArticleCmd_Title(t *testing.T) {
 	articles, err := FindArticleCommand(mysql, article, argFlg)
 
 	if err != nil {
-		argus.StdLogger.ErrorLog(Errors)
+		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -335,7 +335,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 	articles, err := FindArticleByCategoryCommand(mysql, categoryNames, argFlg)
 
 	if err != nil {
-		argus.StdLogger.ErrorLog(Errors)
+		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -377,7 +377,7 @@ func TestFindCategoryCmd(t *testing.T) {
 	categories, err := FindCategoryCommand(mysql, category, 0)
 
 	if err != nil {
-		argus.StdLogger.ErrorLog(Errors)
+		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -411,7 +411,7 @@ func TestFindDraftCmd(t *testing.T) {
 			}).AddRow(1, "draft", "c1&c2", testTime, "0123456789", "9876543210"))
 
 	if _, err := FindDraftCommand(mysql, draft, argFlg); err != nil {
-		argus.StdLogger.ErrorLog(Errors)
+		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {

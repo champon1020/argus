@@ -8,10 +8,13 @@ import (
 )
 
 var (
-	Errors        = argus.Errors
-	IOReadError   = argus.NewError(argus.IOFailedReadError)
-	IOWriteError  = argus.NewError(argus.IOFailedWriteError)
-	IORemoveError = argus.NewError(argus.IOFailedRemoveError)
+	Errors               = &argus.Errors
+	IOOpenError          = argus.NewError(argus.IOFailedOpenError)
+	IOReadError          = argus.NewError(argus.IOFailedReadError)
+	IOWriteError         = argus.NewError(argus.IOFailedWriteError)
+	IORemoveError        = argus.NewError(argus.IOFailedRemoveError)
+	IOCloseError         = argus.NewError(argus.IOFailedCloseError)
+	MultiFormatOpenError = argus.NewError(argus.MultiFormatFailedOpenError)
 )
 
 // If contentHash is empty, generate hash from date.

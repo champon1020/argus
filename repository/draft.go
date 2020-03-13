@@ -33,7 +33,7 @@ func (draft *Draft) InsertDraft(tx *sql.Tx) (err error) {
 		draft.ContentHash,
 		draft.ImageHash,
 	); err != nil {
-		CmdError.SetErr(err).AppendTo(&Errors)
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -51,7 +51,7 @@ func (draft *Draft) UpdateDraft(tx *sql.Tx) (err error) {
 		draft.ImageHash,
 		draft.Id,
 	); err != nil {
-		CmdError.SetErr(err).AppendTo(&Errors)
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -59,7 +59,7 @@ func (draft *Draft) UpdateDraft(tx *sql.Tx) (err error) {
 func (draft *Draft) DeleteDraft(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM drafts WHERE id=?"
 	if _, err := tx.Exec(cmd, draft.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(&Errors)
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -76,7 +76,7 @@ func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32) (drafts []Draft, err 
 			SetErr(err).
 			SetValues("query", query).
 			SetValues("args", args).
-			AppendTo(&Errors)
+			AppendTo(Errors)
 		return
 	}
 
@@ -90,7 +90,7 @@ func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32) (drafts []Draft, err 
 			&d.ContentHash,
 			&d.ImageHash,
 		); err != nil {
-			ScanError.SetErr(err).AppendTo(&Errors)
+			ScanError.SetErr(err).AppendTo(Errors)
 			break
 		}
 		drafts = append(drafts, d)

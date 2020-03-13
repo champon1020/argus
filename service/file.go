@@ -11,7 +11,7 @@ import (
 
 func ReadBody(r io.Reader) (body []byte, err error) {
 	if body, err = ioutil.ReadAll(r); err != nil {
-		IOReadError.SetErr(err).AppendTo(&Errors)
+		IOReadError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -21,11 +21,17 @@ func ReadBody(r io.Reader) (body []byte, err error) {
 func OutputFile(path string, body []byte) (err error) {
 	var file *os.File
 	if file, err = os.Create(path); err != nil {
-		IOWriteError.SetErr(err).AppendTo(&Errors)
+		IOOpenError.SetErr(err).AppendTo(Errors)
 		return
 	}
-	defer file.Close()
-	file.Write(body)
+	defer func() {
+		if err = file.Close(); err != nil {
+			IOCloseError.SetErr(err).AppendTo(Errors)
+		}
+	}()
+	if _, err = file.Write(body); err != nil {
+		IOWriteError.SetErr(err).AppendTo(Errors)
+	}
 	return
 }
 
@@ -37,7 +43,7 @@ func DeleteFile(path string) (err error) {
 		return err
 	}
 	if err := os.Remove(path); err != nil {
-		IORemoveError.SetErr(err).AppendTo(&Errors)
+		IORemoveError.SetErr(err).AppendTo(Errors)
 		return err
 	}
 	return
@@ -51,13 +57,14 @@ func SaveMultipartFiles(path string, fileHeaders []*multipart.FileHeader) (err e
 	)
 	for _, fh := range fileHeaders {
 		if f, err = fh.Open(); err != nil {
+			MultiFormatOpenError.SetErr(err).AppendTo(Errors)
 			return
 		}
 		if body, err = ReadBody(f); err != nil {
 			return
 		}
 
-		fn := path + fh.Filename
+		fn := path + "/" + fh.Filename
 		if err = OutputFile(fn, body); err != nil {
 			return
 		}

@@ -29,7 +29,7 @@ func TestDraftHandler(t *testing.T) {
 }`
 
 	defer func() {
-		argus.StdLogger.ErrorLog(Errors)
+		argus.StdLogger.ErrorLog(*Errors)
 		service.DeleteFile(service.ResolveContentFilePath("0123456789", "drafts"))
 	}()
 
@@ -53,6 +53,8 @@ func TestDraftHandler(t *testing.T) {
 	DraftHandler(ctx, repoCmdMock)
 	res = w.Result()
 	assert.Equal(t, res.StatusCode, 200)
-	assert.Equal(t, len(Errors), 0)
-	Errors = []argus.Error{}
+
+	// see details in debug.log
+	assert.Equal(t, len(*Errors), 0)
+	*Errors = []argus.Error{}
 }

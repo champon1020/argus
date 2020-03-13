@@ -9,7 +9,7 @@ import (
 
 var (
 	GlobalMysql  *MySQL
-	Errors       = argus.Errors
+	Errors       = &argus.Errors
 	RuntimeError = argus.NewError(argus.DbRuntimeError)
 	CmdError     = argus.NewError(argus.DbCmdFailedError)
 	ScanError    = argus.NewError(argus.DbScanFailedError)
@@ -39,7 +39,7 @@ func (mysql *MySQL) Connect(config argus.DbConf) (err error) {
 	argus.Logger.Printf("DataSource: %s\n", dataSourceName)
 
 	if mysql.DB, err = sql.Open("mysql", dataSourceName); err != nil {
-		RuntimeError.SetErr(err).AppendTo(&Errors)
+		RuntimeError.SetErr(err).AppendTo(Errors)
 		return
 	}
 	mysql.SetMaxIdleConns(20)
@@ -51,7 +51,7 @@ func (mysql *MySQL) Connect(config argus.DbConf) (err error) {
 func (mysql *MySQL) Transact(txFunc func(*sql.Tx) error) (err error) {
 	var tx *sql.Tx
 	if tx, err = mysql.Begin(); err != nil {
-		RuntimeError.SetErr(err).AppendTo(&Errors)
+		RuntimeError.SetErr(err).AppendTo(Errors)
 		return
 	}
 
@@ -77,6 +77,6 @@ func RowsClose(rows *sql.Rows) {
 		return
 	}
 	if err := rows.Close(); err != nil {
-		CloseError.SetErr(err).AppendTo(&Errors)
+		CloseError.SetErr(err).AppendTo(Errors)
 	}
 }

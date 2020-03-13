@@ -39,7 +39,7 @@ func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 		article.ImageHash,
 		article.Private,
 	); err != nil {
-		CmdError.SetErr(err).AppendTo(&Errors)
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -55,7 +55,7 @@ func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 		go func() {
 			defer wg.Done()
 			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
-				CmdError.SetErr(err).AppendTo(&Errors)
+				CmdError.SetErr(err).AppendTo(Errors)
 			}
 		}()
 	}
@@ -76,7 +76,7 @@ func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 		article.Private,
 		article.Id,
 	); err != nil {
-		CmdError.SetErr(err).AppendTo(&Errors)
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -84,7 +84,7 @@ func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM articles WHERE id=?"
 	if _, err = tx.Exec(cmd, article.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(&Errors)
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -93,7 +93,7 @@ func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 func (article *Article) DeleteArticleCategoryByArticle(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM article_category WHERE article_id=?"
 	if _, err = tx.Exec(cmd, article.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(&Errors)
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }
@@ -108,7 +108,7 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 		go func() {
 			defer wg.Done()
 			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
-				CmdError.SetErr(err).AppendTo(&Errors)
+				CmdError.SetErr(err).AppendTo(Errors)
 			}
 		}()
 	}
@@ -131,7 +131,7 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 			SetErr(err).
 			SetValues("query", query).
 			SetValues("args", args).
-			AppendTo(&Errors)
+			AppendTo(Errors)
 		return
 	}
 
@@ -146,7 +146,7 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Arti
 			&a.ImageHash,
 			&a.Private,
 		); err != nil {
-			ScanError.SetErr(err).AppendTo(&Errors)
+			ScanError.SetErr(err).AppendTo(Errors)
 			break
 		}
 		if a.Categories, err = a.FindCategoryByArticleId(db); err != nil {
@@ -171,7 +171,7 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 			SetErr(err).
 			SetValues("query", query).
 			SetValues("args", article.Id).
-			AppendTo(&Errors)
+			AppendTo(Errors)
 		return
 	}
 
@@ -180,7 +180,7 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 		if err := rows.Scan(
 			&c.Id,
 			&c.Name); err != nil {
-			ScanError.SetErr(err).AppendTo(&Errors)
+			ScanError.SetErr(err).AppendTo(Errors)
 		}
 		categories = append(categories, c)
 	}

@@ -56,7 +56,7 @@ func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	)
 
 	if argArticle.Id, err = strconv.Atoi(c.Query("id")); err != nil {
-		BasicError.SetErr(err).AppendTo(&Errors)
+		BasicError.SetErr(err).AppendTo(Errors)
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -121,7 +121,7 @@ func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd)
 
 	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		TimeParseError.SetErr(err).AppendTo(&Errors)
+		TimeParseError.SetErr(err).AppendTo(Errors)
 		return
 	}
 
