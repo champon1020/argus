@@ -46,5 +46,6 @@ func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) {
 		service.DeleteFile(fp)
 		return
 	}
+
 	fmt.Fprint(c.Writer, http.StatusOK)
 }

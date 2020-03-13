@@ -50,7 +50,7 @@ func NewRouter() *gin.Engine {
 		find.GET("/article/list/category", handler.FindArticleByCategoryController)
 		find.GET("/category/list", handler.FindCategoryController)
 		find.GET("/draft/list", handler.FindDraftController)
-		find.GET("/image/list")
+		find.GET("/image/list", handler.FindImageHandler)
 	}
 
 	register := router.Group("/api/register")
@@ -66,7 +66,7 @@ func NewRouter() *gin.Engine {
 
 	delete := router.Group("/api/delete")
 	{
-		delete.DELETE("/image")
+		delete.DELETE("/image", handler.DeleteImageController)
 	}
 
 	draft := router.Group("/api/draft")

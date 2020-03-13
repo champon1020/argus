@@ -5,12 +5,20 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 
 	"github.com/champon1020/argus"
 )
 
 func ReadBody(r io.Reader) (body []byte, err error) {
 	if body, err = ioutil.ReadAll(r); err != nil {
+		IOReadError.SetErr(err).AppendTo(Errors)
+	}
+	return
+}
+
+func GetFileList(dirPath string) (files []os.FileInfo, err error) {
+	if files, err = ioutil.ReadDir(dirPath); err != nil {
 		IOReadError.SetErr(err).AppendTo(Errors)
 	}
 	return
@@ -64,7 +72,7 @@ func SaveMultipartFiles(path string, fileHeaders []*multipart.FileHeader) (err e
 			return
 		}
 
-		fn := path + fh.Filename
+		fn := filepath.Join(path, fh.Filename)
 		if err = OutputFile(fn, body); err != nil {
 			return
 		}

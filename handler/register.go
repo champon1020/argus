@@ -87,7 +87,7 @@ func RegisterImageHandler(c *gin.Context) {
 	}
 
 	fileHeaders := form.File["images"]
-	path := argus.EnvVars.Get("resources") + "/"
+	path := argus.EnvVars.Get("resource")
 	if err = service.SaveMultipartFiles(path, fileHeaders); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return

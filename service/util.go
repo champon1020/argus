@@ -1,6 +1,7 @@
 package service
 
 import (
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -30,7 +31,7 @@ func ResolveContentHash(contentHash string) string {
 // Get file path uri from hash(fine name) and dir name.
 func ResolveContentFilePath(contentHash string, dirName string) string {
 	fn := ResolveContentHash(contentHash)
-	return argus.EnvVars.Get("resource") + "/" + dirName + "/" + fn
+	return filepath.Join(argus.EnvVars.Get("resource"), dirName, fn)
 }
 
 // Get only fine name from path(uri or url).
