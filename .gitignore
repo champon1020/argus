@@ -9,3 +9,5 @@ sample_debug/**
 !docker/db/server/script/*.sh
 
 **/.env
+
+docker/app/nginx/default.conf
