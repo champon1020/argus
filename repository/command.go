@@ -156,32 +156,32 @@ func DraftCommand(mysql MySQL, draft Draft) (err error) {
 // Find articles.
 type FindArticleCmd func(MySQL, Article, uint32, int) ([]Article, error)
 
-func FindArticleCommand(mysql MySQL, article Article, argFlg uint32, offset int) ([]Article, error) {
-	articles, err := article.FindArticle(mysql.DB, argFlg, offset)
+func FindArticleCommand(mysql MySQL, article Article, argsFlg uint32, offset int) ([]Article, error) {
+	articles, err := article.FindArticle(mysql.DB, argsFlg, offset)
 	return articles, err
 }
 
 // Find articles by category id.
 type FindArticleByCategoryCmd func(MySQL, []string, uint32, int) ([]Article, error)
 
-func FindArticleByCategoryCommand(mysql MySQL, categoryNames []string, argFlg uint32, offset int) ([]Article, error) {
-	articles, err := FindArticleByCategoryId(mysql.DB, categoryNames, argFlg, offset)
+func FindArticleByCategoryCommand(mysql MySQL, categoryNames []string, argsFlg uint32, offset int) ([]Article, error) {
+	articles, err := FindArticleByCategoryId(mysql.DB, categoryNames, argsFlg, offset)
 	return articles, err
 }
 
 // Find categories.
 type FindCategoryCmd func(MySQL, Category, uint32) ([]CategoryResponse, error)
 
-func FindCategoryCommand(mysql MySQL, category Category, argFlg uint32) ([]CategoryResponse, error) {
-	categories, err := category.FindCategory(mysql.DB, argFlg)
+func FindCategoryCommand(mysql MySQL, category Category, argsFlg uint32) ([]CategoryResponse, error) {
+	categories, err := category.FindCategory(mysql.DB, argsFlg)
 	return categories, err
 }
 
 // Find drafts.
 type FindDraftCmd func(MySQL, Draft, uint32, int) ([]Draft, error)
 
-func FindDraftCommand(mysql MySQL, draft Draft, argFlg uint32, offset int) ([]Draft, error) {
-	drafts, err := draft.FindDrafts(mysql.DB, argFlg, offset)
+func FindDraftCommand(mysql MySQL, draft Draft, argsFlg uint32, offset int) ([]Draft, error) {
+	drafts, err := draft.FindDrafts(mysql.DB, argsFlg, offset)
 	return drafts, err
 }
 
