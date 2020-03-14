@@ -30,14 +30,11 @@ type RequestBody struct {
 }
 
 func RegisterArticleController(c *gin.Context) {
-	RegisterArticleHandler(c, repo.RegisterArticleCommand)
+	_ = RegisterArticleHandler(c, repo.RegisterArticleCommand)
 }
 
-func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) {
-	var (
-		body RequestBody
-		err  error
-	)
+func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (err error) {
+	var body RequestBody
 
 	if err = ParseRequestBody(c.Request, &body); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
@@ -63,26 +60,28 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) {
 
 	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		service.DeleteFile(fp)
+		_ = service.DeleteFile(fp)
 		return
 	}
 
 	fmt.Fprint(c.Writer, http.StatusOK)
+	return
 }
 
 func RegisterImageController(c *gin.Context) {
-	RegisterImageHandler(c)
+	_ = RegisterImageHandler(c)
 }
 
-func RegisterImageHandler(c *gin.Context) {
-	var (
-		form *multipart.Form
-		err  error
-	)
+func RegisterImageHandler(c *gin.Context) (err error) {
+	var form *multipart.Form
 
 	if form, err = c.MultipartForm(); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		BasicError.SetErr(err).AppendTo(Errors)
+		BasicError.
+			SetErr(err).
+			SetValues("header", c.Request.Header).
+			SetValues("multipart-form", form).
+			AppendTo(Errors)
 		return
 	}
 
@@ -94,4 +93,5 @@ func RegisterImageHandler(c *gin.Context) {
 	}
 
 	fmt.Fprint(c.Writer, http.StatusOK)
+	return
 }

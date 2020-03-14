@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -29,15 +28,14 @@ func TestUpdateArticleHandler(t *testing.T) {
 }`
 
 	defer func() {
-		argus.StdLogger.ErrorLog(*Errors)
-		service.DeleteFile(service.ResolveContentFilePath("0123456789", "articles"))
+		_ = service.DeleteFile(service.ResolveContentFilePath("0123456789", "articles"))
 	}()
 
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"PUT",
-		"/update/article",
+		"/api/update/article",
 		strings.NewReader(requestBody))
 
 	repoCmdMock := func(_ repo.MySQL, a repo.Article) (_ error) {
@@ -51,15 +49,11 @@ func TestUpdateArticleHandler(t *testing.T) {
 		return
 	}
 
-	var res *http.Response
-	UpdateArticleHandler(ctx, repoCmdMock)
-	res = w.Result()
-	assert.Equal(t, res.StatusCode, 200)
-
-	// see details in debug.log
-	if len(*Errors) != 0 {
-		argus.Logger.ErrorLog(*Errors)
+	if err := UpdateArticleHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
 	}
-	assert.Equal(t, len(*Errors), 0)
-	*Errors = []argus.Error{}
+
+	res := w.Result()
+	assert.Equal(t, res.StatusCode, 200)
 }

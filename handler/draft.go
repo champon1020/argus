@@ -24,14 +24,11 @@ type DraftRequestBody struct {
 }
 
 func DraftController(c *gin.Context) {
-	DraftHandler(c, repo.DraftCommand)
+	_ = DraftHandler(c, repo.DraftCommand)
 }
 
-func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) {
-	var (
-		body DraftRequestBody
-		err  error
-	)
+func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
+	var body DraftRequestBody
 
 	if err = ParseDraftRequestBody(c.Request, &body); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
@@ -55,11 +52,12 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) {
 
 	if err = repoCmd(*repo.GlobalMysql, draft); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		service.DeleteFile(fp)
+		_ = service.DeleteFile(fp)
 		return
 	}
 
 	fmt.Fprint(c.Writer, http.StatusOK)
+	return
 }
 
 func resolveToDraftCategories(categories []repo.Category) string {

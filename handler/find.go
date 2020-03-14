@@ -21,7 +21,7 @@ type ResponseType struct {
 }
 
 func FindArticleController(c *gin.Context) {
-	FindArticleHandler(c, repo.FindArticleCommand)
+	_ = FindArticleHandler(c, repo.FindArticleCommand)
 }
 
 func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
@@ -48,7 +48,7 @@ func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error)
 }
 
 func FindArticleByIdController(c *gin.Context) {
-	FindArticleByIdHandler(c, repo.FindArticleCommand)
+	_ = FindArticleByIdHandler(c, repo.FindArticleCommand)
 }
 
 func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
@@ -82,7 +82,7 @@ func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err er
 }
 
 func FindArticleByTitleController(c *gin.Context) {
-	FindArticleByTitleHandler(c, repo.FindArticleCommand)
+	_ = FindArticleByTitleHandler(c, repo.FindArticleCommand)
 }
 
 func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
@@ -112,7 +112,7 @@ func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err
 }
 
 func FindArticleByCreateDateController(c *gin.Context) {
-	FindArticleByCreateDateHandler(c, repo.FindArticleCommand)
+	_ = FindArticleByCreateDateHandler(c, repo.FindArticleCommand)
 }
 
 func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
@@ -146,7 +146,7 @@ func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd)
 }
 
 func FindArticleByCategoryController(c *gin.Context) {
-	FindArticleByCategoryHandler(c, repo.FindArticleByCategoryCommand)
+	_ = FindArticleByCategoryHandler(c, repo.FindArticleByCategoryCommand)
 }
 
 func FindArticleByCategoryHandler(c *gin.Context, repoCmd repo.FindArticleByCategoryCmd) (err error) {

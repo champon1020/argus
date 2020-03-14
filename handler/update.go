@@ -11,14 +11,11 @@ import (
 )
 
 func UpdateArticleController(c *gin.Context) {
-	UpdateArticleHandler(c, repo.UpdateArticleCommand)
+	_ = UpdateArticleHandler(c, repo.UpdateArticleCommand)
 }
 
-func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) {
-	var (
-		body RequestBody
-		err  error
-	)
+func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err error) {
+	var body RequestBody
 
 	if err = ParseRequestBody(c.Request, &body); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
@@ -48,4 +45,5 @@ func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) {
 	}
 
 	fmt.Fprint(c.Writer, http.StatusOK)
+	return
 }

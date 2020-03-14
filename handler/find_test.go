@@ -34,7 +34,7 @@ func TestFindArticleHandler(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"GET",
-		"/find/article/list",
+		"/api/find/article/list",
 		nil)
 
 	repoCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articles []repo.Article, _ error) {
@@ -96,7 +96,7 @@ func TestFindArticleByIdHandler(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"GET",
-		"/find/article/list/id?id=2",
+		"/api/find/article/list/id?id=2",
 		nil)
 
 	repoCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articles []repo.Article, _ error) {
@@ -158,7 +158,7 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"GET",
-		"/find/article/list/title?title=test",
+		"/api/find/article/list/title?title=test",
 		nil)
 
 	repoCmdMock := func(_ repo.MySQL, a repo.Article, _ uint32) (articles []repo.Article, err error) {
@@ -224,7 +224,7 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"GET",
-		"/find/article/list/create-date?createDate=2020-03-09T00:00:00Z",
+		"/api/find/article/list/create-date?createDate=2020-03-09T00:00:00Z",
 		nil)
 
 	repoCmdMock := func(_ repo.MySQL, a repo.Article, _ uint32) (articles []repo.Article, err error) {
@@ -290,7 +290,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"GET",
-		"/find/article/list/category?category=c1&category=c2",
+		"/api/find/article/list/category?category=c1&category=c2",
 		nil)
 
 	repoCmdMock := func(_ repo.MySQL, caNames []string, _ uint32) (articles []repo.Article, err error) {
@@ -363,7 +363,7 @@ func TestFindCategoryHandler(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"GET",
-		"/find/category/list",
+		"/api/find/category/list",
 		nil)
 
 	repoCmdMock := func(_ repo.MySQL, _ repo.Category, _ uint32) (categories []repo.CategoryResponse, _ error) {
@@ -408,7 +408,7 @@ func TestFindDraftHandler(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"GET",
-		"/find/draft",
+		"/api/find/draft",
 		nil)
 
 	repoCmdMock := func(_ repo.MySQL, _ repo.Draft, _ uint32) (drafts []repo.Draft, _ error) {
