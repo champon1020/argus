@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -23,12 +24,11 @@ func FindArticleController(c *gin.Context) {
 	FindArticleHandler(c, repo.FindArticleCommand)
 }
 
-func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
 	var (
 		articles []repo.Article
 		response string
 		argFlg   uint32
-		err      error
 	)
 
 	argFlg = service.GenFlg(repo.Article{}, "Limit")
@@ -44,19 +44,19 @@ func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 func FindArticleByIdController(c *gin.Context) {
 	FindArticleByIdHandler(c, repo.FindArticleCommand)
 }
 
-func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
 	var (
 		argArticle repo.Article
 		articles   []repo.Article
 		response   string
 		argFlg     uint32
-		err        error
 	)
 
 	if argArticle.Id, err = strconv.Atoi(c.Query("id")); err != nil {
@@ -78,19 +78,19 @@ func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 func FindArticleByTitleController(c *gin.Context) {
 	FindArticleByTitleHandler(c, repo.FindArticleCommand)
 }
 
-func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
 	var (
 		argArticle repo.Article
 		articles   []repo.Article
 		response   string
 		argFlg     uint32
-		err        error
 	)
 
 	argArticle.Title = c.Query("title")
@@ -108,19 +108,19 @@ func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 func FindArticleByCreateDateController(c *gin.Context) {
 	FindArticleByCreateDateHandler(c, repo.FindArticleCommand)
 }
 
-func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
 	var (
 		argArticle repo.Article
 		articles   []repo.Article
 		response   string
 		argFlg     uint32
-		err        error
 	)
 
 	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
@@ -142,18 +142,18 @@ func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd)
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 func FindArticleByCategoryController(c *gin.Context) {
 	FindArticleByCategoryHandler(c, repo.FindArticleByCategoryCommand)
 }
 
-func FindArticleByCategoryHandler(c *gin.Context, repoCmd repo.FindArticleByCategoryCmd) {
+func FindArticleByCategoryHandler(c *gin.Context, repoCmd repo.FindArticleByCategoryCmd) (err error) {
 	var (
 		articles []repo.Article
 		response string
 		argFlg   uint32
-		err      error
 	)
 
 	categoryNames := c.QueryArray("category")
@@ -170,6 +170,7 @@ func FindArticleByCategoryHandler(c *gin.Context, repoCmd repo.FindArticleByCate
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 // Response type of Category
@@ -178,15 +179,14 @@ type CategoryResponseType struct {
 }
 
 func FindCategoryController(c *gin.Context) {
-	FindCategoryHandler(c, repo.FindCategoryCommand)
+	_ = FindCategoryHandler(c, repo.FindCategoryCommand)
 }
 
-func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) {
+func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) (err error) {
 	var (
 		categories []repo.CategoryResponse
 		response   string
 		argFlg     uint32
-		err        error
 	)
 
 	argFlg = service.GenFlg(repo.Category{}, "Limit")
@@ -202,6 +202,7 @@ func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) {
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 // Response type of Draft
@@ -210,15 +211,14 @@ type DraftResponseType struct {
 }
 
 func FindDraftController(c *gin.Context) {
-	FindDraftHandler(c, repo.FindDraftCommand)
+	_ = FindDraftHandler(c, repo.FindDraftCommand)
 }
 
-func FindDraftHandler(c *gin.Context, repoCmd repo.FindDraftCmd) {
+func FindDraftHandler(c *gin.Context, repoCmd repo.FindDraftCmd) (err error) {
 	var (
 		drafts   []repo.Draft
 		response string
 		argFlg   uint32
-		err      error
 	)
 
 	argFlg = service.GenFlg(repo.Draft{}, "Limit")
@@ -234,6 +234,7 @@ func FindDraftHandler(c *gin.Context, repoCmd repo.FindDraftCmd) {
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 // Response type of Image
@@ -243,23 +244,25 @@ type ImageResponseType struct {
 }
 
 func FindImageController(c *gin.Context) {
-	FindImageHandler(c)
+	_ = FindImageHandler(c)
 }
 
-func FindImageHandler(c *gin.Context) {
+func FindImageHandler(c *gin.Context) (err error) {
 	var (
 		res       ImageResponseType
 		response  string
 		files     []os.FileInfo
 		fileNames []string
-		p         int
-		err       error
 	)
 
-	if p, err = strconv.Atoi(c.Query("p")); err != nil {
-		BasicError.SetErr(err).AppendTo(Errors)
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
+	// get page
+	p := 1
+	if pp, ok := c.GetQuery("p"); ok {
+		if p, err = strconv.Atoi(pp); err != nil {
+			BasicError.SetErr(err).AppendTo(Errors)
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	dirPath := filepath.Join(argus.EnvVars.Get("resource"), "images")
@@ -272,7 +275,7 @@ func FindImageHandler(c *gin.Context) {
 	if offset >= len(files) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		argus.Logger.Println("Exceed the number of existing files")
-		return
+		return errors.New("error happened")
 	}
 
 	for i := offset; i < len(files); i++ {
@@ -291,4 +294,5 @@ func FindImageHandler(c *gin.Context) {
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }

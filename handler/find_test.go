@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -74,20 +73,19 @@ func TestFindArticleHandler(t *testing.T) {
 	]
 }`
 
-	var (
-		buf  bytes.Buffer
-		res  *http.Response
-		body []byte
-	)
+	if err := FindArticleHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
 
-	FindArticleHandler(ctx, repoCmdMock)
-	res = w.Result()
+	res := w.Result()
 	assert.Equal(t, res.StatusCode, 200)
 
-	body, _ = ioutil.ReadAll(res.Body)
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Fatalf("Unable to indent json string: %v\n", err)
+		t.Fatalf("Unable to indent json string\n")
 	}
 	assert.Equal(t, expectedBody, buf.String())
 	buf.Reset()
@@ -137,20 +135,19 @@ func TestFindArticleByIdHandler(t *testing.T) {
 	]
 }`
 
-	var (
-		buf  bytes.Buffer
-		res  *http.Response
-		body []byte
-	)
+	if err := FindArticleByIdHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
 
-	FindArticleByIdHandler(ctx, repoCmdMock)
-	res = w.Result()
+	res := w.Result()
 	assert.Equal(t, res.StatusCode, 200)
 
-	body, _ = ioutil.ReadAll(res.Body)
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Fatalf("Unable to indent json string: %v\n", err)
+		t.Fatalf("Unable to indent json string\n")
 	}
 	assert.Equal(t, expectedBody, buf.String())
 	buf.Reset()
@@ -204,20 +201,19 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 	]
 }`
 
-	var (
-		buf  bytes.Buffer
-		res  *http.Response
-		body []byte
-	)
+	if err := FindArticleByTitleHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
 
-	FindArticleByTitleHandler(ctx, repoCmdMock)
-	res = w.Result()
+	res := w.Result()
 	assert.Equal(t, res.StatusCode, 200)
 
-	body, _ = ioutil.ReadAll(res.Body)
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Fatalf("Unable to indent json string: %v\n", err)
+		t.Fatalf("Unable to indent json string\n")
 	}
 	assert.Equal(t, expectedBody, buf.String())
 	buf.Reset()
@@ -271,20 +267,19 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 	]
 }`
 
-	var (
-		buf  bytes.Buffer
-		res  *http.Response
-		body []byte
-	)
+	if err := FindArticleByCreateDateHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
 
-	FindArticleByCreateDateHandler(ctx, repoCmdMock)
-	res = w.Result()
+	res := w.Result()
 	assert.Equal(t, res.StatusCode, 200)
 
-	body, _ = ioutil.ReadAll(res.Body)
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Fatalf("Unable to indent json string: %v\n", err)
+		t.Fatalf("Unable to indent json string\n")
 	}
 	assert.Equal(t, expectedBody, buf.String())
 	buf.Reset()
@@ -345,20 +340,19 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 	]
 }`
 
-	var (
-		buf  bytes.Buffer
-		res  *http.Response
-		body []byte
-	)
+	if err := FindArticleByCategoryHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
 
-	FindArticleByCategoryHandler(ctx, repoCmdMock)
-	res = w.Result()
+	res := w.Result()
 	assert.Equal(t, res.StatusCode, 200)
 
-	body, _ = ioutil.ReadAll(res.Body)
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Fatalf("Unable to indent json string: %v\n", err)
+		t.Fatalf("Unable to indent json string\n")
 	}
 	assert.Equal(t, expectedBody, buf.String())
 	buf.Reset()
@@ -391,20 +385,19 @@ func TestFindCategoryHandler(t *testing.T) {
 	]
 }`
 
-	var (
-		buf  bytes.Buffer
-		res  *http.Response
-		body []byte
-	)
+	if err := FindCategoryHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
 
-	FindCategoryHandler(ctx, repoCmdMock)
-	res = w.Result()
+	res := w.Result()
 	assert.Equal(t, res.StatusCode, 200)
 
-	body, _ = ioutil.ReadAll(res.Body)
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Fatalf("Unable to indent json string: %v\n", err)
+		t.Fatalf("Unable to indent json string\n")
 	}
 	assert.Equal(t, expectedBody, buf.String())
 	buf.Reset()
@@ -443,20 +436,54 @@ func TestFindDraftHandler(t *testing.T) {
 	]
 }`
 
-	var (
-		buf  bytes.Buffer
-		res  *http.Response
-		body []byte
-	)
+	if err := FindDraftHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
 
-	FindDraftHandler(ctx, repoCmdMock)
-	res = w.Result()
+	res := w.Result()
 	assert.Equal(t, res.StatusCode, 200)
 
-	body, _ = ioutil.ReadAll(res.Body)
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
 	if err := json.Indent(&buf, body, "", "	"); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
-		t.Fatalf("Unable to indent json string: %v\n", err)
+		t.Fatalf("Unable to indent json string\n")
+	}
+	assert.Equal(t, expectedBody, buf.String())
+	buf.Reset()
+}
+
+func TestFindImageHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(
+		"GET",
+		"/api/find/image/list",
+		nil)
+
+	expectedBody := `{
+	"images": [
+		"image_test1.png",
+		"image_test2.jpg"
+	],
+	"next": false
+}`
+
+	if err := FindImageHandler(ctx); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
+
+	res := w.Result()
+	assert.Equal(t, res.StatusCode, 200)
+
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
+	if err := json.Indent(&buf, body, "", "	"); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("Unable to indent json string\n")
+		return
 	}
 	assert.Equal(t, expectedBody, buf.String())
 	buf.Reset()

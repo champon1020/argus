@@ -2,6 +2,7 @@
 cmd/argus
 config.json
 logs/**
+sample_debug/**
 
 *.sh
 !docker/db/common/script/*.sh

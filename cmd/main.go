@@ -50,7 +50,7 @@ func NewRouter() *gin.Engine {
 		find.GET("/article/list/category", handler.FindArticleByCategoryController)
 		find.GET("/category/list", handler.FindCategoryController)
 		find.GET("/draft/list", handler.FindDraftController)
-		find.GET("/image/list", handler.FindImageHandler)
+		find.GET("/image/list", handler.FindImageController)
 	}
 
 	register := router.Group("/api/register")
