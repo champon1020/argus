@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"net/http"
+	"mime/multipart"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -29,15 +29,14 @@ func TestRegisterArticleHandler(t *testing.T) {
 }`
 
 	defer func() {
-		argus.StdLogger.ErrorLog(*Errors)
-		service.DeleteFile(service.ResolveContentFilePath("0123456789", "articles"))
+		_ = service.DeleteFile(service.ResolveContentFilePath("0123456789", "articles"))
 	}()
 
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"POST",
-		"/register/article",
+		"/api/register/article",
 		strings.NewReader(requestBody))
 
 	repoCmdMock := func(_ repo.MySQL, a repo.Article) (_ error) {
@@ -51,15 +50,44 @@ func TestRegisterArticleHandler(t *testing.T) {
 		return
 	}
 
-	var res *http.Response
-	RegisterArticleHandler(ctx, repoCmdMock)
-	res = w.Result()
-	assert.Equal(t, res.StatusCode, 200)
-
-	// see details in debug.log
-	if len(*Errors) != 0 {
-		argus.Logger.ErrorLog(*Errors)
+	if err := RegisterArticleHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
 	}
-	assert.Equal(t, len(*Errors), 0)
-	*Errors = []argus.Error{}
+
+	res := w.Result()
+	assert.Equal(t, res.StatusCode, 200)
+}
+
+func TestRegisterImageHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+
+	// prepare dummy image
+	//mFileHeader := multipart.FileHeader{
+	//	Filename: "test_image.png",
+	//	Header:   make(map[string][]string),
+	//	Size:     16,
+	//}
+
+	// create test request
+	ctx.Request = httptest.NewRequest(
+		"POST",
+		"/register/article",
+		nil)
+	ctx.Request.Header.Set("Content-Type", "multipart/form-data")
+	ctx.Request.MultipartForm = &multipart.Form{
+		//Value: make(map[string][]string),
+		//File: map[string][]*multipart.FileHeader{
+		//	"images": {&mFileHeader},
+		//},
+	}
+
+	if err := RegisterImageHandler(ctx); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
+
+	res := w.Result()
+	assert.Equal(t, res.StatusCode, 200)
 }

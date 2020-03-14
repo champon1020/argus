@@ -119,10 +119,12 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 // ArgFlg determines where statement's arguments.
 // For Example, 'argFlg = 0101' means
 // it includes first and third fields of objects in where statement.
-func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Article, err error) {
-	args := GenArgsSlice(argsFlg, article)
+func (article *Article) FindArticle(db *sql.DB, argsFlg uint32, offset int) (articles []Article, err error) {
+	args := GenArgsSlice(argsFlg, article, offset)
 	whereQuery, limitQuery := GenArgsQuery(argsFlg, article)
-	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id DESC " + limitQuery
+	query := "SELECT * FROM articles " + whereQuery +
+		"ORDER BY id DESC " + limitQuery +
+		"OFFSET ?"
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -183,6 +185,30 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 			ScanError.SetErr(err).AppendTo(Errors)
 		}
 		categories = append(categories, c)
+	}
+	return
+}
+
+func (article *Article) FindArticlesNum(db *sql.DB, argsFlg uint32) (articleNum int, err error) {
+	args := GenArgsSlice(argsFlg, article, -1)
+	whereQuery, _ := GenArgsQuery(argsFlg, article)
+	query := "SELECT COUNT(id) FROM articles " + whereQuery
+
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, args...); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", args).
+			AppendTo(Errors)
+		return
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&articleNum); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+		}
 	}
 	return
 }

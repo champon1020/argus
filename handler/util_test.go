@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseRequestBody(t *testing.T) {
@@ -27,35 +29,49 @@ func TestParseRequestBody(t *testing.T) {
 	}`
 
 	r, _ := http.NewRequest("POST", "", bytes.NewBuffer([]byte(requestJson)))
-
 	if err := ParseRequestBody(r, &body); err != nil {
 		t.Error(err)
 	}
 
-	if body.Article.Id != 2 {
-		t.Errorf("mismatch id: %v, but actual: %v", 2, body.Article.Id)
-	}
-	if body.Article.Title != "test" {
-		t.Errorf("mismatch title: %v, but actual: %v", "test", body.Article.Title)
-	}
-	if len(body.Article.Categories) == 0 {
-		t.Errorf("categories is empty")
-	}
-	if body.Article.Categories[0].Id != 1 {
-		t.Errorf("mismatch category id: %v, but actual: %v", 1, body.Article.Categories[0].Id)
+	assert.Equal(t, 2, body.Article.Id)
+	assert.Equal(t, "test", body.Article.Title)
+	assert.Equal(t, 1, len(body.Article.Categories))
+	assert.Equal(t, 1, body.Article.Categories[0].Id)
+	assert.Equal(t, "http://localhost:2000/", body.Article.ContentHash)
+	assert.Equal(t, "http://localhost:1000/", body.Article.ImageHash)
+	assert.Equal(t, false, body.Article.Private)
+	assert.Equal(t, "<div>ok</div>", body.Contents)
+}
+
+func TestParseDraftRequestBody(t *testing.T) {
+	var body DraftRequestBody
+
+	requestJson := `{
+		"article": {
+			"id": 2,
+			"title": "test",
+			"categories": [
+				{
+					"id": 1,
+					"name": "test_test"
+				}
+			],
+			"contentHash": "http://localhost:2000/",
+			"imageHash": "http://localhost:1000/"
+		},
+		"contents": "<div>ok</div>"
+	}`
+
+	r, _ := http.NewRequest("POST", "", bytes.NewBuffer([]byte(requestJson)))
+	if err := ParseDraftRequestBody(r, &body); err != nil {
+		t.Error(err)
 	}
 
-	if body.Article.ContentHash != "http://localhost:2000/" {
-		t.Errorf("mismatch content url: %v, but actual: %v", "http://localhost:2000/", body.Article.ContentHash)
-	}
-	if body.Article.ImageHash != "http://localhost:1000/" {
-		t.Errorf("mismatch image url: %v, but actual: %v", "http://localhost:1000/", body.Article.ImageHash)
-	}
-	if body.Article.Private != false {
-		t.Errorf("mismatch category id: %v, but actual: %v", false, body.Article.Private)
-	}
-
-	if body.Contents != "<div>ok</div>" {
-		t.Errorf("mismatch contents: %v, but actual: %v", "<div>ok</div>", body.Contents)
-	}
+	assert.Equal(t, 2, body.Article.Id)
+	assert.Equal(t, "test", body.Article.Title)
+	assert.Equal(t, 1, len(body.Article.Categories))
+	assert.Equal(t, 1, body.Article.Categories[0].Id)
+	assert.Equal(t, "http://localhost:2000/", body.Article.ContentHash)
+	assert.Equal(t, "http://localhost:1000/", body.Article.ImageHash)
+	assert.Equal(t, "<div>ok</div>", body.Contents)
 }

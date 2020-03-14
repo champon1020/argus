@@ -9,28 +9,11 @@ paths:
   /api/find/article/list:
     get:
       summary: Return a list of articles.
-      responses:
-        '200':
-          description: A JSON array of articles.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  articles:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Article'
-                required:
-                  - articles
-  /api/find/article/list/title:
-    get:
-      summary: Return a list of articles by title.
       parameters:
-        - name: title
+        - name: p
           in: path
           required: true
-          description: A title of articles.
+          description: Page of view.
           schema:
             type: number
       responses:
@@ -45,18 +28,27 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
+                  articesNum:
+                    type: number
                 required:
                   - articles
-  /api/find/article/list/create-date:
+                  - articlesNum
+  /api/find/article/list/title:
     get:
       summary: Return a list of articles by title.
       parameters:
-        - name: create_date
+        - name: title
           in: path
           required: true
-          description: A created date of articles.
+          description: A title of articles.
           schema:
-            type: string
+            type: number
+        - name: p
+          in: path
+          required: true
+          description: Page of view.
+          schema:
+            type: number
       responses:
         '200':
           description: A JSON array of articles.
@@ -69,8 +61,44 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
+                  articesNum:
+                    type: number
                 required:
                   - articles
+                  - articlesNum
+  /api/find/article/list/create-date:
+    get:
+      summary: Return a list of articles by title.
+      parameters:
+        - name: create_date
+          in: path
+          required: true
+          description: A created date of articles.
+          schema:
+            type: string
+        - name: p
+          in: path
+          required: true
+          description: Page of view.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A JSON array of articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  articesNum:
+                    type: number
+                required:
+                  - articles
+                  - articlesNum
   /api/find/article/list/category:
     get:
       summary: Return a list of articles by title.
@@ -95,8 +123,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
+                  articesNum:
+                    type: number
                 required:
                   - articles
+                  - articlesNum
   /api/find/category/list:
     get:
       summary: Return a list of categories.
@@ -124,6 +155,12 @@ paths:
           description: page of the view (offset)
           schema:
             type: number
+        - name: p
+          in: path
+          required: true
+          description: Page of view.
+          schema:
+            type: number
       responses:
         '200':
           description: A JSON array of drafts.
@@ -136,11 +173,21 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Draft'
+                  draftsNum:
+                    type: number
                 required:
-                  - drafts
+                  - articles
+                  - draftsNum
   /api/find/image/list:
     get:
       summary: Return a list of image names.
+      parameters:
+        - name: p
+          in: path
+          required: true
+          description: Page of view.
+          schema:
+            type: number
       responses:
         '200':
           description: A string array of image names and whether there is next page.

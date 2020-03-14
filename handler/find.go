@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/champon1020/argus"
@@ -16,47 +18,82 @@ import (
 )
 
 type ResponseType struct {
-	Articles []repo.Article `json:"articles"`
+	Articles    []repo.Article `json:"articles"`
+	ArticlesNum int            `json:"articlesNum"`
 }
 
 func FindArticleController(c *gin.Context) {
-	FindArticleHandler(c, repo.FindArticleCommand)
+	_ = FindArticleHandler(c, repo.FindArticleCommand, repo.FindArticlesNumCommand)
 }
 
-func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleHandler(
+	c *gin.Context,
+	repoCmd repo.FindArticleCmd,
+	repoNumCmd repo.FindArticleNumCmd,
+) (err error) {
 	var (
-		articles []repo.Article
-		response string
-		argFlg   uint32
-		err      error
+		articles    []repo.Article
+		articlesNum int
+		response    string
+		p           int
 	)
 
-	argFlg = service.GenFlg(repo.Article{}, "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argFlg); err != nil {
+	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
 
-	res := ResponseType{Articles: articles}
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	// get articles
+	go func() {
+		defer wg.Done()
+		argsFlg := service.GenFlg(repo.Article{}, "Limit")
+		if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argsFlg, offset); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+	// get the number of total articles
+	go func() {
+		defer wg.Done()
+		numArgsFlg := service.GenFlg(repo.Article{})
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+
+	wg.Wait()
+
+	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 func FindArticleByIdController(c *gin.Context) {
-	FindArticleByIdHandler(c, repo.FindArticleCommand)
+	_ = FindArticleByIdHandler(c, repo.FindArticleCommand, repo.FindArticlesNumCommand)
 }
 
-func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleByIdHandler(
+	c *gin.Context,
+	repoCmd repo.FindArticleCmd,
+	repoNumCmd repo.FindArticleNumCmd,
+) (err error) {
 	var (
-		argArticle repo.Article
-		articles   []repo.Article
-		response   string
-		argFlg     uint32
-		err        error
+		argArticle  repo.Article
+		articles    []repo.Article
+		articlesNum int
+		response    string
+		argFlg      uint32
+		p           int
 	)
 
 	if argArticle.Id, err = strconv.Atoi(c.Query("id")); err != nil {
@@ -65,62 +102,122 @@ func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
 		return
 	}
 
-	argFlg = service.GenFlg(repo.Article{}, "Id", "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg); err != nil {
+	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
 
-	res := ResponseType{Articles: articles}
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	// get articles
+	go func() {
+		defer wg.Done()
+		argFlg = service.GenFlg(repo.Article{}, "Id", "Limit")
+		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg, offset); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+	// get the number of total articles
+	go func() {
+		defer wg.Done()
+		numArgsFlg := service.GenFlg(repo.Article{})
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+
+	wg.Wait()
+
+	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 func FindArticleByTitleController(c *gin.Context) {
-	FindArticleByTitleHandler(c, repo.FindArticleCommand)
+	_ = FindArticleByTitleHandler(c, repo.FindArticleCommand, repo.FindArticlesNumCommand)
 }
 
-func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleByTitleHandler(
+	c *gin.Context,
+	repoCmd repo.FindArticleCmd,
+	repoNumCmd repo.FindArticleNumCmd,
+) (err error) {
 	var (
-		argArticle repo.Article
-		articles   []repo.Article
-		response   string
-		argFlg     uint32
-		err        error
+		argArticle  repo.Article
+		articles    []repo.Article
+		articlesNum int
+		response    string
+		argFlg      uint32
+		p           int
 	)
 
 	argArticle.Title = c.Query("title")
 
-	argFlg = service.GenFlg(repo.Article{}, "Title", "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg); err != nil {
+	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
 
-	res := ResponseType{Articles: articles}
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	// get articles
+	go func() {
+		defer wg.Done()
+		argFlg = service.GenFlg(repo.Article{}, "Title", "Limit")
+		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg, offset); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+	// get the number of total articles
+	go func() {
+		defer wg.Done()
+		numArgsFlg := service.GenFlg(repo.Article{})
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+
+	wg.Wait()
+
+	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 func FindArticleByCreateDateController(c *gin.Context) {
-	FindArticleByCreateDateHandler(c, repo.FindArticleCommand)
+	_ = FindArticleByCreateDateHandler(c, repo.FindArticleCommand, repo.FindArticlesNumCommand)
 }
 
-func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd) {
+func FindArticleByCreateDateHandler(
+	c *gin.Context,
+	repoCmd repo.FindArticleCmd,
+	repoNumCmd repo.FindArticleNumCmd,
+) (err error) {
 	var (
-		argArticle repo.Article
-		articles   []repo.Article
-		response   string
-		argFlg     uint32
-		err        error
+		argArticle  repo.Article
+		articles    []repo.Article
+		articlesNum int
+		response    string
+		argFlg      uint32
+		p           int
 	)
 
 	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
@@ -129,47 +226,105 @@ func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd)
 		return
 	}
 
-	argFlg = service.GenFlg(repo.Article{}, "CreateDate", "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg); err != nil {
+	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
 
-	res := ResponseType{Articles: articles}
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	// get articles
+	go func() {
+		defer wg.Done()
+		argFlg = service.GenFlg(repo.Article{}, "CreateDate", "Limit")
+		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg, offset); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+	// get the number of total articles
+	go func() {
+		defer wg.Done()
+		numArgsFlg := service.GenFlg(repo.Article{})
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+
+	wg.Wait()
+
+	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 func FindArticleByCategoryController(c *gin.Context) {
-	FindArticleByCategoryHandler(c, repo.FindArticleByCategoryCommand)
+	_ = FindArticleByCategoryHandler(
+		c,
+		repo.FindArticleByCategoryCommand,
+		repo.FindArticlesNumByCategoryCommand)
 }
 
-func FindArticleByCategoryHandler(c *gin.Context, repoCmd repo.FindArticleByCategoryCmd) {
+func FindArticleByCategoryHandler(
+	c *gin.Context,
+	repoCmd repo.FindArticleByCategoryCmd,
+	repoNumCmd repo.FindArticlesNumByCategoryCmd,
+) (err error) {
 	var (
-		articles []repo.Article
-		response string
-		argFlg   uint32
-		err      error
+		articles    []repo.Article
+		articlesNum int
+		response    string
+		argFlg      uint32
+		p           int
 	)
 
 	categoryNames := c.QueryArray("category")
-	argFlg = service.GenFlg(repo.Article{}, "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argFlg); err != nil {
+
+	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
 
-	res := ResponseType{Articles: articles}
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	// get articles
+	go func() {
+		defer wg.Done()
+		argFlg = service.GenFlg(repo.Article{}, "Limit")
+		if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argFlg, offset); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+	// get the number of total articles
+	go func() {
+		defer wg.Done()
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, categoryNames); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+
+	wg.Wait()
+
+	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 // Response type of Category
@@ -178,15 +333,14 @@ type CategoryResponseType struct {
 }
 
 func FindCategoryController(c *gin.Context) {
-	FindCategoryHandler(c, repo.FindCategoryCommand)
+	_ = FindCategoryHandler(c, repo.FindCategoryCommand)
 }
 
-func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) {
+func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) (err error) {
 	var (
 		categories []repo.CategoryResponse
 		response   string
 		argFlg     uint32
-		err        error
 	)
 
 	argFlg = service.GenFlg(repo.Category{}, "Limit")
@@ -202,38 +356,70 @@ func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) {
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 // Response type of Draft
 type DraftResponseType struct {
-	Drafts []repo.Draft `json:"drafts"`
+	Drafts    []repo.Draft `json:"drafts"`
+	DraftsNum int          `json:"draftsNum"`
 }
 
 func FindDraftController(c *gin.Context) {
-	FindDraftHandler(c, repo.FindDraftCommand)
+	_ = FindDraftHandler(c, repo.FindDraftCommand, repo.FindDraftsNumCommand)
 }
 
-func FindDraftHandler(c *gin.Context, repoCmd repo.FindDraftCmd) {
+func FindDraftHandler(
+	c *gin.Context,
+	repoCmd repo.FindDraftCmd,
+	repoNumCmd repo.FindDraftNumCmd,
+) (err error) {
 	var (
-		drafts   []repo.Draft
-		response string
-		argFlg   uint32
-		err      error
+		drafts    []repo.Draft
+		draftsNum int
+		response  string
+		argFlg    uint32
+		p         int
 	)
 
-	argFlg = service.GenFlg(repo.Draft{}, "Limit")
-	if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argFlg); err != nil {
+	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
 
-	res := DraftResponseType{Drafts: drafts}
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	// get articles
+	go func() {
+		defer wg.Done()
+		argFlg = service.GenFlg(repo.Draft{}, "Limit")
+		if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argFlg, offset); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+	// get the number of total articles
+	go func() {
+		defer wg.Done()
+		numArgsFlg := service.GenFlg(repo.Article{})
+		if draftsNum, err = repoNumCmd(*repo.GlobalMysql, repo.Draft{}, numArgsFlg); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}()
+
+	wg.Wait()
+
+	res := DraftResponseType{Drafts: drafts, DraftsNum: draftsNum}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }
 
 // Response type of Image
@@ -243,24 +429,17 @@ type ImageResponseType struct {
 }
 
 func FindImageController(c *gin.Context) {
-	FindImageHandler(c)
+	_ = FindImageHandler(c)
 }
 
-func FindImageHandler(c *gin.Context) {
+func FindImageHandler(c *gin.Context) (err error) {
 	var (
 		res       ImageResponseType
 		response  string
 		files     []os.FileInfo
 		fileNames []string
 		p         int
-		err       error
 	)
-
-	if p, err = strconv.Atoi(c.Query("p")); err != nil {
-		BasicError.SetErr(err).AppendTo(Errors)
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
 	dirPath := filepath.Join(argus.EnvVars.Get("resource"), "images")
 	if files, err = service.GetFileList(dirPath); err != nil {
@@ -268,10 +447,20 @@ func FindImageHandler(c *gin.Context) {
 		return
 	}
 
+	if p, err = ParsePage(c); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewImageNum
 	if offset >= len(files) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		argus.Logger.Println("Exceed the number of existing files")
+		err = errors.New("error happened")
+		BasicError.
+			SetValues("len(files)", len(files)).
+			SetValues("offset", offset).
+			SetErr(err).
+			AppendTo(Errors)
 		return
 	}
 
@@ -291,4 +480,5 @@ func FindImageHandler(c *gin.Context) {
 	}
 
 	fmt.Fprint(c.Writer, response)
+	return
 }

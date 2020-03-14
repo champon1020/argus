@@ -1,13 +1,12 @@
 package service
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"os"
 	"path/filepath"
-
-	"github.com/champon1020/argus"
 )
 
 func ReadBody(r io.Reader) (body []byte, err error) {
@@ -47,7 +46,10 @@ func OutputFile(path string, body []byte) (err error) {
 // If not exist, add error.
 func DeleteFile(path string) (err error) {
 	if _, err := os.Stat(path); err != nil {
-		argus.Logger.Println("No such file: [handler.util] DeleteFile()")
+		IORemoveError.
+			SetErr(errors.New("no such file: DeleteFile()")).
+			SetValues("path", path).
+			AppendTo(Errors)
 		return err
 	}
 	if err := os.Remove(path); err != nil {
@@ -65,7 +67,10 @@ func SaveMultipartFiles(path string, fileHeaders []*multipart.FileHeader) (err e
 	)
 	for _, fh := range fileHeaders {
 		if f, err = fh.Open(); err != nil {
-			MultiFormatOpenError.SetErr(err).AppendTo(Errors)
+			MultiFormatOpenError.
+				SetValues("file", f).
+				SetErr(err).
+				AppendTo(Errors)
 			return
 		}
 		if body, err = ReadBody(f); err != nil {

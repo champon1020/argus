@@ -42,14 +42,11 @@ func TestGenArgsSliceLogic(t *testing.T) {
 	)
 	argsFlg = service.GenFlg(st, "Title")
 	st.Title = "test"
-	args := service.GenArgsSliceLogic(argsFlg, st)
+	args := service.GenArgsSliceLogic(argsFlg, st, 0)
 
-	if len(args) != 1 {
-		t.Fatalf("length of args: %v\n", len(args))
-	}
-
-	actual := "test"
-	assert.Equal(t, actual, args[0])
+	assert.Equal(t, 2, len(args))
+	assert.Equal(t, "test", args[0])
+	assert.Equal(t, 0, args[1])
 }
 
 func TestGenArgsSliceLogic_Limit(t *testing.T) {
@@ -61,18 +58,12 @@ func TestGenArgsSliceLogic_Limit(t *testing.T) {
 
 	argsFlg = service.GenFlg(st, "Title", "Limit")
 	st.Title = "test"
-	args := service.GenArgsSliceLogic(argsFlg, st)
+	args := service.GenArgsSliceLogic(argsFlg, st, 0)
 
-	if len(args) != 2 {
-		t.Fatalf("length of args: %v\n", len(args))
-	}
-
-	actual1 := "test"
-	assert.Equal(t, actual1, args[0])
-
-	config := argus.GlobalConfig
-	actual2 := config.Web.MaxViewArticleNum
-	assert.Equal(t, actual2, args[1])
+	assert.Equal(t, 3, len(args))
+	assert.Equal(t, "test", args[0])
+	assert.Equal(t, argus.GlobalConfig.Web.MaxViewArticleNum, args[1])
+	assert.Equal(t, 0, args[2])
 }
 
 func TestGenArgsSliceLogic_Multi(t *testing.T) {
@@ -83,17 +74,12 @@ func TestGenArgsSliceLogic_Multi(t *testing.T) {
 	argsFlg = service.GenFlg(st, "Id", "Title")
 	st.Id = 1
 	st.Title = "test"
-	args := service.GenArgsSliceLogic(argsFlg, st)
+	args := service.GenArgsSliceLogic(argsFlg, st, 1)
 
-	if len(args) != 2 {
-		t.Fatalf("length of args: %v\n", len(args))
-	}
-
-	actual1 := 1
-	assert.Equal(t, actual1, args[0])
-
-	actual2 := "test"
-	assert.Equal(t, actual2, args[1])
+	assert.Equal(t, 3, len(args))
+	assert.Equal(t, 1, args[0])
+	assert.Equal(t, "test", args[1])
+	assert.Equal(t, 1, args[2])
 }
 
 func TestGenArgsQuery(t *testing.T) {

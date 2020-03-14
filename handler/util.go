@@ -3,6 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/champon1020/argus/service"
 
@@ -16,6 +19,18 @@ var (
 	IOUnmarshalError = argus.NewError(argus.IOFailedUnmarshalError)
 	TimeParseError   = argus.NewError(argus.TimeFailedParseError)
 )
+
+func ParsePage(c *gin.Context) (p int, err error) {
+	p = 1
+	if pp, ok := c.GetQuery("p"); ok {
+		if p, err = strconv.Atoi(pp); err != nil {
+			BasicError.SetErr(err).AppendTo(Errors)
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+	return
+}
 
 func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {
 	var body []byte

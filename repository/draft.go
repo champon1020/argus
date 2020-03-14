@@ -64,10 +64,12 @@ func (draft *Draft) DeleteDraft(tx *sql.Tx) (err error) {
 	return
 }
 
-func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32) (drafts []Draft, err error) {
-	args := GenArgsSlice(argsFlg, draft)
+func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32, offset int) (drafts []Draft, err error) {
+	args := GenArgsSlice(argsFlg, draft, offset)
 	whereQuery, limitQuery := GenArgsQuery(argsFlg, draft)
-	query := "SELECT * FROM drafts " + whereQuery + "ORDER BY id DESC " + limitQuery
+	query := "SELECT * FROM drafts " + whereQuery +
+		"ORDER BY id DESC " + limitQuery +
+		"OFFSET ?"
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -94,6 +96,30 @@ func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32) (drafts []Draft, err 
 			break
 		}
 		drafts = append(drafts, d)
+	}
+	return
+}
+
+func (draft *Draft) FindDraftsNum(db *sql.DB, argsFlg uint32) (draftNum int, err error) {
+	args := GenArgsSlice(argsFlg, draft, -1)
+	whereQuery, _ := GenArgsQuery(argsFlg, draft)
+	query := "SELECT COUNT(id) FROM drafts " + whereQuery
+
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, args...); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", args).
+			AppendTo(Errors)
+		return
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&draftNum); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+		}
 	}
 	return
 }
