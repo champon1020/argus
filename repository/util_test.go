@@ -127,8 +127,6 @@ func TestExtractCategory(t *testing.T) {
 		},
 	}
 	newCa, delCa, err := ExtractCategory(db, article)
-	argus.Logger.Println(newCa)
-	argus.Logger.Println(delCa)
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
