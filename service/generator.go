@@ -8,6 +8,10 @@ import (
 	"github.com/champon1020/argus"
 )
 
+// Generate flag which determines arguments of database query.
+// For example, if you want a query like '... WHERE title=?',
+// you should set 'Title' of string to fieldNames.
+// But selected struct 'st' must have a field named 'Title'.
 func GenFlg(st interface{}, fieldNames ...string) (flg uint32) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
@@ -25,6 +29,8 @@ func GenFlg(st interface{}, fieldNames ...string) (flg uint32) {
 	return
 }
 
+// Generate arguments slice used in database query.
+// If offset == -1, don't use offset.
 func GenArgsSliceLogic(argsFlg uint32, st interface{}, offset int) (args []interface{}) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
@@ -36,10 +42,14 @@ func GenArgsSliceLogic(argsFlg uint32, st interface{}, offset int) (args []inter
 	if (1 << 31 & argsFlg) > 0 {
 		args = append(args, argus.GlobalConfig.Web.MaxViewArticleNum)
 	}
-	args = append(args, offset)
+	if offset != -1 {
+		args = append(args, offset)
+	}
 	return
 }
 
+// Generate arguments query used in database query.
+// Return values is query(query of following 'WHERE') and limit(limit query 'LIMIT ?').
 func GenArgsQuery(argsFlg uint32, st interface{}) (query string, limit string) {
 	const initQuery = "WHERE "
 	query = initQuery
@@ -67,6 +77,7 @@ var (
 	matchAllCap   = regexp.MustCompile("([a-z0-9])([A-Z])")
 )
 
+// Convert camel case string to snake case.
 func ToSnakeCase(str string) (snake string) {
 	snake = matchFirstCap.ReplaceAllString(str, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")

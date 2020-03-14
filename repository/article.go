@@ -188,3 +188,27 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 	}
 	return
 }
+
+func (article *Article) FindArticlesNum(db *sql.DB, argsFlg uint32) (articleNum int, err error) {
+	args := GenArgsSlice(argsFlg, article, -1)
+	whereQuery, _ := GenArgsQuery(argsFlg, article)
+	query := "SELECT COUNT(id) FROM articles " + whereQuery
+
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, args...); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", args).
+			AppendTo(Errors)
+		return
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&articleNum); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+		}
+	}
+	return
+}

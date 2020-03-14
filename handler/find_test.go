@@ -53,6 +53,11 @@ func TestFindArticleHandler(t *testing.T) {
 		return
 	}
 
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articleNum int, _ error) {
+		articleNum = 10
+		return
+	}
+
 	expectedBody := `{
 	"articles": [
 		{
@@ -70,10 +75,11 @@ func TestFindArticleHandler(t *testing.T) {
 			"imageHash": "9876543210",
 			"private": false
 		}
-	]
+	],
+	"articleNum": 10
 }`
 
-	if err := FindArticleHandler(ctx, repoCmdMock); err != nil {
+	if err := FindArticleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error happend in handler")
 	}
@@ -115,6 +121,11 @@ func TestFindArticleByIdHandler(t *testing.T) {
 		return
 	}
 
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articleNum int, _ error) {
+		articleNum = 10
+		return
+	}
+
 	expectedBody := `{
 	"articles": [
 		{
@@ -132,10 +143,11 @@ func TestFindArticleByIdHandler(t *testing.T) {
 			"imageHash": "9876543210",
 			"private": false
 		}
-	]
+	],
+	"articleNum": 10
 }`
 
-	if err := FindArticleByIdHandler(ctx, repoCmdMock); err != nil {
+	if err := FindArticleByIdHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error happend in handler")
 	}
@@ -181,6 +193,11 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 		return
 	}
 
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articleNum int, _ error) {
+		articleNum = 10
+		return
+	}
+
 	expectedBody := `{
 	"articles": [
 		{
@@ -198,10 +215,11 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 			"imageHash": "9876543210",
 			"private": false
 		}
-	]
+	],
+	"articleNum": 10
 }`
 
-	if err := FindArticleByTitleHandler(ctx, repoCmdMock); err != nil {
+	if err := FindArticleByTitleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error happend in handler")
 	}
@@ -247,6 +265,11 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 		return
 	}
 
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articleNum int, _ error) {
+		articleNum = 10
+		return
+	}
+
 	expectedBody := `{
 	"articles": [
 		{
@@ -264,10 +287,11 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 			"imageHash": "9876543210",
 			"private": false
 		}
-	]
+	],
+	"articleNum": 10
 }`
 
-	if err := FindArticleByCreateDateHandler(ctx, repoCmdMock); err != nil {
+	if err := FindArticleByCreateDateHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error happend in handler")
 	}
@@ -316,6 +340,11 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 		return
 	}
 
+	repoNumCmdMock := func(_ repo.MySQL, _ []string) (articleNum int, _ error) {
+		articleNum = 10
+		return
+	}
+
 	expectedBody := `{
 	"articles": [
 		{
@@ -337,10 +366,11 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 			"imageHash": "9876543210",
 			"private": false
 		}
-	]
+	],
+	"articleNum": 10
 }`
 
-	if err := FindArticleByCategoryHandler(ctx, repoCmdMock); err != nil {
+	if err := FindArticleByCategoryHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error happend in handler")
 	}
@@ -423,6 +453,11 @@ func TestFindDraftHandler(t *testing.T) {
 		return
 	}
 
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Draft, _ uint32) (draftNum int, _ error) {
+		draftNum = 10
+		return
+	}
+
 	expectedBody := `{
 	"drafts": [
 		{
@@ -433,10 +468,11 @@ func TestFindDraftHandler(t *testing.T) {
 			"contentHash": "0123456789",
 			"imageHash": "9876543210"
 		}
-	]
+	],
+	"draftNum": 10
 }`
 
-	if err := FindDraftHandler(ctx, repoCmdMock); err != nil {
+	if err := FindDraftHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error happend in handler")
 	}

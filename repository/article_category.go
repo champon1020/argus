@@ -2,22 +2,20 @@ package repository
 
 import "database/sql"
 
-func FindArticleByCategoryId(db *sql.DB, categoryNames []string, argsFlg uint32, offset int) (articles []Article, err error) {
+func FindArticleByCategoryId(
+	db *sql.DB,
+	categoryNames []string,
+	argsFlg uint32,
+	offset int,
+) (articles []Article, err error) {
 	query := "SELECT * FROM articles " +
 		"WHERE id IN (" +
 		"SELECT article_id FROM article_category " +
 		"WHERE category_id IN (" +
-		"SELECT id FROM categories " +
-		"WHERE "
+		"SELECT id FROM categories "
 
-	var args []interface{}
-	for i, cn := range categoryNames {
-		if i != 0 {
-			query += "AND "
-		}
-		query += "name=? "
-		args = append(args, cn)
-	}
+	args, whereQuery := GenArgsFromStrSlice(categoryNames)
+	query += whereQuery
 	query += ")) "
 
 	args = append(args, GenArgsSlice(argsFlg, Article{}, offset)...)
@@ -53,6 +51,53 @@ func FindArticleByCategoryId(db *sql.DB, categoryNames []string, argsFlg uint32,
 			break
 		}
 		articles = append(articles, a)
+	}
+	return
+}
+
+func FindArticlesNumByCategoryId(db *sql.DB, categoryNames []string) (articleNum int, err error) {
+	query := "SELECT COUNT(id) FROM articles " +
+		"WHERE id IN (" +
+		"SELECT article_id FROM article_category " +
+		"WHERE category_id IN (" +
+		"SELECT id FROM categories "
+
+	args, whereQuery := GenArgsFromStrSlice(categoryNames)
+	query += whereQuery
+	query += ")) "
+
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = db.Query(query, args...); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", args).
+			AppendTo(Errors)
+		return
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&articleNum); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+			break
+		}
+	}
+	return
+}
+
+func GenArgsFromStrSlice(sl []string) (args []interface{}, whereQuery string) {
+	const initQuery = "WHERE "
+	whereQuery = initQuery
+	for i, cn := range sl {
+		if i != 0 {
+			whereQuery += "AND "
+		}
+		whereQuery += "name=? "
+		args = append(args, cn)
+	}
+	if whereQuery == initQuery {
+		whereQuery = ""
 	}
 	return
 }
