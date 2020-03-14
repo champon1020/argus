@@ -25,7 +25,7 @@ func GenFlg(st interface{}, fieldNames ...string) (flg uint32) {
 	return
 }
 
-func GenArgsSliceLogic(argsFlg uint32, st interface{}) (args []interface{}) {
+func GenArgsSliceLogic(argsFlg uint32, st interface{}, offset int) (args []interface{}) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
@@ -36,6 +36,7 @@ func GenArgsSliceLogic(argsFlg uint32, st interface{}) (args []interface{}) {
 	if (1 << 31 & argsFlg) > 0 {
 		args = append(args, argus.GlobalConfig.Web.MaxViewArticleNum)
 	}
+	args = append(args, offset)
 	return
 }
 

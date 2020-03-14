@@ -119,10 +119,12 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 // ArgFlg determines where statement's arguments.
 // For Example, 'argFlg = 0101' means
 // it includes first and third fields of objects in where statement.
-func (article *Article) FindArticle(db *sql.DB, argsFlg uint32) (articles []Article, err error) {
-	args := GenArgsSlice(argsFlg, article)
+func (article *Article) FindArticle(db *sql.DB, argsFlg uint32, offset int) (articles []Article, err error) {
+	args := GenArgsSlice(argsFlg, article, offset)
 	whereQuery, limitQuery := GenArgsQuery(argsFlg, article)
-	query := "SELECT * FROM articles " + whereQuery + "ORDER BY id DESC " + limitQuery
+	query := "SELECT * FROM articles " + whereQuery +
+		"ORDER BY id DESC " + limitQuery +
+		"OFFSET ?"
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

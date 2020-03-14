@@ -64,10 +64,12 @@ func (draft *Draft) DeleteDraft(tx *sql.Tx) (err error) {
 	return
 }
 
-func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32) (drafts []Draft, err error) {
-	args := GenArgsSlice(argsFlg, draft)
+func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32, offset int) (drafts []Draft, err error) {
+	args := GenArgsSlice(argsFlg, draft, offset)
 	whereQuery, limitQuery := GenArgsQuery(argsFlg, draft)
-	query := "SELECT * FROM drafts " + whereQuery + "ORDER BY id DESC " + limitQuery
+	query := "SELECT * FROM drafts " + whereQuery +
+		"ORDER BY id DESC " + limitQuery +
+		"OFFSET ?"
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

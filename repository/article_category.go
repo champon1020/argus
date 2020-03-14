@@ -2,7 +2,7 @@ package repository
 
 import "database/sql"
 
-func FindArticleByCategoryId(db *sql.DB, categoryNames []string, argsFlg uint32) (articles []Article, err error) {
+func FindArticleByCategoryId(db *sql.DB, categoryNames []string, argsFlg uint32, offset int) (articles []Article, err error) {
 	query := "SELECT * FROM articles " +
 		"WHERE id IN (" +
 		"SELECT article_id FROM article_category " +
@@ -20,9 +20,9 @@ func FindArticleByCategoryId(db *sql.DB, categoryNames []string, argsFlg uint32)
 	}
 	query += ")) "
 
-	args = append(args, GenArgsSlice(argsFlg, Article{})...)
+	args = append(args, GenArgsSlice(argsFlg, Article{}, offset)...)
 	_, limitQuery := GenArgsQuery(argsFlg, Article{})
-	query += limitQuery
+	query += limitQuery + "OFFSET ?"
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

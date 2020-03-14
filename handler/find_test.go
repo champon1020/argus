@@ -37,7 +37,7 @@ func TestFindArticleHandler(t *testing.T) {
 		"/api/find/article/list",
 		nil)
 
-	repoCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articles []repo.Article, _ error) {
+	repoCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32, _ int) (articles []repo.Article, _ error) {
 		articles = append(articles, repo.Article{
 			Id:    1,
 			Title: "test",
@@ -99,7 +99,7 @@ func TestFindArticleByIdHandler(t *testing.T) {
 		"/api/find/article/list/id?id=2",
 		nil)
 
-	repoCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articles []repo.Article, _ error) {
+	repoCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32, _ int) (articles []repo.Article, _ error) {
 		articles = append(articles, repo.Article{
 			Id:    2,
 			Title: "test",
@@ -161,7 +161,7 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 		"/api/find/article/list/title?title=test",
 		nil)
 
-	repoCmdMock := func(_ repo.MySQL, a repo.Article, _ uint32) (articles []repo.Article, err error) {
+	repoCmdMock := func(_ repo.MySQL, a repo.Article, _ uint32, _ int) (articles []repo.Article, err error) {
 		if a.Title != "test" {
 			err = errors.New("query parameter is not valid")
 			return
@@ -227,7 +227,7 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 		"/api/find/article/list/create-date?createDate=2020-03-09T00:00:00Z",
 		nil)
 
-	repoCmdMock := func(_ repo.MySQL, a repo.Article, _ uint32) (articles []repo.Article, err error) {
+	repoCmdMock := func(_ repo.MySQL, a repo.Article, _ uint32, _ int) (articles []repo.Article, err error) {
 		if testTime.Equal(a.CreateDate) {
 			err = errors.New("query parameter is not valid")
 			return
@@ -293,7 +293,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 		"/api/find/article/list/category?category=c1&category=c2",
 		nil)
 
-	repoCmdMock := func(_ repo.MySQL, caNames []string, _ uint32) (articles []repo.Article, err error) {
+	repoCmdMock := func(_ repo.MySQL, caNames []string, _ uint32, _ int) (articles []repo.Article, err error) {
 		if len(caNames) != 2 {
 			err = errors.New("category names length is not valid")
 		}
@@ -411,7 +411,7 @@ func TestFindDraftHandler(t *testing.T) {
 		"/api/find/draft",
 		nil)
 
-	repoCmdMock := func(_ repo.MySQL, _ repo.Draft, _ uint32) (drafts []repo.Draft, _ error) {
+	repoCmdMock := func(_ repo.MySQL, _ repo.Draft, _ uint32, _ int) (drafts []repo.Draft, _ error) {
 		drafts = append(drafts, repo.Draft{
 			Id:          1,
 			Title:       "test",

@@ -29,10 +29,17 @@ func FindArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error)
 		articles []repo.Article
 		response string
 		argFlg   uint32
+		p        int
 	)
 
+	if p, err = ParsePage(c); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+
 	argFlg = service.GenFlg(repo.Article{}, "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argFlg, offset); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -57,6 +64,7 @@ func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err er
 		articles   []repo.Article
 		response   string
 		argFlg     uint32
+		p          int
 	)
 
 	if argArticle.Id, err = strconv.Atoi(c.Query("id")); err != nil {
@@ -65,8 +73,14 @@ func FindArticleByIdHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err er
 		return
 	}
 
+	if p, err = ParsePage(c); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+
 	argFlg = service.GenFlg(repo.Article{}, "Id", "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg, offset); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -91,12 +105,19 @@ func FindArticleByTitleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err
 		articles   []repo.Article
 		response   string
 		argFlg     uint32
+		p          int
 	)
 
 	argArticle.Title = c.Query("title")
 
+	if p, err = ParsePage(c); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+
 	argFlg = service.GenFlg(repo.Article{}, "Title", "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg, offset); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -121,6 +142,7 @@ func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd)
 		articles   []repo.Article
 		response   string
 		argFlg     uint32
+		p          int
 	)
 
 	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
@@ -129,8 +151,14 @@ func FindArticleByCreateDateHandler(c *gin.Context, repoCmd repo.FindArticleCmd)
 		return
 	}
 
+	if p, err = ParsePage(c); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+
 	argFlg = service.GenFlg(repo.Article{}, "CreateDate", "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argFlg, offset); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -154,11 +182,18 @@ func FindArticleByCategoryHandler(c *gin.Context, repoCmd repo.FindArticleByCate
 		articles []repo.Article
 		response string
 		argFlg   uint32
+		p        int
 	)
+
+	if p, err = ParsePage(c); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
 
 	categoryNames := c.QueryArray("category")
 	argFlg = service.GenFlg(repo.Article{}, "Limit")
-	if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argFlg); err != nil {
+	if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argFlg, offset); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -219,10 +254,17 @@ func FindDraftHandler(c *gin.Context, repoCmd repo.FindDraftCmd) (err error) {
 		drafts   []repo.Draft
 		response string
 		argFlg   uint32
+		p        int
 	)
 
+	if p, err = ParsePage(c); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+
 	argFlg = service.GenFlg(repo.Draft{}, "Limit")
-	if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argFlg); err != nil {
+	if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argFlg, offset); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -253,17 +295,8 @@ func FindImageHandler(c *gin.Context) (err error) {
 		response  string
 		files     []os.FileInfo
 		fileNames []string
+		p         int
 	)
-
-	// get page
-	p := 1
-	if pp, ok := c.GetQuery("p"); ok {
-		if p, err = strconv.Atoi(pp); err != nil {
-			BasicError.SetErr(err).AppendTo(Errors)
-			c.Writer.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
 
 	dirPath := filepath.Join(argus.EnvVars.Get("resource"), "images")
 	if files, err = service.GetFileList(dirPath); err != nil {
@@ -271,11 +304,21 @@ func FindImageHandler(c *gin.Context) (err error) {
 		return
 	}
 
+	if p, err = ParsePage(c); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewImageNum
 	if offset >= len(files) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		argus.Logger.Println("Exceed the number of existing files")
-		return errors.New("error happened")
+		err = errors.New("error happened")
+		BasicError.
+			SetValues("len(files)", len(files)).
+			SetValues("offset", offset).
+			SetErr(err).
+			AppendTo(Errors)
+		return
 	}
 
 	for i := offset; i < len(files); i++ {

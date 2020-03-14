@@ -9,6 +9,13 @@ paths:
   /api/find/article/list:
     get:
       summary: Return a list of articles.
+      parameters:
+        - name: p
+          in: path
+          required: true
+          description: Page of view.
+          schema:
+            type: number
       responses:
         '200':
           description: A JSON array of articles.
@@ -31,6 +38,12 @@ paths:
           in: path
           required: true
           description: A title of articles.
+          schema:
+            type: number
+        - name: p
+          in: path
+          required: true
+          description: Page of view.
           schema:
             type: number
       responses:
@@ -57,6 +70,12 @@ paths:
           description: A created date of articles.
           schema:
             type: string
+        - name: p
+          in: path
+          required: true
+          description: Page of view.
+          schema:
+            type: number
       responses:
         '200':
           description: A JSON array of articles.
@@ -124,6 +143,12 @@ paths:
           description: page of the view (offset)
           schema:
             type: number
+        - name: p
+          in: path
+          required: true
+          description: Page of view.
+          schema:
+            type: number
       responses:
         '200':
           description: A JSON array of drafts.
@@ -141,6 +166,13 @@ paths:
   /api/find/image/list:
     get:
       summary: Return a list of image names.
+      parameters:
+        - name: p
+          in: path
+          required: true
+          description: Page of view.
+          schema:
+            type: number
       responses:
         '200':
           description: A string array of image names and whether there is next page.
