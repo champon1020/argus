@@ -28,8 +28,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
+                  articesNum:
+                    type: number
                 required:
                   - articles
+                  - articlesNum
   /api/find/article/list/title:
     get:
       summary: Return a list of articles by title.
@@ -58,8 +61,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
+                  articesNum:
+                    type: number
                 required:
                   - articles
+                  - articlesNum
   /api/find/article/list/create-date:
     get:
       summary: Return a list of articles by title.
@@ -88,8 +94,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
+                  articesNum:
+                    type: number
                 required:
                   - articles
+                  - articlesNum
   /api/find/article/list/category:
     get:
       summary: Return a list of articles by title.
@@ -114,8 +123,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
+                  articesNum:
+                    type: number
                 required:
                   - articles
+                  - articlesNum
   /api/find/category/list:
     get:
       summary: Return a list of categories.
@@ -161,8 +173,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Draft'
+                  draftsNum:
+                    type: number
                 required:
-                  - drafts
+                  - articles
+                  - draftsNum
   /api/find/image/list:
     get:
       summary: Return a list of image names.

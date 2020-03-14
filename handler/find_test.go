@@ -76,7 +76,7 @@ func TestFindArticleHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articleNum": 10
+	"articlesNum": 10
 }`
 
 	if err := FindArticleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -144,7 +144,7 @@ func TestFindArticleByIdHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articleNum": 10
+	"articlesNum": 10
 }`
 
 	if err := FindArticleByIdHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -216,7 +216,7 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articleNum": 10
+	"articlesNum": 10
 }`
 
 	if err := FindArticleByTitleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -288,7 +288,7 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articleNum": 10
+	"articlesNum": 10
 }`
 
 	if err := FindArticleByCreateDateHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -367,7 +367,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articleNum": 10
+	"articlesNum": 10
 }`
 
 	if err := FindArticleByCategoryHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -469,7 +469,7 @@ func TestFindDraftHandler(t *testing.T) {
 			"imageHash": "9876543210"
 		}
 	],
-	"draftNum": 10
+	"draftsNum": 10
 }`
 
 	if err := FindDraftHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
