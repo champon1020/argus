@@ -42,7 +42,7 @@ func FindArticleHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
+	lo := ParseLimitOffset(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -51,7 +51,7 @@ func FindArticleHandler(
 	go func() {
 		defer wg.Done()
 		argsFlg := service.GenFlg(repo.Article{}, "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argsFlg, offset); err != nil {
+		if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argsFlg, lo); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -106,7 +106,7 @@ func FindArticleByIdHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
+	lo := ParseLimitOffset(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -115,7 +115,7 @@ func FindArticleByIdHandler(
 	go func() {
 		defer wg.Done()
 		argsFlg = service.GenFlg(repo.Article{}, "Id", "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, offset); err != nil {
+		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, lo); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -166,7 +166,7 @@ func FindArticleByTitleHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
+	lo := ParseLimitOffset(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -175,7 +175,7 @@ func FindArticleByTitleHandler(
 	go func() {
 		defer wg.Done()
 		argsFlg = service.GenFlg(repo.Article{}, "Title", "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, offset); err != nil {
+		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, lo); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -230,7 +230,7 @@ func FindArticleByCreateDateHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
+	lo := ParseLimitOffset(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -239,7 +239,7 @@ func FindArticleByCreateDateHandler(
 	go func() {
 		defer wg.Done()
 		argsFlg = service.GenFlg(repo.Article{}, "CreateDate", "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, offset); err != nil {
+		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, lo); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -292,7 +292,7 @@ func FindArticleByCategoryHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
+	lo := ParseLimitOffset(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -301,7 +301,7 @@ func FindArticleByCategoryHandler(
 	go func() {
 		defer wg.Done()
 		argsFlg = service.GenFlg(repo.Article{}, "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argsFlg, offset); err != nil {
+		if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argsFlg, lo); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -344,7 +344,7 @@ func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) (err erro
 	)
 
 	argsFlg = service.GenFlg(repo.Category{}, "Limit")
-	if categories, err = repoCmd(*repo.GlobalMysql, repo.Category{}, argsFlg); err != nil {
+	if categories, err = repoCmd(*repo.GlobalMysql, repo.Category{}, argsFlg, [2]int{}); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -386,7 +386,7 @@ func FindDraftHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+	lo := ParseLimitOffset(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -395,7 +395,7 @@ func FindDraftHandler(
 	go func() {
 		defer wg.Done()
 		argsFlg = service.GenFlg(repo.Draft{}, "Limit")
-		if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argsFlg, offset); err != nil {
+		if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argsFlg, lo); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -451,7 +451,7 @@ func FindImageHandler(c *gin.Context) (err error) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
+	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewImageNum
 
 	if offset >= len(files) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)

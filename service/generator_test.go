@@ -35,21 +35,20 @@ func TestGenFlg_Id_Title(t *testing.T) {
 	assert.Equal(t, actual, flg)
 }
 
-func TestGenArgsSliceLogic(t *testing.T) {
+func TestGenArgsSlice(t *testing.T) {
 	var (
 		argsFlg uint32
 		st      Hoge
 	)
 	argsFlg = service.GenFlg(st, "Title")
 	st.Title = "test"
-	args := service.GenArgsSliceLogic(argsFlg, st, 0)
+	args := service.GenArgsSlice(argsFlg, st, [2]int{})
 
-	assert.Equal(t, 2, len(args))
+	assert.Equal(t, 1, len(args))
 	assert.Equal(t, "test", args[0])
-	assert.Equal(t, 0, args[1])
 }
 
-func TestGenArgsSliceLogic_Limit(t *testing.T) {
+func TestGenArgsSlice_Limit(t *testing.T) {
 	var (
 		argsFlg uint32
 		st      Hoge
@@ -58,15 +57,15 @@ func TestGenArgsSliceLogic_Limit(t *testing.T) {
 
 	argsFlg = service.GenFlg(st, "Title", "Limit")
 	st.Title = "test"
-	args := service.GenArgsSliceLogic(argsFlg, st, 0)
+	args := service.GenArgsSlice(argsFlg, st, [2]int{1, 2})
 
 	assert.Equal(t, 3, len(args))
 	assert.Equal(t, "test", args[0])
-	assert.Equal(t, argus.GlobalConfig.Web.MaxViewArticleNum, args[1])
-	assert.Equal(t, 0, args[2])
+	assert.Equal(t, 1, args[1])
+	assert.Equal(t, 2, args[2])
 }
 
-func TestGenArgsSliceLogic_Multi(t *testing.T) {
+func TestGenArgsSlice_Multi(t *testing.T) {
 	var (
 		argsFlg uint32
 		st      Hoge
@@ -74,12 +73,11 @@ func TestGenArgsSliceLogic_Multi(t *testing.T) {
 	argsFlg = service.GenFlg(st, "Id", "Title")
 	st.Id = 1
 	st.Title = "test"
-	args := service.GenArgsSliceLogic(argsFlg, st, 1)
+	args := service.GenArgsSlice(argsFlg, st, [2]int{})
 
-	assert.Equal(t, 3, len(args))
+	assert.Equal(t, 2, len(args))
 	assert.Equal(t, 1, args[0])
 	assert.Equal(t, "test", args[1])
-	assert.Equal(t, 1, args[2])
 }
 
 func TestGenArgsQuery(t *testing.T) {
@@ -102,7 +100,7 @@ func TestGenArgsQuery_Multi(t *testing.T) {
 	argsFlg = service.GenFlg(st, "Title", "Date", "Limit")
 	args, limit := service.GenArgsQuery(argsFlg, st)
 
-	actual := "WHERE title=? AND date=? LIMIT ? "
+	actual := "WHERE title=? AND date=? LIMIT ?,? "
 	assert.Equal(t, actual, args+limit)
 }
 
