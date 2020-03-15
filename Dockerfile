@@ -1,9 +1,12 @@
 FROM golang:latest
 
-WORKDIR /go/src/app
+WORKDIR /go/src/github.com/champon1020/argus
 
-RUN mkdir /go/src/app
+COPY . /go/src/github.com/champon1020/argus
+
 RUN go get -d -v ./...
-RUN go install -v ./...
+RUN go build -o cmd/argus cmd/main.go
 
-CMD ["app"]
+ARG mode
+
+CMD ["./cmd/argus", "$mode"]

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: argus_db
+  labels:
+    app: argus_db
+spec:
+  selector:
+    app: argus_db
+  ports:
+    - name: http
+      port: 80

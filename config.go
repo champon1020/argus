@@ -63,10 +63,9 @@ func (config *Configurations) load() (err error) {
 	var row []byte
 	configPath := EnvVars.Get("config")
 	if row, err = ioutil.ReadFile(configPath); err != nil {
-		current, _ := os.Getwd()
 		ConfigLoadError.
 			SetErr(err).
-			SetValues("current path", current).
+			SetValues("configPath", configPath).
 			AppendTo(&Errors)
 		return
 	}
