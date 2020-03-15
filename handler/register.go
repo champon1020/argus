@@ -7,8 +7,7 @@ import (
 	"time"
 
 	"github.com/champon1020/argus"
-
-	repo "github.com/champon1020/argus/repository"
+	"github.com/champon1020/argus/repo"
 	"github.com/champon1020/argus/service"
 	"github.com/gin-gonic/gin"
 )

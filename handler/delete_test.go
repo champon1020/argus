@@ -5,9 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/champon1020/argus/service"
-
 	"github.com/champon1020/argus"
+	"github.com/champon1020/argus/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

@@ -7,7 +7,7 @@ import (
 
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/handler"
-	"github.com/champon1020/argus/repository"
+	"github.com/champon1020/argus/repo"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +20,7 @@ var (
 func main() {
 	flag.Parse()
 	argus.GlobalConfig = argus.NewConfig(flag.Arg(0))
-	repository.GlobalMysql = repository.NewMysql()
+	repo.GlobalMysql = repo.NewMysql()
 
 	r := NewRouter()
 	_ = r.Run(":8000")

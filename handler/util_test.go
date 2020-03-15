@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/champon1020/argus"
-
 	"github.com/stretchr/testify/assert"
 )
 
