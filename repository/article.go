@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"sync"
 	"time"
+
+	"github.com/champon1020/argus/service"
 )
 
 // Id: primary key
@@ -119,12 +121,11 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 // ArgFlg determines where statement's arguments.
 // For Example, 'argsFlg = 0101' means
 // it includes first and third fields of objects in where statement.
-func (article *Article) FindArticle(db *sql.DB, argsFlg uint32, offset int) (articles []Article, err error) {
-	args := GenArgsSlice(argsFlg, article, offset)
-	whereQuery, limitQuery := GenArgsQuery(argsFlg, article)
+func (article *Article) FindArticle(db *sql.DB, argsFlg uint32, ol OffsetLimit) (articles []Article, err error) {
+	args := service.GenArgsSlice(argsFlg, article, ol)
+	whereQuery, limitQuery := service.GenArgsQuery(argsFlg, article)
 	query := "SELECT * FROM articles " + whereQuery +
-		"ORDER BY id DESC " + limitQuery +
-		"OFFSET ?"
+		"ORDER BY id DESC " + limitQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -190,8 +191,8 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 }
 
 func (article *Article) FindArticlesNum(db *sql.DB, argsFlg uint32) (articleNum int, err error) {
-	args := GenArgsSlice(argsFlg, article, -1)
-	whereQuery, _ := GenArgsQuery(argsFlg, article)
+	args := service.GenArgsSlice(argsFlg, article)
+	whereQuery, _ := service.GenArgsQuery(argsFlg, article)
 	query := "SELECT COUNT(id) FROM articles " + whereQuery
 
 	var rows *sql.Rows

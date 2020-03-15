@@ -1,12 +1,16 @@
 package repository
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/champon1020/argus/service"
+)
 
 func FindArticleByCategoryId(
 	db *sql.DB,
 	categoryNames []string,
 	argsFlg uint32,
-	offset int,
+	ol OffsetLimit,
 ) (articles []Article, err error) {
 	query := "SELECT * FROM articles " +
 		"WHERE id IN (" +
@@ -18,8 +22,8 @@ func FindArticleByCategoryId(
 	query += whereQuery
 	query += ")) "
 
-	args = append(args, GenArgsSlice(argsFlg, Article{}, offset)...)
-	_, limitQuery := GenArgsQuery(argsFlg, Article{})
+	args = append(args, service.GenArgsSlice(argsFlg, Article{}, ol)...)
+	_, limitQuery := service.GenArgsQuery(argsFlg, Article{})
 	query += limitQuery + "OFFSET ?"
 
 	var rows *sql.Rows
@@ -86,6 +90,7 @@ func FindArticlesNumByCategoryId(db *sql.DB, categoryNames []string) (articleNum
 	return
 }
 
+// Generate where statement of query from string slice.
 func GenArgsFromStrSlice(sl []string) (args []interface{}, whereQuery string) {
 	const initQuery = "WHERE "
 	whereQuery = initQuery

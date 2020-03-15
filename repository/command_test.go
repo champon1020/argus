@@ -68,8 +68,8 @@ func TestRegisterArticleCmd(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1).AddRow(2))
 
 	// FindDrafts() with content hash
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY id DESC OFFSET ?")).
-		WithArgs("0123456789", 0).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY id DESC")).
+		WithArgs("0123456789").
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	// Start transaction
@@ -121,8 +121,8 @@ func TestDraftCmd_Insert(t *testing.T) {
 	}
 
 	// FindDrafts()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY id DESC OFFSET ?")).
-		WithArgs("0123456789", 0).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY id DESC")).
+		WithArgs("0123456789").
 		WillReturnRows(sqlmock.NewRows([]string{}))
 
 	mock.ExpectBegin()
@@ -170,8 +170,8 @@ func TestDraftCmd_Update(t *testing.T) {
 	}
 
 	// FindDrafts()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY id DESC OFFSET ?")).
-		WithArgs("0123456789", 0).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY id DESC")).
+		WithArgs("0123456789").
 		WillReturnRows(
 			sqlmock.NewRows([]string{
 				"id", "title", "categories", "update_date", "content_hash", "image_hash",
@@ -208,7 +208,7 @@ func TestFindArticleCmd_All(t *testing.T) {
 	argsFlg := service.GenFlg(article, "Limit")
 
 	// FindArticle()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles ORDER BY id DESC LIMIT ? OFFSET ?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles ORDER BY id DESC LIMIT ?,?")).
 		WithArgs(0, 0).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -225,7 +225,7 @@ func TestFindArticleCmd_All(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "c1"))
 
-	articles, err := FindArticleCommand(mysql, article, argsFlg, 0)
+	articles, err := FindArticleCommand(mysql, article, argsFlg, [2]int{})
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -254,7 +254,7 @@ func TestFindArticleCmd_Title(t *testing.T) {
 	argsFlg := service.GenFlg(article, "Title", "Limit")
 
 	// FindArticle()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles WHERE title=? ORDER BY id DESC LIMIT ? OFFSET ?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles WHERE title=? ORDER BY id DESC LIMIT ?,?")).
 		WithArgs("test", 0, 0).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -271,7 +271,7 @@ func TestFindArticleCmd_Title(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "c1"))
 
-	articles, err := FindArticleCommand(mysql, article, argsFlg, 0)
+	articles, err := FindArticleCommand(mysql, article, argsFlg, [2]int{})
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -304,7 +304,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 			"SELECT article_id FROM article_category "+
 			"WHERE category_id IN ("+
 			"SELECT id FROM categories "+
-			"WHERE name=? AND name=? )) LIMIT ? OFFSET ?")).
+			"WHERE name=? AND name=? )) LIMIT ?,?")).
 		WithArgs("c1", "c2", 0, 0).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -324,7 +324,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 				"id", "name",
 			}).AddRow(1, "c1"))
 
-	articles, err := FindArticleByCategoryCommand(mysql, categoryNames, argsFlg, 0)
+	articles, err := FindArticleByCategoryCommand(mysql, categoryNames, argsFlg, [2]int{})
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -362,7 +362,7 @@ func TestFindCategoryCmd(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"articleNum"}).
 			AddRow(3))
 
-	categories, err := FindCategoryCommand(mysql, category, 0)
+	categories, err := FindCategoryCommand(mysql, category, 0, [2]int{})
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -389,14 +389,14 @@ func TestFindDraftCmd(t *testing.T) {
 	argsFlg := service.GenFlg(draft, "Limit")
 
 	// FindDraft()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts ORDER BY id DESC LIMIT ? OFFSET ?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts ORDER BY id DESC LIMIT ?,?")).
 		WithArgs(0, 0).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
 				"id", "title", "categories", "update_date", "content_hash", "image_hsah",
 			}).AddRow(1, "draft", "c1&c2", testTime, "0123456789", "9876543210"))
 
-	if _, err := FindDraftCommand(mysql, draft, argsFlg, 0); err != nil {
+	if _, err := FindDraftCommand(mysql, draft, argsFlg, [2]int{}); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}

@@ -3,6 +3,8 @@ package repository
 import (
 	"database/sql"
 	"time"
+
+	"github.com/champon1020/argus/service"
 )
 
 // Id: primary key
@@ -64,12 +66,11 @@ func (draft *Draft) DeleteDraft(tx *sql.Tx) (err error) {
 	return
 }
 
-func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32, offset int) (drafts []Draft, err error) {
-	args := GenArgsSlice(argsFlg, draft, offset)
-	whereQuery, limitQuery := GenArgsQuery(argsFlg, draft)
+func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32, ol OffsetLimit) (drafts []Draft, err error) {
+	args := service.GenArgsSlice(argsFlg, draft, ol)
+	whereQuery, limitQuery := service.GenArgsQuery(argsFlg, draft)
 	query := "SELECT * FROM drafts " + whereQuery +
-		"ORDER BY id DESC " + limitQuery +
-		"OFFSET ?"
+		"ORDER BY id DESC " + limitQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -101,8 +102,8 @@ func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32, offset int) (drafts [
 }
 
 func (draft *Draft) FindDraftsNum(db *sql.DB, argsFlg uint32) (draftNum int, err error) {
-	args := GenArgsSlice(argsFlg, draft, -1)
-	whereQuery, _ := GenArgsQuery(argsFlg, draft)
+	args := service.GenArgsSlice(argsFlg, draft)
+	whereQuery, _ := service.GenArgsQuery(argsFlg, draft)
 	query := "SELECT COUNT(id) FROM drafts " + whereQuery
 
 	var rows *sql.Rows

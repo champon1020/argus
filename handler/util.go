@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
-	"github.com/champon1020/argus/service"
-
 	"github.com/champon1020/argus"
+	repo "github.com/champon1020/argus/repository"
+	"github.com/champon1020/argus/service"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -20,6 +19,7 @@ var (
 	TimeParseError   = argus.NewError(argus.TimeFailedParseError)
 )
 
+// Parse page from context of gin framework.
 func ParsePage(c *gin.Context) (p int, err error) {
 	p = 1
 	if pp, ok := c.GetQuery("p"); ok {
@@ -32,6 +32,20 @@ func ParsePage(c *gin.Context) (p int, err error) {
 	return
 }
 
+// Get LimitOffset object from p (page num).
+func ParseOffsetLimit(p int) (ol repo.OffsetLimit) {
+	mx := argus.GlobalConfig.Web.MaxViewArticleNum
+	ol[1] = mx + 2
+	if p == 1 {
+		ol[0] = 0
+		ol[1]--
+		return
+	}
+	ol[0] = (p-1)*mx - 1
+	return
+}
+
+// Get max of a and b;
 func Max(a int, b int) (r int) {
 	if a >= b {
 		r = a
@@ -41,6 +55,7 @@ func Max(a int, b int) (r int) {
 	return
 }
 
+// Parse request object from http.Request.
 func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {
 	var body []byte
 	if body, err = service.ReadBody(r.Body); err != nil {
@@ -52,6 +67,7 @@ func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {
 	return
 }
 
+// Parse draft request object from http.Request.
 func ParseDraftRequestBody(r *http.Request, reqBody *DraftRequestBody) (err error) {
 	var body []byte
 	if body, err = service.ReadBody(r.Body); err != nil {
@@ -63,6 +79,7 @@ func ParseDraftRequestBody(r *http.Request, reqBody *DraftRequestBody) (err erro
 	return
 }
 
+// Parse json string from object.
 func ParseToJson(st interface{}) (res string, err error) {
 	var bytes []byte
 	if bytes, err = json.Marshal(&st); err != nil {

@@ -1,6 +1,10 @@
 package repository
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/champon1020/argus/service"
+)
 
 // Id: primary key
 // Name: category name
@@ -86,12 +90,11 @@ type CategoryResponse struct {
 	ArticleNum int    `json:"articleNum"`
 }
 
-func (category *Category) FindCategory(db *sql.DB, argsFlg uint32) (categories []CategoryResponse, err error) {
-	args := GenArgsSlice(argsFlg, category, 0)
-	whereQuery, limitQuery := GenArgsQuery(argsFlg, category)
+func (category *Category) FindCategory(db *sql.DB, argsFlg uint32, ol OffsetLimit) (categories []CategoryResponse, err error) {
+	args := service.GenArgsSlice(argsFlg, category, ol)
+	whereQuery, limitQuery := service.GenArgsQuery(argsFlg, category)
 	query := "SELECT * FROM categories " + whereQuery +
-		limitQuery +
-		"OFFSET ?"
+		limitQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

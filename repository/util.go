@@ -2,21 +2,7 @@ package repository
 
 import (
 	"database/sql"
-
-	"github.com/champon1020/argus/service"
 )
-
-// Generate query from struct and argument flag.
-// If (flg & 1 << 31) > 0, limit query is on.
-func GenArgsQuery(argsFlg uint32, st interface{}) (string, string) {
-	return service.GenArgsQuery(argsFlg, st)
-}
-
-// Generate arguments slice from struct and argument flag.
-// If (flg & 1 << 31) > 0, limit query is on.
-func GenArgsSlice(argsFlg uint32, st interface{}, offset int) []interface{} {
-	return service.GenArgsSliceLogic(argsFlg, st, offset)
-}
 
 // Get and Set empty and minimum articles id.
 func ConvertArticleId(mysql MySQL, article *Article) (err error) {

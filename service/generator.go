@@ -4,8 +4,6 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
-
-	"github.com/champon1020/argus"
 )
 
 // Generate flag which determines arguments of database query.
@@ -30,8 +28,8 @@ func GenFlg(st interface{}, fieldNames ...string) (flg uint32) {
 }
 
 // Generate arguments slice used in database query.
-// If offset == -1, don't use offset.
-func GenArgsSliceLogic(argsFlg uint32, st interface{}, offset int) (args []interface{}) {
+// If (flg & 1 << 31) > 0, limit query is turned on.
+func GenArgsSlice(argsFlg uint32, st interface{}, ol ...[2]int) (args []interface{}) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
@@ -39,17 +37,16 @@ func GenArgsSliceLogic(argsFlg uint32, st interface{}, offset int) (args []inter
 			args = append(args, v.Field(i).Interface())
 		}
 	}
-	if (1 << 31 & argsFlg) > 0 {
-		args = append(args, argus.GlobalConfig.Web.MaxViewArticleNum)
-	}
-	if offset != -1 {
-		args = append(args, offset)
+	if (1<<31&argsFlg) > 0 && len(ol) >= 1 {
+		args = append(args, ol[0][0], ol[0][1])
 	}
 	return
 }
 
 // Generate arguments query used in database query.
-// Return values is query(query of following 'WHERE') and limit(limit query 'LIMIT ?').
+// If (flg & 1 << 31) > 0, limit query is turned on.
+// Return values is query(query of following 'WHERE')
+// and limit(limit query 'LIMIT ?,?').
 func GenArgsQuery(argsFlg uint32, st interface{}) (query string, limit string) {
 	const initQuery = "WHERE "
 	query = initQuery
@@ -64,7 +61,7 @@ func GenArgsQuery(argsFlg uint32, st interface{}) (query string, limit string) {
 		}
 	}
 	if (1 << 31 & argsFlg) > 0 {
-		limit = "LIMIT ? "
+		limit = "LIMIT ?,? "
 	}
 	if query == initQuery {
 		query = ""

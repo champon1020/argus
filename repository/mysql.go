@@ -72,6 +72,7 @@ func (mysql *MySQL) Transact(txFunc func(*sql.Tx) error) (err error) {
 	return
 }
 
+// Close *sql.Rows with handling error.
 func RowsClose(rows *sql.Rows) {
 	if rows == nil {
 		return
@@ -80,3 +81,7 @@ func RowsClose(rows *sql.Rows) {
 		CloseError.SetErr(err).AppendTo(Errors)
 	}
 }
+
+// 0: offset
+// 1: limit
+type OffsetLimit [2]int
