@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/champon1020/argus"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,6 +43,24 @@ func TestParseRequestBody(t *testing.T) {
 	assert.Equal(t, "http://localhost:1000/", body.Article.ImageHash)
 	assert.Equal(t, false, body.Article.Private)
 	assert.Equal(t, "<div>ok</div>", body.Contents)
+}
+
+func TestParseOffsetLimit(t *testing.T) {
+	p := 1
+	aNum := argus.GlobalConfig.Web.MaxViewArticleNum
+	ol := ParseOffsetLimit(p)
+	assert.Equal(t, 0, ol[0])
+	assert.Equal(t, aNum+1, ol[1])
+
+	p = 2
+	ol = ParseOffsetLimit(p)
+	assert.Equal(t, aNum-1, ol[0])
+	assert.Equal(t, aNum+2, ol[1])
+
+	p = 3
+	ol = ParseOffsetLimit(p)
+	assert.Equal(t, aNum*2-1, ol[0])
+	assert.Equal(t, aNum+2, ol[1])
 }
 
 func TestMax(t *testing.T) {
