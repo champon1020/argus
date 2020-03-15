@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"net/http"
 	"time"
 
@@ -17,11 +16,11 @@ var (
 	Errors = &argus.Errors
 )
 
-func main() {
-	flag.Parse()
-	argus.GlobalConfig = argus.NewConfig(flag.Arg(0))
+func init() {
 	repo.GlobalMysql = repo.NewMysql()
+}
 
+func main() {
 	r := NewRouter()
 	_ = r.Run(":8000")
 }

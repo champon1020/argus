@@ -22,7 +22,6 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	argus.GlobalConfig = argus.NewConfig("dev")
 	repo.GlobalMysql = repo.NewMysql()
 
 	ret := m.Run()

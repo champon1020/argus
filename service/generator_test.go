@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/repo"
 	"github.com/champon1020/argus/service"
 	"github.com/stretchr/testify/assert"
@@ -53,7 +52,6 @@ func TestGenArgsSlice_Limit(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argus.GlobalConfig = argus.NewConfig("dev")
 
 	argsFlg = service.GenFlg(st, "Title", "Limit")
 	st.Title = "test"

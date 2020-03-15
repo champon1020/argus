@@ -17,10 +17,12 @@ var (
 	StdLogger LogHandler
 )
 
+// initialize function of top level
 func init() {
 	EnvVars = NewEnv()
 	StdLogger = *NewStdLogger()
 	Logger = *NewLogger()
+	GlobalConfig = *NewConfig()
 }
 
 func NewLogger() *LogHandler {
