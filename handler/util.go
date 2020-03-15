@@ -32,6 +32,15 @@ func ParsePage(c *gin.Context) (p int, err error) {
 	return
 }
 
+func Max(a int, b int) (r int) {
+	if a >= b {
+		r = a
+	} else {
+		r = b
+	}
+	return
+}
+
 func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {
 	var body []byte
 	if body, err = service.ReadBody(r.Body); err != nil {

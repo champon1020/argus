@@ -42,7 +42,7 @@ func FindArticleHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -106,7 +106,7 @@ func FindArticleByIdHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -166,7 +166,7 @@ func FindArticleByTitleHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -230,7 +230,7 @@ func FindArticleByCreateDateHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -292,7 +292,7 @@ func FindArticleByCategoryHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewArticleNum
+	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -451,8 +451,8 @@ func FindImageHandler(c *gin.Context) (err error) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	offset := Max((p-1)*argus.GlobalConfig.Web.MaxViewArticleNum-1, 0)
 
-	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewImageNum
 	if offset >= len(files) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		err = errors.New("error happened")

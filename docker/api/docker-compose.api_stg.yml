@@ -4,7 +4,7 @@ services:
     image: argus
     container_name: argus
     env_file:
-      - docker/api/.env
+      - ./.env
     environment:
       ARGUS_LOG_PATH: "${ARGUS_LOG_PATH}"
       ARGUS_CONFIG_PATH: "${ARGUS_CONFIG_PATH}"
@@ -12,4 +12,4 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - "/var/www/blog:/var/www/blog"
+      - "/var/www/blog_dev:/var/www/blog_dev"

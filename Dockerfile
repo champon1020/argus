@@ -7,6 +7,4 @@ COPY . /go/src/github.com/champon1020/argus
 RUN go get -d -v ./...
 RUN go build -o cmd/argus cmd/main.go
 
-ARG mode
-
-CMD ["./cmd/argus", "$mode"]
+CMD ./cmd/argus stg
