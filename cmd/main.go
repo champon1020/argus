@@ -23,7 +23,7 @@ func main() {
 	repository.GlobalMysql = repository.NewMysql()
 
 	r := NewRouter()
-	_ = r.Run(":8080")
+	_ = r.Run(":8000")
 }
 
 func NewRouter() *gin.Engine {

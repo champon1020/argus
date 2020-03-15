@@ -1,0 +1,15 @@
+version: "3"
+services:
+  api:
+    image: argus
+    container_name: argus
+    env_file:
+      - ./.env
+    environment:
+      ARGUS_LOG_PATH: "${ARGUS_LOG_PATH}"
+      ARGUS_CONFIG_PATH: "${ARGUS_CONFIG_PATH}"
+      ARGUS_RESOURCE_PATH: "${ARGUS_RESOURCE_PATH}"
+    ports:
+      - "8000:8000"
+    volumes:
+      - "/var/www/blog_dev:/var/www/blog_dev"

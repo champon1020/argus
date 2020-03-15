@@ -7,6 +7,9 @@ services:
       - ./.env
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: argus_test
+      MYSQL_USER: "${TEST_USER_NAME}"
+      MYSQL_PASSWORD: "${TEST_USER_PASSWORD}"
       MYSQL_ROOT_HOST: "127.0.0.1"
       TZ: "Asia/Tokyo"
     ports:

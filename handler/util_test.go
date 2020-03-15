@@ -43,6 +43,13 @@ func TestParseRequestBody(t *testing.T) {
 	assert.Equal(t, "<div>ok</div>", body.Contents)
 }
 
+func TestMax(t *testing.T) {
+	a := 2
+	b := 3
+	c := Max(a, b)
+	assert.Equal(t, 3, c)
+}
+
 func TestParseDraftRequestBody(t *testing.T) {
 	var body DraftRequestBody
 

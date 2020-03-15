@@ -9,3 +9,4 @@ sample_debug/**
 !docker/db/server/script/*.sh
 
 **/.env
+**.conf

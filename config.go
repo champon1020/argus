@@ -45,10 +45,13 @@ func NewConfig(args string) Config {
 	config := new(Config)
 	if args == "" {
 		*config = configurations.Deploy
+		Logger.Println("deploy mode")
 	} else if args == "stg" {
 		*config = configurations.Staging
+		Logger.Println("staging mode")
 	} else if args == "dev" {
 		*config = configurations.Dev
+		Logger.Println("develop mode")
 	} else {
 		StdLogger.Fatalf("%s is not confortable, required '' or 'stg' or 'dev'.\n", args)
 	}
@@ -63,10 +66,9 @@ func (config *Configurations) load() (err error) {
 	var row []byte
 	configPath := EnvVars.Get("config")
 	if row, err = ioutil.ReadFile(configPath); err != nil {
-		current, _ := os.Getwd()
 		ConfigLoadError.
 			SetErr(err).
-			SetValues("current path", current).
+			SetValues("configPath", configPath).
 			AppendTo(&Errors)
 		return
 	}
