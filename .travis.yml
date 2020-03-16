@@ -24,8 +24,8 @@ branches:
     - master
 
 before_script:
-  mkdir ./logs
-  touch ./logs/debug.log
+  - mkdir ./logs
+  - touch ./logs/debug.log
 
 script:
   - go test
