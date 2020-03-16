@@ -6,6 +6,7 @@ services:
     env_file:
       - ./.env
     environment:
+      ARGUS_MODE: "staging"
       ARGUS_LOG_PATH: "${ARGUS_LOG_PATH}"
       ARGUS_CONFIG_PATH: "${ARGUS_CONFIG_PATH}"
       ARGUS_RESOURCE_PATH: "${ARGUS_RESOURCE_PATH}"
