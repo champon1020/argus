@@ -14,10 +14,10 @@ install:
 
 env:
   global:
+    - ARGUS_MODE=test
     - ARGUS_LOG_PATH=./logs
     - ARGUS_RESOURCE_PATH=./resource_test
     - ARGUS_CONFIG_PATH=./config.json
-    - IS_TRAVIS=on
 
 branches:
   only:
