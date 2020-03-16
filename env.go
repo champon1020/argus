@@ -13,11 +13,11 @@ func NewEnv() Env {
 	argusConfigPath := os.Getenv("ARGUS_CONFIG_PATH")
 	argusResourcePath := os.Getenv("ARGUS_RESOURCE_PATH")
 	argusLogPath := os.Getenv("ARGUS_LOG_PATH")
-	isTravis := os.Getenv("IS_TRAVIS")
+	argusMode := os.Getenv("ARGUS_MODE")
 	e.set("config", argusConfigPath)
 	e.set("resource", argusResourcePath)
 	e.set("log", argusLogPath)
-	e.set("travis", isTravis)
+	e.set("mode", argusMode)
 	return e
 }
 

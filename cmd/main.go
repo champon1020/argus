@@ -1,13 +1,12 @@
 package main
 
 import (
-	"flag"
 	"net/http"
 	"time"
 
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/handler"
-	"github.com/champon1020/argus/repository"
+	"github.com/champon1020/argus/repo"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -17,11 +16,11 @@ var (
 	Errors = &argus.Errors
 )
 
-func main() {
-	flag.Parse()
-	argus.GlobalConfig = argus.NewConfig(flag.Arg(0))
-	repository.GlobalMysql = repository.NewMysql()
+func init() {
+	repo.GlobalMysql = repo.NewMysql()
+}
 
+func main() {
 	r := NewRouter()
 	_ = r.Run(":8000")
 }

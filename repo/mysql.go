@@ -1,7 +1,8 @@
-package repository
+package repo
 
 import (
 	"database/sql"
+	"os"
 
 	"github.com/champon1020/argus"
 	_ "github.com/go-sql-driver/mysql"
@@ -25,6 +26,7 @@ func NewMysql() *MySQL {
 	mysql := new(MySQL)
 	if err := mysql.Connect(argus.GlobalConfig.Db); err != nil {
 		argus.StdLogger.Fatalf("%v\n", err)
+		os.Exit(1)
 	}
 	return mysql
 }

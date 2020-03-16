@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/champon1020/argus"
-	repo "github.com/champon1020/argus/repository"
+	"github.com/champon1020/argus/repo"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -22,7 +22,6 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	argus.GlobalConfig = argus.NewConfig("dev")
 	repo.GlobalMysql = repo.NewMysql()
 
 	ret := m.Run()

@@ -35,7 +35,7 @@ var (
 	ConfigLoadError = NewError(ConfigFailedLoadError)
 )
 
-func NewConfig(args string) Config {
+func NewConfig() *Config {
 	configurations := new(Configurations)
 	if err := configurations.load(); err != nil {
 		StdLogger.ErrorLog(Errors)
@@ -43,23 +43,30 @@ func NewConfig(args string) Config {
 	}
 
 	config := new(Config)
-	if args == "" {
+	if EnvVars.Get("mode") == "deploy" {
 		*config = configurations.Deploy
 		Logger.Println("deploy mode")
-	} else if args == "stg" {
+		return config
+	}
+	if EnvVars.Get("mode") == "staging" {
 		*config = configurations.Staging
 		Logger.Println("staging mode")
-	} else if args == "dev" {
-		*config = configurations.Dev
-		Logger.Println("develop mode")
-	} else {
-		StdLogger.Fatalf("%s is not confortable, required '' or 'stg' or 'dev'.\n", args)
+		return config
 	}
-	return *config
+	*config = configurations.Dev
+	Logger.Println("dev mode")
+	return config
 }
 
 func (config *Configurations) load() (err error) {
-	if os.Getenv("IS_TRAVIS") == "on" {
+	if EnvVars.Get("mode") == "test" {
+		config.Dev = Config{
+			Db: DbConf{},
+			Web: WebConf{
+				MaxViewArticleNum: 3,
+				MaxViewImageNum:   12,
+			},
+		}
 		return
 	}
 
