@@ -17,8 +17,8 @@ import (
 )
 
 type ResponseType struct {
-	Articles    []repo.Article `json:"articles"`
-	ArticlesNum int            `json:"articlesNum"`
+	Articles []repo.Article `json:"articles"`
+	MaxPage  int            `json:"maxPage"`
 }
 
 func FindArticleController(c *gin.Context) {
@@ -67,7 +67,10 @@ func FindArticleHandler(
 
 	wg.Wait()
 
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ResponseType{
+		Articles: articles,
+		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -131,7 +134,10 @@ func FindArticleByIdHandler(
 
 	wg.Wait()
 
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ResponseType{
+		Articles: articles,
+		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -191,7 +197,10 @@ func FindArticleByTitleHandler(
 
 	wg.Wait()
 
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ResponseType{
+		Articles: articles,
+		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -255,7 +264,10 @@ func FindArticleByCreateDateHandler(
 
 	wg.Wait()
 
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ResponseType{
+		Articles: articles,
+		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -316,7 +328,10 @@ func FindArticleByCategoryHandler(
 
 	wg.Wait()
 
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ResponseType{
+		Articles: articles,
+		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -362,6 +377,7 @@ func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) (err erro
 type DraftResponseType struct {
 	Drafts    []repo.Draft `json:"drafts"`
 	DraftsNum int          `json:"draftsNum"`
+	MaxPage   int          `json:"maxPage"`
 }
 
 func FindDraftController(c *gin.Context) {
@@ -411,7 +427,12 @@ func FindDraftHandler(
 
 	wg.Wait()
 
-	res := DraftResponseType{Drafts: drafts, DraftsNum: draftsNum}
+	maxPage := GetMaxPage(draftsNum, argus.GlobalConfig.Web.MaxViewSettingArticleNum)
+	res := DraftResponseType{
+		Drafts:    drafts,
+		DraftsNum: draftsNum,
+		MaxPage:   maxPage,
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return

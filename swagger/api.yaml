@@ -17,7 +17,7 @@ paths:
       summary: Return a list of articles.
       parameters:
         - name: p
-          in: path
+          in: query
           required: false
           description: Page of view.
           schema:
@@ -34,22 +34,22 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articesNum:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - articlesNum
+                  - maxPage
   /api/find/article/list/title:
     get:
       summary: Return a list of articles by title.
       parameters:
         - name: title
-          in: path
+          in: query
           required: true
           description: A title of articles.
           schema:
-            type: number
-        - name: p
+            type: string
+        - name: query
           in: path
           required: false
           description: Page of view.
@@ -67,23 +67,23 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articesNum:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - articlesNum
+                  - maxPage
   /api/find/article/list/create-date:
     get:
       summary: Return a list of articles by title.
       parameters:
         - name: create_date
-          in: path
+          in: query
           required: true
           description: A created date of articles.
           schema:
             type: string
         - name: p
-          in: path
+          in: query
           required: false
           description: Page of view.
           schema:
@@ -100,17 +100,17 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articesNum:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - articlesNum
+                  - maxPage
   /api/find/article/list/category:
     get:
       summary: Return a list of articles by title.
       parameters:
         - name: category
-          in: path
+          in: query
           required: true
           description: A category name which an articles has.
           schema:
@@ -129,11 +129,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articesNum:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - articlesNum
+                  - maxPage
   /api/find/category/list:
     get:
       summary: Return a list of categories.
@@ -156,7 +156,7 @@ paths:
       summary: Return a list of drafts.
       parameters:
         - name: p
-          in: path
+          in: query
           required: false
           description: Page of view.
           schema:
@@ -175,15 +175,18 @@ paths:
                       $ref: '#/components/schemas/Draft'
                   draftsNum:
                     type: number
+                  maxPage:
+                    type: number
                 required:
                   - drafts
                   - draftsNum
+                  - maxPage
   /api/find/image/list:
     get:
       summary: Return a list of image names.
       parameters:
         - name: p
-          in: path
+          in: query
           required: false
           description: Page of view.
           schema:
@@ -298,7 +301,7 @@ paths:
       summary: Delete image.
       parameters:
         - name: imgName
-          in: path
+          in: query
           required: true
           description: page of the view (offset)
           schema:

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -52,9 +53,10 @@ func TestFindArticleHandler(t *testing.T) {
 		return
 	}
 
-	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articleNum int, _ error) {
-		articleNum = 10
-		return
+	articlesNum := 10
+	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (int, error) {
+		return articlesNum, nil
 	}
 
 	expectedBody := `{
@@ -75,7 +77,7 @@ func TestFindArticleHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articlesNum": 10
+	"maxPage": ` + strconv.Itoa(mxPage) + `
 }`
 
 	if err := FindArticleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -120,9 +122,10 @@ func TestFindArticleByIdHandler(t *testing.T) {
 		return
 	}
 
-	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articleNum int, _ error) {
-		articleNum = 10
-		return
+	articlesNum := 10
+	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (int, error) {
+		return articlesNum, nil
 	}
 
 	expectedBody := `{
@@ -143,7 +146,7 @@ func TestFindArticleByIdHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articlesNum": 10
+	"maxPage": ` + strconv.Itoa(mxPage) + `
 }`
 
 	if err := FindArticleByIdHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -192,9 +195,10 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 		return
 	}
 
-	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articleNum int, _ error) {
-		articleNum = 10
-		return
+	articlesNum := 10
+	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (int, error) {
+		return articlesNum, nil
 	}
 
 	expectedBody := `{
@@ -215,7 +219,7 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articlesNum": 10
+	"maxPage": ` + strconv.Itoa(mxPage) + `
 }`
 
 	if err := FindArticleByTitleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -264,9 +268,10 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 		return
 	}
 
-	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (articleNum int, _ error) {
-		articleNum = 10
-		return
+	articlesNum := 10
+	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (int, error) {
+		return articlesNum, nil
 	}
 
 	expectedBody := `{
@@ -287,7 +292,7 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articlesNum": 10
+	"maxPage": ` + strconv.Itoa(mxPage) + `
 }`
 
 	if err := FindArticleByCreateDateHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -339,9 +344,10 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 		return
 	}
 
-	repoNumCmdMock := func(_ repo.MySQL, _ []string) (articleNum int, _ error) {
-		articleNum = 10
-		return
+	articlesNum := 10
+	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
+	repoNumCmdMock := func(_ repo.MySQL, _ []string) (int, error) {
+		return articlesNum, nil
 	}
 
 	expectedBody := `{
@@ -366,7 +372,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 			"private": false
 		}
 	],
-	"articlesNum": 10
+	"maxPage": ` + strconv.Itoa(mxPage) + `
 }`
 
 	if err := FindArticleByCategoryHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
@@ -452,9 +458,10 @@ func TestFindDraftHandler(t *testing.T) {
 		return
 	}
 
-	repoNumCmdMock := func(_ repo.MySQL, _ repo.Draft, _ uint32) (draftNum int, _ error) {
-		draftNum = 10
-		return
+	draftNum := 10
+	mxPage := GetMaxPage(draftNum, argus.GlobalConfig.Web.MaxViewSettingArticleNum)
+	repoNumCmdMock := func(_ repo.MySQL, _ repo.Draft, _ uint32) (int, error) {
+		return draftNum, nil
 	}
 
 	expectedBody := `{
@@ -468,7 +475,8 @@ func TestFindDraftHandler(t *testing.T) {
 			"imageHash": "9876543210"
 		}
 	],
-	"draftsNum": 10
+	"draftsNum": 10,
+	"maxPage": ` + strconv.Itoa(mxPage) + `
 }`
 
 	if err := FindDraftHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {

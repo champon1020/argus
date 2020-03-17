@@ -15,8 +15,9 @@ type DbConf struct {
 }
 
 type WebConf struct {
-	MaxViewArticleNum int `json:"maxViewArticleNum"`
-	MaxViewImageNum   int `json:"maxViewImageNum"`
+	MaxViewArticleNum        int `json:"maxViewArticleNum"`
+	MaxViewImageNum          int `json:"maxViewImageNum"`
+	MaxViewSettingArticleNum int `json:"maxViewSettingArticleNum"`
 }
 
 type Config struct {
@@ -63,8 +64,9 @@ func (config *Configurations) load() (err error) {
 		config.Dev = Config{
 			Db: DbConf{},
 			Web: WebConf{
-				MaxViewArticleNum: 3,
-				MaxViewImageNum:   12,
+				MaxViewArticleNum:        4,
+				MaxViewImageNum:          12,
+				MaxViewSettingArticleNum: 10,
 			},
 		}
 		return

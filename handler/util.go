@@ -55,6 +55,11 @@ func Max(a int, b int) (r int) {
 	return
 }
 
+// Get total page of view
+func GetMaxPage(articlesNum int, maxView int) int {
+	return (maxView + articlesNum - 1) / maxView
+}
+
 // Parse request object from http.Request.
 func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {
 	var body []byte
