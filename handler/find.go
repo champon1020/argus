@@ -342,7 +342,7 @@ func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) (err erro
 		argsFlg    uint32
 	)
 
-	argsFlg = service.GenFlg(repo.Category{}, "Limit")
+	argsFlg = service.GenFlg(repo.Category{})
 	if categories, err = repoCmd(*repo.GlobalMysql, repo.Category{}, argsFlg, [2]int{}); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return

@@ -5,6 +5,12 @@ info:
   description: My blog
   version: 1.0.0
 
+servers:
+  - url: http://blog.champon.tech
+    description: staging server
+  - url: http://localhost:8000
+    description: local server
+
 paths:
   /api/find/article/list:
     get:
@@ -12,7 +18,7 @@ paths:
       parameters:
         - name: p
           in: path
-          required: true
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -45,7 +51,7 @@ paths:
             type: number
         - name: p
           in: path
-          required: true
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -78,7 +84,7 @@ paths:
             type: string
         - name: p
           in: path
-          required: true
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -151,13 +157,7 @@ paths:
       parameters:
         - name: p
           in: path
-          required: true
-          description: page of the view (offset)
-          schema:
-            type: number
-        - name: p
-          in: path
-          required: true
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -176,7 +176,7 @@ paths:
                   draftsNum:
                     type: number
                 required:
-                  - articles
+                  - drafts
                   - draftsNum
   /api/find/image/list:
     get:
@@ -184,7 +184,7 @@ paths:
       parameters:
         - name: p
           in: path
-          required: true
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -228,6 +228,7 @@ paths:
           description: Success
         '503':
           description: Failed
+
   /api/register/image:
     post:
       summary: Register new image.
@@ -269,6 +270,7 @@ paths:
           description: Success
         '503':
           description: Failed
+
   /api/draft/article:
     post:
       summary: Draft article.
