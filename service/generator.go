@@ -1,72 +1,92 @@
 package service
 
 import (
-	"reflect"
+	"math/rand"
 	"regexp"
 	"strings"
+	"time"
 )
 
-// Generate flag which determines arguments of database query.
-// For example, if you want a query like '... WHERE title=?',
-// you should set 'Title' of string to fieldNames.
-// But selected struct 'st' must have a field named 'Title'.
-func GenMask(st interface{}, fieldNames ...string) (mask uint32) {
-	v := reflect.Indirect(reflect.ValueOf(st))
-	t := v.Type()
-	for _, fn := range fieldNames {
-		if fn == "Limit" {
-			mask |= 1 << 31
-			continue
-		}
-		for j := 0; j < t.NumField(); j++ {
-			if fn == t.Field(j).Name {
-				mask |= 1 << j
-			}
-		}
-	}
-	return
+// Mathematical operation of database query.
+type Ope string
+
+func (o *Ope) toString() string {
+	return string(*o)
 }
 
-// Generate arguments slice used in database query.
-// If (flg & 1 << 31) > 0, limit query is turned on.
-func GenArgsSlice(argsMask uint32, st interface{}, ol ...[2]int) (args []interface{}) {
-	v := reflect.Indirect(reflect.ValueOf(st))
-	t := v.Type()
-	for i := 0; i < t.NumField(); i++ {
-		if (1 << i & argsMask) > 0 {
-			args = append(args, v.Field(i).Interface())
-		}
+const (
+	Ne Ope = "!=" // Not Equal
+	Eq Ope = "="  // Equal
+	Gt Ope = ">"  // Greater Than
+	Lt Ope = "<"  // Less Than
+	Ge Ope = ">=" // Greater or Equal
+	Le Ope = "<=" // Less or Equal
+)
+
+// map[<Struct Field Name>]<Operation>
+type ArgsOpeMap map[string]Ope
+
+// Database query information.
+type QueryOption struct {
+	Args   []interface{}
+	Aom    ArgsOpeMap
+	Limit  int
+	Offset int
+	Order  string
+	Desc   bool
+}
+
+func (op *QueryOption) BuildArgs() {
+	if op.Limit != 0 {
+		op.Args = append(op.Args, op.Offset, op.Limit)
 	}
-	if (1<<31&argsMask) > 0 && len(ol) >= 1 {
-		args = append(args, ol[0][0], ol[0][1])
-	}
-	return
+}
+
+var DefaultOption = &QueryOption{
+	Args:   []interface{}{},
+	Aom:    map[string]Ope{},
+	Limit:  0,
+	Offset: 0,
+	Order:  "",
+	Desc:   false,
 }
 
 // Generate arguments query used in database query.
-// If (flg & 1 << 31) > 0, limit query is turned on.
 // Return values is query(query of following 'WHERE')
-// and limit(limit query 'LIMIT ?,?').
-func GenArgsQuery(argsMask uint32, st interface{}) (query string, limit string) {
-	const initQuery = "WHERE "
-	query = initQuery
-	v := reflect.Indirect(reflect.ValueOf(st))
-	t := v.Type()
-	for i := 0; i < t.NumField(); i++ {
-		if (1 << i & argsMask) > 0 {
-			if query != initQuery {
-				query += "AND "
-			}
-			query += ToSnakeCase(t.Field(i).Name) + "=" + "? "
+func GenArgsQuery(option QueryOption) (query string) {
+	for k, v := range option.Aom {
+		if query == "" {
+			query += "WHERE "
+		} else {
+			query += "AND "
+		}
+		query += ToSnakeCase(k) + v.toString() + "? "
+	}
+	if option.Order != "" {
+		query += "ORDER BY " + option.Order + " "
+		if option.Desc {
+			query += "DESC "
 		}
 	}
-	if (1 << 31 & argsMask) > 0 {
-		limit = "LIMIT ?,? "
-	}
-	if query == initQuery {
-		query = ""
+	if option.Limit != 0 {
+		query += "LIMIT ?,? "
 	}
 	return
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const IdLen = 50
+
+func GenNewId(length int, id *string) {
+	if *id == "TEST_ID" || *id == "TEST_CA_ID" {
+		return
+	}
+	var randSeed = rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[randSeed.Intn(len(charset))]
+	}
+	*id = string(b)
 }
 
 var (
@@ -76,6 +96,7 @@ var (
 
 // Convert camel case string to snake case.
 func ToSnakeCase(str string) (snake string) {
+	str = strings.Split(str, "#")[0]
 	snake = matchFirstCap.ReplaceAllString(str, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
 	snake = strings.ToLower(snake)

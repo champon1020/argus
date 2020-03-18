@@ -14,14 +14,15 @@ import (
 var (
 	Logger = argus.Logger
 	Errors = &argus.Errors
+	r      *gin.Engine
 )
 
 func init() {
 	repo.GlobalMysql = repo.NewMysql()
+	r = NewRouter()
 }
 
 func main() {
-	r := NewRouter()
 	_ = r.Run(":8000")
 }
 

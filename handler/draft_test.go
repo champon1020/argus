@@ -15,11 +15,10 @@ import (
 func TestDraftHandler(t *testing.T) {
 	requestBody := `{
 	"article": {
-		"id": 1,
 		"title": "test",
 		"categories": [
-			{"id": -1, "name": "c1"},
-			{"id": -1, "name": "c2"}
+			{"id": "TEST_CA_ID", "name": "c1"},
+			{"id": "TEST_CA_ID2", "name": "c2"}
 		],
 		"contentHash": "0123456789",
 		"imageHash": "9876543210"
@@ -39,7 +38,6 @@ func TestDraftHandler(t *testing.T) {
 		strings.NewReader(requestBody))
 
 	repoCmdMock := func(_ repo.MySQL, d repo.Draft) (_ error) {
-		assert.Equal(t, d.Id, 1)
 		assert.Equal(t, d.Title, "test")
 		assert.Equal(t, d.Categories, "c1&c2")
 		assert.Equal(t, d.ContentHash, "0123456789")
@@ -49,6 +47,7 @@ func TestDraftHandler(t *testing.T) {
 
 	if err := DraftHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
 		t.Fatalf("error happend in handler")
 	}
 

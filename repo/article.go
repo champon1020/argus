@@ -2,7 +2,6 @@ package repo
 
 import (
 	"database/sql"
-	"sync"
 	"time"
 
 	"github.com/champon1020/argus/service"
@@ -17,7 +16,8 @@ import (
 // ImageHash: image file name
 // private: this article is whether public or not
 type Article struct {
-	Id          int        `json:"id"`
+	Id          string     `json:"id"`
+	SortedId    int        `json:"sortedId"`
 	Title       string     `json:"title"`
 	Categories  []Category `json:"categories"`
 	CreateDate  time.Time  `json:"createDate"`
@@ -43,25 +43,6 @@ func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 	); err != nil {
 		CmdError.SetErr(err).AppendTo(Errors)
 	}
-	return
-}
-
-// Insert column to article_category table.
-func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
-	cmd := "INSERT INTO article_category (article_id, category_id) " +
-		"VALUES (?, ?)"
-
-	wg := new(sync.WaitGroup)
-	for _, c := range article.Categories {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
-				CmdError.SetErr(err).AppendTo(Errors)
-			}
-		}()
-	}
-	wg.Wait()
 	return
 }
 
@@ -91,41 +72,13 @@ func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 	return
 }
 
-// Remove column which of article_id is equal to object from article_category table.
-func (article *Article) DeleteArticleCategoryByArticle(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM article_category WHERE article_id=?"
-	if _, err = tx.Exec(cmd, article.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
-	}
-	return
-}
-
-// Remove column that both of article_id and category_id is equal to object.
-func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM article_category WHERE article_id=? AND category_id=?"
-
-	wg := new(sync.WaitGroup)
-	for _, c := range article.Categories {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
-				CmdError.SetErr(err).AppendTo(Errors)
-			}
-		}()
-	}
-	wg.Wait()
-	return
-}
-
 // ArgFlg determines where statement's arguments.
 // For Example, 'argsMask = 0101' means
 // it includes first and third fields of objects in where statement.
-func (article *Article) FindArticle(db *sql.DB, argsMask uint32, ol OffsetLimit) (articles []Article, err error) {
-	args := service.GenArgsSlice(argsMask, article, ol)
-	whereQuery, limitQuery := service.GenArgsQuery(argsMask, article)
-	query := "SELECT * FROM articles " + whereQuery +
-		"ORDER BY create_date DESC " + limitQuery
+func FindArticle(db *sql.DB, option *service.QueryOption) (articles []Article, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT * FROM articles " + argsQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -142,6 +95,7 @@ func (article *Article) FindArticle(db *sql.DB, argsMask uint32, ol OffsetLimit)
 	for rows.Next() {
 		if err := rows.Scan(
 			&a.Id,
+			&a.SortedId,
 			&a.Title,
 			&a.CreateDate,
 			&a.UpdateDate,
@@ -190,10 +144,10 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 	return
 }
 
-func (article *Article) FindArticlesNum(db *sql.DB, argsMask uint32) (articleNum int, err error) {
-	args := service.GenArgsSlice(argsMask, article)
-	whereQuery, _ := service.GenArgsQuery(argsMask, article)
-	query := "SELECT COUNT(id) FROM articles " + whereQuery
+func FindArticlesNum(db *sql.DB, option *service.QueryOption) (articleNum int, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT COUNT(id) FROM articles " + argsQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

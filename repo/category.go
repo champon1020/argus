@@ -9,13 +9,13 @@ import (
 // Id: primary key
 // Name: category name
 type Category struct {
-	Id   int    `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
 func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
 	cmd := "INSERT INTO categories (id, name) " +
-		"SELECT ?, ? " +
+		"SELECT ?,? " +
 		"WHERE NOT EXISTS (" +
 		"SELECT name FROM categories WHERE name=?)"
 
@@ -24,34 +24,6 @@ func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
 		category.Name,
 		category.Name,
 	); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
-	}
-	return
-}
-
-func (category *Category) UpdateCategory(tx *sql.Tx) (err error) {
-	cmd := "UPDATE categories " +
-		"SET name=? " +
-		"WHERE id=? "
-
-	if _, err = tx.Exec(cmd, category.Name, category.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
-	}
-	return
-}
-
-func (category *Category) DeleteCategory(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM categories WHERE id=?"
-	if _, err = tx.Exec(cmd, category.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
-	}
-	return
-}
-
-// Remove column which of category_id is equal to object from article_category table.
-func (category *Category) DeleteArticleCategoryByCategoryId(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM article_category WHERE category_id=?"
-	if _, err = tx.Exec(cmd, category.Id); err != nil {
 		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
@@ -81,20 +53,44 @@ func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int
 	return
 }
 
+func (category *Category) Exist(tx *sql.Tx, option *service.QueryOption) (categoryId string, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT id FROM categories " + argsQuery
+
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = tx.Query(query, args...); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", args).
+			AppendTo(Errors)
+		return
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&categoryId); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+			break
+		}
+	}
+	return
+}
+
 // This is article category struct which is used only response.
 // Difference of normal category struct is that this has property of 'ArticleNum'.
 // ArticleNum is the number of articles related to this category.
 type CategoryResponse struct {
-	Id         int    `json:"id"`
+	Id         string `json:"id"`
 	Name       string `json:"name"`
 	ArticleNum int    `json:"articleNum"`
 }
 
-func (category *Category) FindCategory(db *sql.DB, argsMask uint32, ol OffsetLimit) (categories []CategoryResponse, err error) {
-	args := service.GenArgsSlice(argsMask, category, ol)
-	whereQuery, limitQuery := service.GenArgsQuery(argsMask, category)
-	query := "SELECT * FROM categories " + whereQuery +
-		limitQuery
+func FindCategory(db *sql.DB, option *service.QueryOption) (categories []CategoryResponse, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT * FROM categories " + argsQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

@@ -6,11 +6,50 @@ import (
 	"github.com/champon1020/argus/service"
 )
 
+type ArticleCategory struct {
+	ArticleId  string
+	CategoryId string
+}
+
+// Insert column to article_category table.
+func (ac *ArticleCategory) InsertArticleCategory(tx *sql.Tx) (err error) {
+	cmd := "INSERT INTO article_category (article_id, category_id) " +
+		"SELECT ?,? WHERE NOT EXISTS (" +
+		"SELECT * FROM article_category WHERE article_id=? AND category_id=?)"
+
+	args := []interface{}{
+		ac.ArticleId, ac.CategoryId,
+		ac.ArticleId, ac.CategoryId,
+	}
+	if _, err = tx.Exec(cmd, args...); err != nil {
+		CmdError.
+			SetErr(err).
+			SetValues("cmd", cmd).
+			SetValues("args", args).
+			AppendTo(Errors)
+		return
+	}
+	return
+}
+
+func DeleteArticleCategory(tx *sql.Tx, option *service.QueryOption) (err error) {
+	args := option.Args
+	query := service.GenArgsQuery(*option)
+	cmd := "DELETE FROM article_category " + query
+	if _, err = tx.Exec(cmd, args...); err != nil {
+		CmdError.
+			SetErr(err).
+			SetValues("cmd", cmd).
+			SetValues("args", args).
+			AppendTo(Errors)
+	}
+	return
+}
+
 func FindArticleByCategoryId(
 	db *sql.DB,
 	categoryNames []string,
-	argsMask uint32,
-	ol OffsetLimit,
+	option *service.QueryOption,
 ) (articles []Article, err error) {
 	query := "SELECT * FROM articles " +
 		"WHERE id IN (" +
@@ -22,9 +61,8 @@ func FindArticleByCategoryId(
 	query += whereQuery
 	query += ")) "
 
-	args = append(args, service.GenArgsSlice(argsMask, Article{}, ol)...)
-	_, limitQuery := service.GenArgsQuery(argsMask, Article{})
-	query += "ORDER BY create_date DESC " + limitQuery
+	args = append(args, (*option).Args...)
+	query += service.GenArgsQuery(*option)
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -41,6 +79,7 @@ func FindArticleByCategoryId(
 	for rows.Next() {
 		if err := rows.Scan(
 			&a.Id,
+			&a.SortedId,
 			&a.Title,
 			&a.CreateDate,
 			&a.UpdateDate,

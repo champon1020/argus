@@ -6,9 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"sync"
-	"time"
 
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/repo"
@@ -41,7 +39,6 @@ func FindArticleHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	ol := ParseOffsetLimit(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -49,8 +46,15 @@ func FindArticleHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsMask := service.GenMask(repo.Article{}, "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argsMask, ol); err != nil {
+		ol := ParseOffsetLimit(p)
+		option := &service.QueryOption{
+			Limit:  ol[1],
+			Offset: ol[0],
+			Order:  "sorted_id",
+			Desc:   true,
+		}
+		option.BuildArgs()
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -58,8 +62,7 @@ func FindArticleHandler(
 	// get the number of total articles
 	go func() {
 		defer wg.Done()
-		numArgsFlg := service.GenMask(repo.Article{})
-		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, service.DefaultOption); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -82,6 +85,8 @@ func FindArticleHandler(
 
 type ArticleResponseType struct {
 	Article repo.Article `json:"article"`
+	Next    repo.Article `json:"next"`
+	Prev    repo.Article `json:"prev"`
 }
 
 func FindArticleByIdController(c *gin.Context) {
@@ -93,34 +98,57 @@ func FindArticleByIdHandler(
 	repoCmd repo.FindArticleCmd,
 ) (err error) {
 	var (
-		argArticle repo.Article
-		articles   []repo.Article
-		response   string
-		argsMask   uint32
+		articles []repo.Article
+		response string
 	)
 
-	if argArticle.Id, err = strconv.Atoi(c.Query("id")); err != nil {
-		BasicError.SetErr(err).AppendTo(Errors)
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	sortedId := c.Query("sortedId")
+	res := new(ArticleResponseType)
 
-	argsMask = service.GenMask(repo.Article{}, "Id")
-	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsMask, [2]int{}); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+	// get current and previous article
+	go func() {
+		defer wg.Done()
+		option := &service.QueryOption{
+			Args:   []interface{}{sortedId},
+			Aom:    map[string]service.Ope{"SortedId": service.Ge},
+			Limit:  2,
+			Offset: 0,
+			Order:  "sorted_id",
+		}
+		option.BuildArgs()
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		res.Article = articles[0]
+		if len(articles) == 2 {
+			res.Prev = articles[1]
+		}
+	}()
+	// get next article
+	go func() {
+		defer wg.Done()
+		option := &service.QueryOption{
+			Args:   []interface{}{sortedId},
+			Aom:    map[string]service.Ope{"SortedId": service.Lt},
+			Limit:  1,
+			Offset: 0,
+			Order:  "sorted_id",
+			Desc:   true,
+		}
+		option.BuildArgs()
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if len(articles) == 1 {
+			res.Next = articles[0]
+		}
+	}()
+	wg.Wait()
 
-	if len(articles) == 0 {
-		err = errors.New("article is not found")
-		BasicError.SetErr(err).AppendTo(Errors)
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	res := ArticleResponseType{
-		Article: articles[0],
-	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -140,21 +168,16 @@ func FindArticleByTitleHandler(
 	repoNumCmd repo.FindArticleNumCmd,
 ) (err error) {
 	var (
-		argArticle  repo.Article
 		articles    []repo.Article
 		articlesNum int
 		response    string
-		argsMask    uint32
 		p           int
 	)
-
-	argArticle.Title = c.Query("title")
 
 	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	ol := ParseOffsetLimit(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -162,8 +185,17 @@ func FindArticleByTitleHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsMask = service.GenMask(repo.Article{}, "Title", "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsMask, ol); err != nil {
+		ol := ParseOffsetLimit(p)
+		option := &service.QueryOption{
+			Args:   []interface{}{c.Query("title")},
+			Aom:    map[string]service.Ope{"Title": service.Eq},
+			Limit:  ol[1],
+			Offset: ol[0],
+			Order:  "sorted_id",
+			Desc:   true,
+		}
+		option.BuildArgs()
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -171,8 +203,11 @@ func FindArticleByTitleHandler(
 	// get the number of total articles
 	go func() {
 		defer wg.Done()
-		numArgsFlg := service.GenMask(repo.Article{})
-		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
+		option := &service.QueryOption{
+			Args: []interface{}{c.Query("title")},
+			Aom:  map[string]service.Ope{"Title": service.Eq},
+		}
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -203,25 +238,18 @@ func FindArticleByCreateDateHandler(
 	repoNumCmd repo.FindArticleNumCmd,
 ) (err error) {
 	var (
-		argArticle  repo.Article
 		articles    []repo.Article
 		articlesNum int
 		response    string
-		argsMask    uint32
 		p           int
 	)
 
-	if argArticle.CreateDate, err = time.Parse(time.RFC3339, c.Query("createDate")); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		TimeParseError.SetErr(err).AppendTo(Errors)
-		return
-	}
+	createDate := c.Query("createDate")
 
 	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	ol := ParseOffsetLimit(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -229,8 +257,17 @@ func FindArticleByCreateDateHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsMask = service.GenMask(repo.Article{}, "CreateDate", "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsMask, ol); err != nil {
+		ol := ParseOffsetLimit(p)
+		option := &service.QueryOption{
+			Args:   []interface{}{createDate},
+			Aom:    map[string]service.Ope{"CreateDate": service.Eq},
+			Limit:  ol[1],
+			Offset: ol[0],
+			Order:  "sorted_id",
+			Desc:   true,
+		}
+		option.BuildArgs()
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -238,8 +275,11 @@ func FindArticleByCreateDateHandler(
 	// get the number of total articles
 	go func() {
 		defer wg.Done()
-		numArgsFlg := service.GenMask(repo.Article{})
-		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
+		option := &service.QueryOption{
+			Args: []interface{}{createDate},
+			Aom:  map[string]service.Ope{"CreateDate": service.Eq},
+		}
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -276,26 +316,31 @@ func FindArticleByCategoryHandler(
 		articles    []repo.Article
 		articlesNum int
 		response    string
-		argsMask    uint32
 		p           int
 	)
-
-	categoryNames := c.QueryArray("category")
 
 	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	ol := ParseOffsetLimit(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 
+	categoryNames := c.QueryArray("category")
+
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsMask = service.GenMask(repo.Article{}, "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argsMask, ol); err != nil {
+		ol := ParseOffsetLimit(p)
+		option := &service.QueryOption{
+			Limit:  ol[1],
+			Offset: ol[0],
+			Order:  "sorted_id",
+			Desc:   true,
+		}
+		option.BuildArgs()
+		if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -337,11 +382,9 @@ func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) (err erro
 	var (
 		categories []repo.CategoryResponse
 		response   string
-		argsMask   uint32
 	)
 
-	argsMask = service.GenMask(repo.Category{})
-	if categories, err = repoCmd(*repo.GlobalMysql, repo.Category{}, argsMask, [2]int{}); err != nil {
+	if categories, err = repoCmd(*repo.GlobalMysql, service.DefaultOption); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -376,7 +419,6 @@ func FindDraftHandler(
 		drafts    []repo.Draft
 		draftsNum int
 		response  string
-		argsMask  uint32
 		p         int
 	)
 
@@ -384,7 +426,6 @@ func FindDraftHandler(
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	ol := ParseOffsetLimit(p)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -392,8 +433,15 @@ func FindDraftHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsMask = service.GenMask(repo.Draft{}, "Limit")
-		if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argsMask, ol); err != nil {
+		ol := ParseOffsetLimit(p)
+		option := &service.QueryOption{
+			Limit:  ol[1],
+			Offset: ol[0],
+			Order:  "sorted_id",
+			Desc:   true,
+		}
+		option.BuildArgs()
+		if drafts, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -401,8 +449,7 @@ func FindDraftHandler(
 	// get the number of total articles
 	go func() {
 		defer wg.Done()
-		numArgsFlg := service.GenMask(repo.Article{})
-		if draftsNum, err = repoNumCmd(*repo.GlobalMysql, repo.Draft{}, numArgsFlg); err != nil {
+		if draftsNum, err = repoNumCmd(*repo.GlobalMysql, service.DefaultOption); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}

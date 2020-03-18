@@ -68,9 +68,6 @@ func (l *LogHandler) StackTrace() []string {
 	return stackTrace
 }
 
-func (l *LogHandler) Log() {
-}
-
 func (l *LogHandler) ErrorLog(errs []Error) {
 	if len(errs) == 0 {
 		return

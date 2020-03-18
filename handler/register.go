@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/champon1020/argus"
@@ -15,7 +16,7 @@ import (
 // Property of 'categories' has -1 of id absolutely.
 // This is because client side cannot fetch categories information interactively,
 type RequestArticle struct {
-	Id          int             `json:"id"`
+	Id          string          `json:"id"`
 	Title       string          `json:"title"`
 	Categories  []repo.Category `json:"categories"`
 	ContentHash string          `json:"contentHash"`
@@ -42,7 +43,6 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 
 	fp := service.ResolveContentFilePath(body.Article.ContentHash, "articles")
 	article := repo.Article{
-		Id:          body.Article.Id,
 		Title:       body.Article.Title,
 		Categories:  body.Article.Categories,
 		CreateDate:  time.Now(),
@@ -51,6 +51,7 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 		ImageHash:   body.Article.ImageHash,
 		Private:     body.Article.Private,
 	}
+	service.GenNewId(service.IdLen, &article.Id)
 
 	if err = service.OutputFile(fp, []byte(body.Contents)); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
@@ -85,7 +86,7 @@ func RegisterImageHandler(c *gin.Context) (err error) {
 	}
 
 	fileHeaders := form.File["images"]
-	path := argus.EnvVars.Get("resource")
+	path := filepath.Join(argus.EnvVars.Get("resource"), "images")
 	if err = service.SaveMultipartFiles(path, fileHeaders); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return

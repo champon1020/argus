@@ -16,10 +16,9 @@ import (
 func TestRegisterArticleHandler(t *testing.T) {
 	requestBody := `{
 	"article": {
-		"id": 1,
 		"title": "test",
 		"categories": [
-			{"id": 1, "name": "c1"}
+			{"id": "TEST_CA_ID", "name": "c1"}
 		],
 		"contentHash": "0123456789",
 		"imageHash": "9876543210",
@@ -40,9 +39,9 @@ func TestRegisterArticleHandler(t *testing.T) {
 		strings.NewReader(requestBody))
 
 	repoCmdMock := func(_ repo.MySQL, a repo.Article) (_ error) {
-		assert.Equal(t, a.Id, 1)
 		assert.Equal(t, a.Title, "test")
 		assert.Equal(t, len(a.Categories), 1)
+		assert.Equal(t, a.Categories[0].Id, "TEST_CA_ID")
 		assert.Equal(t, a.Categories[0].Name, "c1")
 		assert.Equal(t, a.ContentHash, "0123456789")
 		assert.Equal(t, a.ImageHash, "9876543210")
@@ -52,6 +51,7 @@ func TestRegisterArticleHandler(t *testing.T) {
 
 	if err := RegisterArticleHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
 		t.Fatalf("error happend in handler")
 	}
 
@@ -85,6 +85,7 @@ func TestRegisterImageHandler(t *testing.T) {
 
 	if err := RegisterImageHandler(ctx); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
 		t.Fatalf("error happend in handler")
 	}
 
