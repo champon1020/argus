@@ -2,7 +2,6 @@ package repo
 
 import (
 	"database/sql"
-	"errors"
 	"sync"
 
 	"github.com/champon1020/argus/service"
@@ -246,25 +245,4 @@ type FindDraftNumCmd func(MySQL, *service.QueryOption) (int, error)
 func FindDraftsNumCommand(mysql MySQL, option *service.QueryOption) (int, error) {
 	draftNum, err := FindDraftsNum(mysql.DB, option)
 	return draftNum, err
-}
-
-// Insert category array to categories table.
-func InsertCategories(tx *sql.Tx, categories []Category) (err error) {
-	errCnt := 0
-	wg := new(sync.WaitGroup)
-	for _, c := range categories {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if err := c.InsertCategory(tx); err != nil {
-				errCnt++
-			}
-		}()
-	}
-	wg.Wait()
-
-	if errCnt != 0 {
-		err = errors.New("error happened in InsertCategories()")
-	}
-	return
 }

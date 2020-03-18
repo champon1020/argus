@@ -29,8 +29,7 @@ func TestRegisterArticleCmd(t *testing.T) {
 		Id:    "TEST_ID",
 		Title: "test",
 		Categories: []Category{
-			{Id: "1", Name: "c1"},
-			{Id: "2", Name: "c2"},
+			{Id: "TEST_CA_ID", Name: "c1"},
 		},
 		CreateDate:  testTime,
 		UpdateDate:  testTime,
@@ -38,16 +37,6 @@ func TestRegisterArticleCmd(t *testing.T) {
 		ImageHash:   "9876543210",
 		Private:     false,
 	}
-
-	// FindCategoryByArticleId()
-	// Called by repository/util.go: ExtractCategory()
-	mock.ExpectQuery(regexp.QuoteMeta(
-		"SELECT * FROM categories " +
-			"WHERE id IN (" +
-			"SELECT category_id FROM article_category " +
-			"WHERE article_id=?) ORDER BY name")).
-		WithArgs("TEST_ID").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow("1", "c1"))
 
 	// FindDrafts() with content hash
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=?")).
@@ -57,10 +46,15 @@ func TestRegisterArticleCmd(t *testing.T) {
 	// Start transaction
 	mock.ExpectBegin()
 
+	// category.Exist()
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT id FROM categories WHERE name=?")).
+		WithArgs("c1").
+		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}))
+
 	// InsertCategories()
 	mock.ExpectExec("INSERT INTO categories").
-		WithArgs("2", "c2", "c2").
-		WillReturnResult(sqlmock.NewResult(2, 1))
+		WithArgs("TEST_CA_ID", "c1", "c1").
+		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	// InsertArticles()
 	mock.ExpectExec("INSERT INTO articles").
@@ -69,7 +63,7 @@ func TestRegisterArticleCmd(t *testing.T) {
 
 	// InsertArticleCategory()
 	mock.ExpectExec("INSERT INTO article_category").
-		WithArgs("TEST_ID", "2").
+		WithArgs("TEST_ID", "TEST_CA_ID", "TEST_ID", "TEST_CA_ID").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	// Commit
@@ -204,7 +198,7 @@ func TestFindArticleCmd_All(t *testing.T) {
 			"SELECT category_id FROM article_category " +
 			"WHERE article_id=?) ORDER BY name")).
 		WithArgs("TEST_ID").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow("1", "c1"))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow("TEST_CA_ID", "c1"))
 
 	articles, err := FindArticleCommand(mysql, option)
 
@@ -217,9 +211,9 @@ func TestFindArticleCmd_All(t *testing.T) {
 		t.Fatalf("different from expectation: %v\n", err)
 	}
 
-	assert.Equal(t, len(articles), 1)
-	assert.Equal(t, len(articles[0].Categories), 1)
-	assert.Equal(t, articles[0].Categories[0].Name, "c1")
+	assert.Equal(t, 1, len(articles))
+	assert.Equal(t, 1, len(articles[0].Categories))
+	assert.Equal(t, "c1", articles[0].Categories[0].Name)
 }
 
 func TestFindArticleCmd_Title(t *testing.T) {
@@ -257,7 +251,7 @@ func TestFindArticleCmd_Title(t *testing.T) {
 			"SELECT category_id FROM article_category " +
 			"WHERE article_id=?) ORDER BY name")).
 		WithArgs("TEST_ID").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow("1", "c1"))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow("TEST_CA_ID", "c1"))
 
 	articles, err := FindArticleCommand(mysql, option)
 
@@ -269,9 +263,9 @@ func TestFindArticleCmd_Title(t *testing.T) {
 		t.Fatalf("different from expectation: %v\n", err)
 	}
 
-	assert.Equal(t, len(articles), 1)
-	assert.Equal(t, len(articles[0].Categories), 1)
-	assert.Equal(t, articles[0].Categories[0].Name, "c1")
+	assert.Equal(t, 1, len(articles))
+	assert.Equal(t, 1, len(articles[0].Categories))
+	assert.Equal(t, "c1", articles[0].Categories[0].Name)
 }
 
 func TestFindArticleByCategoryCmd(t *testing.T) {
@@ -318,7 +312,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 		WillReturnRows(
 			sqlmock.NewRows([]string{
 				"id", "name",
-			}).AddRow("1", "c1"))
+			}).AddRow("TEST_CA_ID", "c1"))
 
 	articles, err := FindArticleByCategoryCommand(mysql, categoryNames, option)
 
@@ -330,9 +324,9 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 		t.Fatalf("different from expectation: %v\n", err)
 	}
 
-	assert.Equal(t, len(articles), 1)
-	assert.Equal(t, len(articles[0].Categories), 1)
-	assert.Equal(t, articles[0].Categories[0].Name, "c1")
+	assert.Equal(t, 1, len(articles))
+	assert.Equal(t, 1, len(articles[0].Categories))
+	assert.Equal(t, "c1", articles[0].Categories[0].Name)
 }
 
 func TestFindCategoryCmd(t *testing.T) {
@@ -349,12 +343,12 @@ func TestFindCategoryCmd(t *testing.T) {
 	// FindCategory()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM categories")).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).
-			AddRow("1", "c1"))
+			AddRow("TEST_CA_ID", "c1"))
 
 	// FindArticleNumByCategoryId()
 	// Called by category.go: FindCategory()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(article_id) FROM article_category WHERE category_id=?")).
-		WithArgs("1").
+		WithArgs("TEST_CA_ID").
 		WillReturnRows(sqlmock.NewRows([]string{"articleNum"}).
 			AddRow(3))
 
@@ -368,8 +362,10 @@ func TestFindCategoryCmd(t *testing.T) {
 		t.Fatalf("different from expectation: %v\n", err)
 	}
 
-	assert.Equal(t, len(categories), 1)
-	assert.Equal(t, categories[0].Name, "c1")
+	assert.Equal(t, 1, len(categories))
+	assert.Equal(t, "TEST_CA_ID", categories[0].Id)
+	assert.Equal(t, "c1", categories[0].Name)
+	assert.Equal(t, 3, categories[0].ArticleNum)
 }
 
 func TestFindDraftCmd(t *testing.T) {
@@ -386,26 +382,32 @@ func TestFindDraftCmd(t *testing.T) {
 		Aom:    nil,
 		Limit:  1,
 		Offset: 2,
-		Order:  "create_date",
+		Order:  "sorted_id",
 		Desc:   true,
 	}
 	option.BuildArgs()
 
 	// FindDraft()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts ORDER BY create_date DESC LIMIT ?,?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts ORDER BY sorted_id DESC LIMIT ?,?")).
 		WithArgs(2, 1).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
-				"id", "title", "categories", "update_date", "content_hash", "image_hsah",
-			}).AddRow(1, "draft", "c1&c2", testTime, "0123456789", "9876543210"))
+				"id", "sortedId", "title", "categories", "update_date", "content_hash", "image_hsah",
+			}).AddRow("TEST_D_ID", 1, "draft", "c1&c2", testTime, "0123456789", "9876543210"))
 
-	if _, err := FindDraftCommand(mysql, option); err != nil {
+	d, err := FindDraftCommand(mysql, option)
+
+	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatalf("different from expectation: %v\n", err)
 	}
+
+	assert.Equal(t, 1, len(d))
+	assert.Equal(t, "TEST_D_ID", d[0].Id)
+	assert.Equal(t, "draft", d[0].Title)
 }
 
 func TestFindArticlesNumCommand(t *testing.T) {
@@ -433,7 +435,7 @@ func TestFindArticlesNumCommand(t *testing.T) {
 		t.Fatalf("different from expectation: %v\n", err)
 	}
 
-	assert.Equal(t, articlesNum, 1)
+	assert.Equal(t, 1, articlesNum)
 }
 
 func TestFindArticlesNumByCategoryCommand(t *testing.T) {
@@ -466,7 +468,7 @@ func TestFindArticlesNumByCategoryCommand(t *testing.T) {
 		t.Fatalf("different from expectation: %v\n", err)
 	}
 
-	assert.Equal(t, articlesNum, 1)
+	assert.Equal(t, 1, articlesNum)
 }
 
 func TestFindDraftsNumCommand(t *testing.T) {
@@ -494,5 +496,5 @@ func TestFindDraftsNumCommand(t *testing.T) {
 		t.Fatalf("different from expectation: %v\n", err)
 	}
 
-	assert.Equal(t, draftsNum, 1)
+	assert.Equal(t, 1, draftsNum)
 }

@@ -78,7 +78,7 @@ const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const IdLen = 50
 
 func GenNewId(length int, id *string) {
-	if *id == "TEST_ID" {
+	if *id == "TEST_ID" || *id == "TEST_CA_ID" {
 		return
 	}
 	var randSeed = rand.New(rand.NewSource(time.Now().UnixNano()))
