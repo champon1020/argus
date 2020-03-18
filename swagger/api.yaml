@@ -5,14 +5,42 @@ info:
   description: My blog
   version: 1.0.0
 
+servers:
+  - url: http://blog.champon.tech
+    description: staging server
+  - url: http://localhost:8000
+    description: local server
+
 paths:
+  /api/find/article/id:
+    get:
+      summary: Return an aritlce by selected id.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Article id.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A JSON of article.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    $ref: '#/components/schemas/Article'
+                required:
+                  - article
   /api/find/article/list:
     get:
       summary: Return a list of articles.
       parameters:
         - name: p
-          in: path
-          required: true
+          in: query
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -28,24 +56,24 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articesNum:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - articlesNum
+                  - maxPage
   /api/find/article/list/title:
     get:
       summary: Return a list of articles by title.
       parameters:
         - name: title
-          in: path
+          in: query
           required: true
           description: A title of articles.
           schema:
-            type: number
-        - name: p
+            type: string
+        - name: query
           in: path
-          required: true
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -61,24 +89,24 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articesNum:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - articlesNum
+                  - maxPage
   /api/find/article/list/create-date:
     get:
       summary: Return a list of articles by title.
       parameters:
         - name: create_date
-          in: path
+          in: query
           required: true
           description: A created date of articles.
           schema:
             type: string
         - name: p
-          in: path
-          required: true
+          in: query
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -94,17 +122,17 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articesNum:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - articlesNum
+                  - maxPage
   /api/find/article/list/category:
     get:
       summary: Return a list of articles by title.
       parameters:
         - name: category
-          in: path
+          in: query
           required: true
           description: A category name which an articles has.
           schema:
@@ -123,11 +151,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articesNum:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - articlesNum
+                  - maxPage
   /api/find/category/list:
     get:
       summary: Return a list of categories.
@@ -150,14 +178,8 @@ paths:
       summary: Return a list of drafts.
       parameters:
         - name: p
-          in: path
-          required: true
-          description: page of the view (offset)
-          schema:
-            type: number
-        - name: p
-          in: path
-          required: true
+          in: query
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -175,16 +197,19 @@ paths:
                       $ref: '#/components/schemas/Draft'
                   draftsNum:
                     type: number
+                  maxPage:
+                    type: number
                 required:
-                  - articles
+                  - drafts
                   - draftsNum
+                  - maxPage
   /api/find/image/list:
     get:
       summary: Return a list of image names.
       parameters:
         - name: p
-          in: path
-          required: true
+          in: query
+          required: false
           description: Page of view.
           schema:
             type: number
@@ -228,6 +253,7 @@ paths:
           description: Success
         '503':
           description: Failed
+
   /api/register/image:
     post:
       summary: Register new image.
@@ -269,6 +295,7 @@ paths:
           description: Success
         '503':
           description: Failed
+
   /api/draft/article:
     post:
       summary: Draft article.
@@ -296,7 +323,7 @@ paths:
       summary: Delete image.
       parameters:
         - name: imgName
-          in: path
+          in: query
           required: true
           description: page of the view (offset)
           schema:

@@ -69,6 +69,18 @@ func TestMax(t *testing.T) {
 	assert.Equal(t, 3, c)
 }
 
+func TestGetMaxPage(t *testing.T) {
+	mxView := 3
+	num := 5
+	c := GetMaxPage(num, mxView)
+	assert.Equal(t, 2, c)
+
+	mxView = 4
+	num = 12
+	c = GetMaxPage(num, mxView)
+	assert.Equal(t, 3, c)
+}
+
 func TestParseDraftRequestBody(t *testing.T) {
 	var body DraftRequestBody
 

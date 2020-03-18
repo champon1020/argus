@@ -17,8 +17,8 @@ import (
 )
 
 type ResponseType struct {
-	Articles    []repo.Article `json:"articles"`
-	ArticlesNum int            `json:"articlesNum"`
+	Articles []repo.Article `json:"articles"`
+	MaxPage  int            `json:"maxPage"`
 }
 
 func FindArticleController(c *gin.Context) {
@@ -49,8 +49,8 @@ func FindArticleHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsFlg := service.GenFlg(repo.Article{}, "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argsFlg, ol); err != nil {
+		argsMask := service.GenMask(repo.Article{}, "Limit")
+		if articles, err = repoCmd(*repo.GlobalMysql, repo.Article{}, argsMask, ol); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -58,7 +58,7 @@ func FindArticleHandler(
 	// get the number of total articles
 	go func() {
 		defer wg.Done()
-		numArgsFlg := service.GenFlg(repo.Article{})
+		numArgsFlg := service.GenMask(repo.Article{})
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -67,7 +67,10 @@ func FindArticleHandler(
 
 	wg.Wait()
 
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ResponseType{
+		Articles: articles,
+		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -77,22 +80,23 @@ func FindArticleHandler(
 	return
 }
 
+type ArticleResponseType struct {
+	Article repo.Article `json:"article"`
+}
+
 func FindArticleByIdController(c *gin.Context) {
-	_ = FindArticleByIdHandler(c, repo.FindArticleCommand, repo.FindArticlesNumCommand)
+	_ = FindArticleByIdHandler(c, repo.FindArticleCommand)
 }
 
 func FindArticleByIdHandler(
 	c *gin.Context,
 	repoCmd repo.FindArticleCmd,
-	repoNumCmd repo.FindArticleNumCmd,
 ) (err error) {
 	var (
-		argArticle  repo.Article
-		articles    []repo.Article
-		articlesNum int
-		response    string
-		argsFlg     uint32
-		p           int
+		argArticle repo.Article
+		articles   []repo.Article
+		response   string
+		argsMask   uint32
 	)
 
 	if argArticle.Id, err = strconv.Atoi(c.Query("id")); err != nil {
@@ -101,37 +105,22 @@ func FindArticleByIdHandler(
 		return
 	}
 
-	if p, err = ParsePage(c); err != nil {
+	argsMask = service.GenMask(repo.Article{}, "Id")
+	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsMask, [2]int{}); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	ol := ParseOffsetLimit(p)
 
-	wg := new(sync.WaitGroup)
-	wg.Add(2)
+	if len(articles) == 0 {
+		err = errors.New("article is not found")
+		BasicError.SetErr(err).AppendTo(Errors)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	// get articles
-	go func() {
-		defer wg.Done()
-		argsFlg = service.GenFlg(repo.Article{}, "Id", "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, ol); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}()
-	// get the number of total articles
-	go func() {
-		defer wg.Done()
-		numArgsFlg := service.GenFlg(repo.Article{})
-		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}()
-
-	wg.Wait()
-
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ArticleResponseType{
+		Article: articles[0],
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -155,7 +144,7 @@ func FindArticleByTitleHandler(
 		articles    []repo.Article
 		articlesNum int
 		response    string
-		argsFlg     uint32
+		argsMask    uint32
 		p           int
 	)
 
@@ -173,8 +162,8 @@ func FindArticleByTitleHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsFlg = service.GenFlg(repo.Article{}, "Title", "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, ol); err != nil {
+		argsMask = service.GenMask(repo.Article{}, "Title", "Limit")
+		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsMask, ol); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -182,7 +171,7 @@ func FindArticleByTitleHandler(
 	// get the number of total articles
 	go func() {
 		defer wg.Done()
-		numArgsFlg := service.GenFlg(repo.Article{})
+		numArgsFlg := service.GenMask(repo.Article{})
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -191,7 +180,10 @@ func FindArticleByTitleHandler(
 
 	wg.Wait()
 
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ResponseType{
+		Articles: articles,
+		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -215,7 +207,7 @@ func FindArticleByCreateDateHandler(
 		articles    []repo.Article
 		articlesNum int
 		response    string
-		argsFlg     uint32
+		argsMask    uint32
 		p           int
 	)
 
@@ -237,8 +229,8 @@ func FindArticleByCreateDateHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsFlg = service.GenFlg(repo.Article{}, "CreateDate", "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, ol); err != nil {
+		argsMask = service.GenMask(repo.Article{}, "CreateDate", "Limit")
+		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsMask, ol); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -246,7 +238,7 @@ func FindArticleByCreateDateHandler(
 	// get the number of total articles
 	go func() {
 		defer wg.Done()
-		numArgsFlg := service.GenFlg(repo.Article{})
+		numArgsFlg := service.GenMask(repo.Article{})
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -255,7 +247,10 @@ func FindArticleByCreateDateHandler(
 
 	wg.Wait()
 
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ResponseType{
+		Articles: articles,
+		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -281,7 +276,7 @@ func FindArticleByCategoryHandler(
 		articles    []repo.Article
 		articlesNum int
 		response    string
-		argsFlg     uint32
+		argsMask    uint32
 		p           int
 	)
 
@@ -299,8 +294,8 @@ func FindArticleByCategoryHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsFlg = service.GenFlg(repo.Article{}, "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argsFlg, ol); err != nil {
+		argsMask = service.GenMask(repo.Article{}, "Limit")
+		if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, argsMask, ol); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -316,7 +311,10 @@ func FindArticleByCategoryHandler(
 
 	wg.Wait()
 
-	res := ResponseType{Articles: articles, ArticlesNum: articlesNum}
+	res := ResponseType{
+		Articles: articles,
+		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -339,11 +337,11 @@ func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) (err erro
 	var (
 		categories []repo.CategoryResponse
 		response   string
-		argsFlg    uint32
+		argsMask   uint32
 	)
 
-	argsFlg = service.GenFlg(repo.Category{}, "Limit")
-	if categories, err = repoCmd(*repo.GlobalMysql, repo.Category{}, argsFlg, [2]int{}); err != nil {
+	argsMask = service.GenMask(repo.Category{})
+	if categories, err = repoCmd(*repo.GlobalMysql, repo.Category{}, argsMask, [2]int{}); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -362,6 +360,7 @@ func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) (err erro
 type DraftResponseType struct {
 	Drafts    []repo.Draft `json:"drafts"`
 	DraftsNum int          `json:"draftsNum"`
+	MaxPage   int          `json:"maxPage"`
 }
 
 func FindDraftController(c *gin.Context) {
@@ -377,7 +376,7 @@ func FindDraftHandler(
 		drafts    []repo.Draft
 		draftsNum int
 		response  string
-		argsFlg   uint32
+		argsMask  uint32
 		p         int
 	)
 
@@ -393,8 +392,8 @@ func FindDraftHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		argsFlg = service.GenFlg(repo.Draft{}, "Limit")
-		if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argsFlg, ol); err != nil {
+		argsMask = service.GenMask(repo.Draft{}, "Limit")
+		if drafts, err = repoCmd(*repo.GlobalMysql, repo.Draft{}, argsMask, ol); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -402,7 +401,7 @@ func FindDraftHandler(
 	// get the number of total articles
 	go func() {
 		defer wg.Done()
-		numArgsFlg := service.GenFlg(repo.Article{})
+		numArgsFlg := service.GenMask(repo.Article{})
 		if draftsNum, err = repoNumCmd(*repo.GlobalMysql, repo.Draft{}, numArgsFlg); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -411,7 +410,12 @@ func FindDraftHandler(
 
 	wg.Wait()
 
-	res := DraftResponseType{Drafts: drafts, DraftsNum: draftsNum}
+	maxPage := GetMaxPage(draftsNum, argus.GlobalConfig.Web.MaxViewSettingArticleNum)
+	res := DraftResponseType{
+		Drafts:    drafts,
+		DraftsNum: draftsNum,
+		MaxPage:   maxPage,
+	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return

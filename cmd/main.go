@@ -42,8 +42,8 @@ func NewRouter() *gin.Engine {
 
 	find := router.Group("/api/find")
 	{
+		find.GET("/article/id", handler.FindArticleByIdController)
 		find.GET("/article/list", handler.FindArticleController)
-		find.GET("/article/list/id", handler.FindArticleByIdController)
 		find.GET("/article/list/title", handler.FindArticleByTitleController)
 		find.GET("/article/list/create-date", handler.FindArticleByCreateDateController)
 		find.GET("/article/list/category", handler.FindArticleByCategoryController)

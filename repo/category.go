@@ -90,9 +90,9 @@ type CategoryResponse struct {
 	ArticleNum int    `json:"articleNum"`
 }
 
-func (category *Category) FindCategory(db *sql.DB, argsFlg uint32, ol OffsetLimit) (categories []CategoryResponse, err error) {
-	args := service.GenArgsSlice(argsFlg, category, ol)
-	whereQuery, limitQuery := service.GenArgsQuery(argsFlg, category)
+func (category *Category) FindCategory(db *sql.DB, argsMask uint32, ol OffsetLimit) (categories []CategoryResponse, err error) {
+	args := service.GenArgsSlice(argsMask, category, ol)
+	whereQuery, limitQuery := service.GenArgsQuery(argsMask, category)
 	query := "SELECT * FROM categories " + whereQuery +
 		limitQuery
 

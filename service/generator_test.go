@@ -15,20 +15,20 @@ type Hoge struct {
 	Date  time.Time
 }
 
-func TestGenFlg_Title(t *testing.T) {
+func TestGenMask_Title(t *testing.T) {
 	article := repo.Article{}
 	fieldName := "Title"
 
-	flg := service.GenFlg(article, fieldName)
+	flg := service.GenMask(article, fieldName)
 
 	var actual uint32 = 2
 	assert.Equal(t, actual, flg)
 }
 
-func TestGenFlg_Id_Title(t *testing.T) {
+func TestGenMask_Id_Title(t *testing.T) {
 	article := repo.Article{}
 
-	flg := service.GenFlg(article, "Id", "Title")
+	flg := service.GenMask(article, "Id", "Title")
 
 	var actual uint32 = 3
 	assert.Equal(t, actual, flg)
@@ -36,12 +36,12 @@ func TestGenFlg_Id_Title(t *testing.T) {
 
 func TestGenArgsSlice(t *testing.T) {
 	var (
-		argsFlg uint32
-		st      Hoge
+		argsMask uint32
+		st       Hoge
 	)
-	argsFlg = service.GenFlg(st, "Title")
+	argsMask = service.GenMask(st, "Title")
 	st.Title = "test"
-	args := service.GenArgsSlice(argsFlg, st, [2]int{})
+	args := service.GenArgsSlice(argsMask, st, [2]int{})
 
 	assert.Equal(t, 1, len(args))
 	assert.Equal(t, "test", args[0])
@@ -49,13 +49,13 @@ func TestGenArgsSlice(t *testing.T) {
 
 func TestGenArgsSlice_Limit(t *testing.T) {
 	var (
-		argsFlg uint32
-		st      Hoge
+		argsMask uint32
+		st       Hoge
 	)
 
-	argsFlg = service.GenFlg(st, "Title", "Limit")
+	argsMask = service.GenMask(st, "Title", "Limit")
 	st.Title = "test"
-	args := service.GenArgsSlice(argsFlg, st, [2]int{1, 2})
+	args := service.GenArgsSlice(argsMask, st, [2]int{1, 2})
 
 	assert.Equal(t, 3, len(args))
 	assert.Equal(t, "test", args[0])
@@ -65,13 +65,13 @@ func TestGenArgsSlice_Limit(t *testing.T) {
 
 func TestGenArgsSlice_Multi(t *testing.T) {
 	var (
-		argsFlg uint32
-		st      Hoge
+		argsMask uint32
+		st       Hoge
 	)
-	argsFlg = service.GenFlg(st, "Id", "Title")
+	argsMask = service.GenMask(st, "Id", "Title")
 	st.Id = 1
 	st.Title = "test"
-	args := service.GenArgsSlice(argsFlg, st, [2]int{})
+	args := service.GenArgsSlice(argsMask, st, [2]int{})
 
 	assert.Equal(t, 2, len(args))
 	assert.Equal(t, 1, args[0])
@@ -80,11 +80,11 @@ func TestGenArgsSlice_Multi(t *testing.T) {
 
 func TestGenArgsQuery(t *testing.T) {
 	var (
-		argsFlg uint32
-		st      Hoge
+		argsMask uint32
+		st       Hoge
 	)
-	argsFlg = service.GenFlg(st, "Title")
-	args, limit := service.GenArgsQuery(argsFlg, st)
+	argsMask = service.GenMask(st, "Title")
+	args, limit := service.GenArgsQuery(argsMask, st)
 
 	actual := "WHERE title=? "
 	assert.Equal(t, actual, args+limit)
@@ -92,11 +92,11 @@ func TestGenArgsQuery(t *testing.T) {
 
 func TestGenArgsQuery_Multi(t *testing.T) {
 	var (
-		argsFlg uint32
-		st      Hoge
+		argsMask uint32
+		st       Hoge
 	)
-	argsFlg = service.GenFlg(st, "Title", "Date", "Limit")
-	args, limit := service.GenArgsQuery(argsFlg, st)
+	argsMask = service.GenMask(st, "Title", "Date", "Limit")
+	args, limit := service.GenArgsQuery(argsMask, st)
 
 	actual := "WHERE title=? AND date=? LIMIT ?,? "
 	assert.Equal(t, actual, args+limit)
