@@ -48,6 +48,8 @@ func FindArticleHandler(
 		defer wg.Done()
 		ol := ParseOffsetLimit(p)
 		option := &service.QueryOption{
+			Args:   []interface{}{false},
+			Aom:    map[string]service.Ope{"Private": service.Eq},
 			Limit:  ol[1],
 			Offset: ol[0],
 			Order:  "sorted_id",
@@ -111,8 +113,11 @@ func FindArticleByIdHandler(
 	go func() {
 		defer wg.Done()
 		option := &service.QueryOption{
-			Args:   []interface{}{sortedId},
-			Aom:    map[string]service.Ope{"SortedId": service.Ge},
+			Args: []interface{}{sortedId, false},
+			Aom: map[string]service.Ope{
+				"SortedId": service.Ge,
+				"Private":  service.Eq,
+			},
 			Limit:  2,
 			Offset: 0,
 			Order:  "sorted_id",
@@ -131,8 +136,11 @@ func FindArticleByIdHandler(
 	go func() {
 		defer wg.Done()
 		option := &service.QueryOption{
-			Args:   []interface{}{sortedId},
-			Aom:    map[string]service.Ope{"SortedId": service.Lt},
+			Args: []interface{}{sortedId, false},
+			Aom: map[string]service.Ope{
+				"SortedId": service.Lt,
+				"Private":  service.Eq,
+			},
 			Limit:  1,
 			Offset: 0,
 			Order:  "sorted_id",
@@ -187,8 +195,11 @@ func FindArticleByTitleHandler(
 		defer wg.Done()
 		ol := ParseOffsetLimit(p)
 		option := &service.QueryOption{
-			Args:   []interface{}{c.Query("title")},
-			Aom:    map[string]service.Ope{"Title": service.Eq},
+			Args: []interface{}{c.Query("title"), false},
+			Aom: map[string]service.Ope{
+				"Title":   service.Eq,
+				"Private": service.Eq,
+			},
 			Limit:  ol[1],
 			Offset: ol[0],
 			Order:  "sorted_id",
@@ -259,8 +270,11 @@ func FindArticleByCreateDateHandler(
 		defer wg.Done()
 		ol := ParseOffsetLimit(p)
 		option := &service.QueryOption{
-			Args:   []interface{}{createDate},
-			Aom:    map[string]service.Ope{"CreateDate": service.Eq},
+			Args: []interface{}{createDate, false},
+			Aom: map[string]service.Ope{
+				"CreateDate": service.Eq,
+				"Private":    service.Eq,
+			},
 			Limit:  ol[1],
 			Offset: ol[0],
 			Order:  "sorted_id",
@@ -334,6 +348,8 @@ func FindArticleByCategoryHandler(
 		defer wg.Done()
 		ol := ParseOffsetLimit(p)
 		option := &service.QueryOption{
+			Args:   []interface{}{false},
+			Aom:    map[string]service.Ope{"Private": service.Eq},
 			Limit:  ol[1],
 			Offset: ol[0],
 			Order:  "sorted_id",
