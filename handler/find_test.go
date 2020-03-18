@@ -122,34 +122,25 @@ func TestFindArticleByIdHandler(t *testing.T) {
 		return
 	}
 
-	articlesNum := 10
-	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
-	repoNumCmdMock := func(_ repo.MySQL, _ repo.Article, _ uint32) (int, error) {
-		return articlesNum, nil
-	}
-
 	expectedBody := `{
-	"articles": [
-		{
-			"id": 2,
-			"title": "test",
-			"categories": [
-				{
-					"id": 1,
-					"name": "c1"
-				}
-			],
-			"createDate": "2020-03-09T00:00:00+09:00",
-			"updateDate": "2020-03-09T00:00:00+09:00",
-			"contentHash": "0123456789",
-			"imageHash": "9876543210",
-			"private": false
-		}
-	],
-	"maxPage": ` + strconv.Itoa(mxPage) + `
+	"article": {
+		"id": 2,
+		"title": "test",
+		"categories": [
+			{
+				"id": 1,
+				"name": "c1"
+			}
+		],
+		"createDate": "2020-03-09T00:00:00+09:00",
+		"updateDate": "2020-03-09T00:00:00+09:00",
+		"contentHash": "0123456789",
+		"imageHash": "9876543210",
+		"private": false
+	}
 }`
 
-	if err := FindArticleByIdHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
+	if err := FindArticleByIdHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error happend in handler")
 	}

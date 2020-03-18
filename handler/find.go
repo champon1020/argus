@@ -80,22 +80,23 @@ func FindArticleHandler(
 	return
 }
 
+type ArticleResponseType struct {
+	Article repo.Article `json:"article"`
+}
+
 func FindArticleByIdController(c *gin.Context) {
-	_ = FindArticleByIdHandler(c, repo.FindArticleCommand, repo.FindArticlesNumCommand)
+	_ = FindArticleByIdHandler(c, repo.FindArticleCommand)
 }
 
 func FindArticleByIdHandler(
 	c *gin.Context,
 	repoCmd repo.FindArticleCmd,
-	repoNumCmd repo.FindArticleNumCmd,
 ) (err error) {
 	var (
-		argArticle  repo.Article
-		articles    []repo.Article
-		articlesNum int
-		response    string
-		argsFlg     uint32
-		p           int
+		argArticle repo.Article
+		articles   []repo.Article
+		response   string
+		argsFlg    uint32
 	)
 
 	if argArticle.Id, err = strconv.Atoi(c.Query("id")); err != nil {
@@ -104,39 +105,21 @@ func FindArticleByIdHandler(
 		return
 	}
 
-	if p, err = ParsePage(c); err != nil {
+	argsFlg = service.GenFlg(repo.Article{}, "Id")
+	if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, [2]int{}); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	ol := ParseOffsetLimit(p)
 
-	wg := new(sync.WaitGroup)
-	wg.Add(2)
+	if len(articles) == 0 {
+		err = errors.New("article is not found")
+		BasicError.SetErr(err).AppendTo(Errors)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	// get articles
-	go func() {
-		defer wg.Done()
-		argsFlg = service.GenFlg(repo.Article{}, "Id", "Limit")
-		if articles, err = repoCmd(*repo.GlobalMysql, argArticle, argsFlg, ol); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}()
-	// get the number of total articles
-	go func() {
-		defer wg.Done()
-		numArgsFlg := service.GenFlg(repo.Article{})
-		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, repo.Article{}, numArgsFlg); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}()
-
-	wg.Wait()
-
-	res := ResponseType{
-		Articles: articles,
-		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
+	res := ArticleResponseType{
+		Article: articles[0],
 	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)

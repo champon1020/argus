@@ -12,6 +12,28 @@ servers:
     description: local server
 
 paths:
+  /api/find/article/id:
+    get:
+      summary: Return an aritlce by selected id.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Article id.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A JSON of article.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    $ref: '#/components/schemas/Article'
+                required:
+                  - article
   /api/find/article/list:
     get:
       summary: Return a list of articles.
