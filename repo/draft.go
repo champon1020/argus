@@ -66,9 +66,9 @@ func (draft *Draft) DeleteDraft(tx *sql.Tx) (err error) {
 	return
 }
 
-func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32, ol OffsetLimit) (drafts []Draft, err error) {
-	args := service.GenArgsSlice(argsFlg, draft, ol)
-	whereQuery, limitQuery := service.GenArgsQuery(argsFlg, draft)
+func (draft *Draft) FindDrafts(db *sql.DB, argsMask uint32, ol OffsetLimit) (drafts []Draft, err error) {
+	args := service.GenArgsSlice(argsMask, draft, ol)
+	whereQuery, limitQuery := service.GenArgsQuery(argsMask, draft)
 	query := "SELECT * FROM drafts " + whereQuery +
 		"ORDER BY create_date DESC " + limitQuery
 
@@ -101,9 +101,9 @@ func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32, ol OffsetLimit) (draf
 	return
 }
 
-func (draft *Draft) FindDraftsNum(db *sql.DB, argsFlg uint32) (draftNum int, err error) {
-	args := service.GenArgsSlice(argsFlg, draft)
-	whereQuery, _ := service.GenArgsQuery(argsFlg, draft)
+func (draft *Draft) FindDraftsNum(db *sql.DB, argsMask uint32) (draftNum int, err error) {
+	args := service.GenArgsSlice(argsMask, draft)
+	whereQuery, _ := service.GenArgsQuery(argsMask, draft)
 	query := "SELECT COUNT(id) FROM drafts " + whereQuery
 
 	var rows *sql.Rows

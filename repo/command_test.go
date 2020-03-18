@@ -205,7 +205,7 @@ func TestFindArticleCmd_All(t *testing.T) {
 	defer db.Close()
 
 	article := Article{}
-	argsFlg := service.GenFlg(article, "Limit")
+	argsMask := service.GenMask(article, "Limit")
 
 	// FindArticle()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles ORDER BY create_date DESC LIMIT ?,?")).
@@ -225,7 +225,7 @@ func TestFindArticleCmd_All(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "c1"))
 
-	articles, err := FindArticleCommand(mysql, article, argsFlg, [2]int{})
+	articles, err := FindArticleCommand(mysql, article, argsMask, [2]int{})
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -251,7 +251,7 @@ func TestFindArticleCmd_Title(t *testing.T) {
 	defer db.Close()
 
 	article := Article{Title: "test"}
-	argsFlg := service.GenFlg(article, "Title", "Limit")
+	argsMask := service.GenMask(article, "Title", "Limit")
 
 	// FindArticle()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles WHERE title=? ORDER BY create_date DESC LIMIT ?,?")).
@@ -271,7 +271,7 @@ func TestFindArticleCmd_Title(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "c1"))
 
-	articles, err := FindArticleCommand(mysql, article, argsFlg, [2]int{})
+	articles, err := FindArticleCommand(mysql, article, argsMask, [2]int{})
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -296,7 +296,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 	defer db.Close()
 
 	categoryNames := []string{"c1", "c2"}
-	argsFlg := service.GenFlg(Article{}, "Limit")
+	argsMask := service.GenMask(Article{}, "Limit")
 
 	// FindArticleByCategoryId()
 	mock.ExpectQuery(regexp.QuoteMeta(
@@ -324,7 +324,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 				"id", "name",
 			}).AddRow(1, "c1"))
 
-	articles, err := FindArticleByCategoryCommand(mysql, categoryNames, argsFlg, [2]int{})
+	articles, err := FindArticleByCategoryCommand(mysql, categoryNames, argsMask, [2]int{})
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -386,7 +386,7 @@ func TestFindDraftCmd(t *testing.T) {
 	defer db.Close()
 
 	draft := Draft{}
-	argsFlg := service.GenFlg(draft, "Limit")
+	argsMask := service.GenMask(draft, "Limit")
 
 	// FindDraft()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts ORDER BY create_date DESC LIMIT ?,?")).
@@ -396,7 +396,7 @@ func TestFindDraftCmd(t *testing.T) {
 				"id", "title", "categories", "update_date", "content_hash", "image_hsah",
 			}).AddRow(1, "draft", "c1&c2", testTime, "0123456789", "9876543210"))
 
-	if _, err := FindDraftCommand(mysql, draft, argsFlg, [2]int{}); err != nil {
+	if _, err := FindDraftCommand(mysql, draft, argsMask, [2]int{}); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error was occured in testing function\n")
 	}
@@ -415,13 +415,13 @@ func TestFindArticlesNumCommand(t *testing.T) {
 	defer db.Close()
 
 	article := Article{}
-	argsFlg := service.GenFlg(article)
+	argsMask := service.GenMask(article)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(id) FROM articles")).
 		WillReturnRows(
 			sqlmock.NewRows([]string{"articlesNum"}).AddRow(1))
 
-	articlesNum, err := FindArticlesNumCommand(mysql, article, argsFlg)
+	articlesNum, err := FindArticlesNumCommand(mysql, article, argsMask)
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -477,13 +477,13 @@ func TestFindDraftsNumCommand(t *testing.T) {
 	defer db.Close()
 
 	draft := Draft{}
-	argsFlg := service.GenFlg(draft)
+	argsMask := service.GenMask(draft)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(id) FROM drafts")).
 		WillReturnRows(
 			sqlmock.NewRows([]string{"draftsNum"}).AddRow(1))
 
-	draftsNum, err := FindDraftsNumCommand(mysql, draft, argsFlg)
+	draftsNum, err := FindDraftsNumCommand(mysql, draft, argsMask)
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)

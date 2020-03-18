@@ -15,20 +15,20 @@ type Hoge struct {
 	Date  time.Time
 }
 
-func TestGenFlg_Title(t *testing.T) {
+func TestGenMask_Title(t *testing.T) {
 	article := repo.Article{}
 	fieldName := "Title"
 
-	flg := service.GenFlg(article, fieldName)
+	flg := service.GenMask(article, fieldName)
 
 	var actual uint32 = 2
 	assert.Equal(t, actual, flg)
 }
 
-func TestGenFlg_Id_Title(t *testing.T) {
+func TestGenMask_Id_Title(t *testing.T) {
 	article := repo.Article{}
 
-	flg := service.GenFlg(article, "Id", "Title")
+	flg := service.GenMask(article, "Id", "Title")
 
 	var actual uint32 = 3
 	assert.Equal(t, actual, flg)
@@ -39,7 +39,7 @@ func TestGenArgsSlice(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argsFlg = service.GenFlg(st, "Title")
+	argsFlg = service.GenMask(st, "Title")
 	st.Title = "test"
 	args := service.GenArgsSlice(argsFlg, st, [2]int{})
 
@@ -53,7 +53,7 @@ func TestGenArgsSlice_Limit(t *testing.T) {
 		st      Hoge
 	)
 
-	argsFlg = service.GenFlg(st, "Title", "Limit")
+	argsFlg = service.GenMask(st, "Title", "Limit")
 	st.Title = "test"
 	args := service.GenArgsSlice(argsFlg, st, [2]int{1, 2})
 
@@ -68,7 +68,7 @@ func TestGenArgsSlice_Multi(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argsFlg = service.GenFlg(st, "Id", "Title")
+	argsFlg = service.GenMask(st, "Id", "Title")
 	st.Id = 1
 	st.Title = "test"
 	args := service.GenArgsSlice(argsFlg, st, [2]int{})
@@ -83,7 +83,7 @@ func TestGenArgsQuery(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argsFlg = service.GenFlg(st, "Title")
+	argsFlg = service.GenMask(st, "Title")
 	args, limit := service.GenArgsQuery(argsFlg, st)
 
 	actual := "WHERE title=? "
@@ -95,7 +95,7 @@ func TestGenArgsQuery_Multi(t *testing.T) {
 		argsFlg uint32
 		st      Hoge
 	)
-	argsFlg = service.GenFlg(st, "Title", "Date", "Limit")
+	argsFlg = service.GenMask(st, "Title", "Date", "Limit")
 	args, limit := service.GenArgsQuery(argsFlg, st)
 
 	actual := "WHERE title=? AND date=? LIMIT ?,? "

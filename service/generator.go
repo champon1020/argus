@@ -10,17 +10,17 @@ import (
 // For example, if you want a query like '... WHERE title=?',
 // you should set 'Title' of string to fieldNames.
 // But selected struct 'st' must have a field named 'Title'.
-func GenFlg(st interface{}, fieldNames ...string) (flg uint32) {
+func GenMask(st interface{}, fieldNames ...string) (mask uint32) {
 	v := reflect.Indirect(reflect.ValueOf(st))
 	t := v.Type()
 	for _, fn := range fieldNames {
 		if fn == "Limit" {
-			flg |= 1 << 31
+			mask |= 1 << 31
 			continue
 		}
 		for j := 0; j < t.NumField(); j++ {
 			if fn == t.Field(j).Name {
-				flg |= 1 << j
+				mask |= 1 << j
 			}
 		}
 	}
