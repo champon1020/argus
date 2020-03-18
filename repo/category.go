@@ -81,6 +81,31 @@ func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int
 	return
 }
 
+func (category *Category) Exist(tx *sql.Tx, option *service.QueryOption) (categoryId string, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT id FROM categories " + argsQuery
+
+	var rows *sql.Rows
+	defer RowsClose(rows)
+	if rows, err = tx.Query(query, args...); err != nil || rows == nil {
+		QueryError.
+			SetErr(err).
+			SetValues("query", query).
+			SetValues("args", args).
+			AppendTo(Errors)
+		return
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&categoryId); err != nil {
+			ScanError.SetErr(err).AppendTo(Errors)
+			break
+		}
+	}
+	return
+}
+
 // This is article category struct which is used only response.
 // Difference of normal category struct is that this has property of 'ArticleNum'.
 // ArticleNum is the number of articles related to this category.

@@ -19,15 +19,6 @@ Flow:
 	- Insert the pair of article_id and category_ids.
 */
 func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
-	var newCa []Category
-	if newCa, _, err = ExtractCategory(mysql.DB, article); err != nil {
-		return
-	}
-	for _, c := range newCa {
-		service.GenNewId(service.IdLen, &c.Id)
-	}
-	article.Categories = newCa
-
 	var d []Draft
 	option := &service.QueryOption{
 		Args: []interface{}{article.ContentHash},
@@ -42,11 +33,39 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 	// Start transaction
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
 		if len(d) > 0 {
-			d[0].DeleteDraft(tx)
+			if err = d[0].DeleteDraft(tx); err != nil {
+				return
+			}
 		}
-		if err = InsertCategories(tx, newCa); err != nil {
-			return
+
+		var (
+			categoryId        string
+			articleCategories []Category
+		)
+		wg := new(sync.WaitGroup)
+		for _, c := range article.Categories {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				if categoryId, err = c.Exist(tx, &service.QueryOption{
+					Args: []interface{}{c.Name},
+					Aom:  map[string]service.Ope{"Name": service.Eq},
+				}); err != nil {
+					return
+				}
+				if categoryId == "" {
+					service.GenNewId(service.IdLen, &c.Id)
+					if err = c.InsertCategory(tx); err != nil {
+						return
+					}
+				} else {
+					c.Id = categoryId
+				}
+				articleCategories = append(articleCategories, c)
+			}()
 		}
+		wg.Wait()
+		article.Categories = articleCategories
 		if err = article.InsertArticle(tx); err != nil {
 			return
 		}
@@ -72,52 +91,42 @@ Flow:
 	- Delete the pair of article_id and old category_ids.
 */
 func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
-	var newCa, delCa []Category
-	if newCa, delCa, err = ExtractCategory(mysql.DB, article); err != nil {
-		return
-	}
-	for _, c := range newCa {
-		service.GenNewId(service.IdLen, &c.Id)
-	}
-
 	// Start transaction
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
-		errCnt := 0
+		var (
+			categoryId        string
+			articleCategories []Category
+		)
 		wg := new(sync.WaitGroup)
-		wg.Add(3)
-
-		// update articles
-		go func() {
-			defer wg.Done()
-			if err = article.UpdateArticle(tx); err != nil {
-				errCnt++
-			}
-		}()
-
-		// insert new categories
-		go func() {
-			defer wg.Done()
-			a := Article{Id: article.Id, Categories: newCa}
-			if err = InsertCategories(tx, newCa); err != nil {
-				errCnt++
-			}
-			if err = a.InsertArticleCategory(tx); err != nil {
-				errCnt++
-			}
-		}()
-
-		// delete old categories
-		go func() {
-			defer wg.Done()
-			a := Article{Id: article.Id, Categories: delCa}
-			if err = a.DeleteArticleCategoryByBoth(tx); err != nil {
-				errCnt++
-			}
-		}()
+		for _, c := range article.Categories {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				if categoryId, err = c.Exist(tx, &service.QueryOption{
+					Args: []interface{}{c.Name},
+					Aom:  map[string]service.Ope{"Name": service.Eq},
+				}); err != nil {
+					return
+				}
+				if categoryId == "" {
+					service.GenNewId(service.IdLen, &c.Id)
+					if err = c.InsertCategory(tx); err != nil {
+						return
+					}
+				} else {
+					c.Id = categoryId
+				}
+				articleCategories = append(articleCategories, c)
+			}()
+		}
 		wg.Wait()
-
-		if errCnt != 0 {
-			err = errors.New("error happened in UpdateArticleCmd()")
+		article.Categories = articleCategories
+		// delete func
+		if err = article.UpdateArticle(tx); err != nil {
+			return
+		}
+		if err = article.InsertArticleCategory(tx); err != nil {
+			return
 		}
 		return
 	})

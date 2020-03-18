@@ -50,14 +50,15 @@ func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 // Insert column to article_category table.
 func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
 	cmd := "INSERT INTO article_category (article_id, category_id) " +
-		"VALUES (?, ?)"
+		"SELECT ?,? WHERE NOT EXISTS (" +
+		"SELECT * FROM article_category WHERE article_id=? AND category_id=?)"
 
 	wg := new(sync.WaitGroup)
 	for _, c := range article.Categories {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
+			if _, err = tx.Exec(cmd, article.Id, c.Id, article.Id, c.Id); err != nil {
 				CmdError.SetErr(err).AppendTo(Errors)
 			}
 		}()
