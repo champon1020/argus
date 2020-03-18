@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/champon1020/argus"
@@ -85,7 +86,7 @@ func RegisterImageHandler(c *gin.Context) (err error) {
 	}
 
 	fileHeaders := form.File["images"]
-	path := argus.EnvVars.Get("resource")
+	path := filepath.Join(argus.EnvVars.Get("resource"), "images")
 	if err = service.SaveMultipartFiles(path, fileHeaders); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
