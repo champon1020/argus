@@ -103,70 +103,52 @@ func FindArticleByIdHandler(
 	)
 
 	sortedId := c.Query("sortedId")
+	res := new(ArticleResponseType)
 
 	wg := new(sync.WaitGroup)
-	wg.Add(3)
-	// get article
-	go func() {
-		defer wg.Done()
-		option := &service.QueryOption{
-			Args: []interface{}{sortedId},
-			Aom:  map[string]service.Ope{"SortedId": service.Eq},
-		}
-		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}()
-	// get next article
-	var next []repo.Article
+	wg.Add(2)
+	// get current and previous article
 	go func() {
 		defer wg.Done()
 		option := &service.QueryOption{
 			Args:   []interface{}{sortedId},
-			Aom:    map[string]service.Ope{"SortedId": service.Gt},
+			Aom:    map[string]service.Ope{"SortedId": service.Ge},
+			Limit:  2,
+			Offset: 0,
+			Order:  "sorted_id",
+		}
+		option.BuildArgs()
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		res.Article = articles[0]
+		if len(articles) == 2 {
+			res.Prev = articles[1]
+		}
+	}()
+	// get next article
+	go func() {
+		defer wg.Done()
+		option := &service.QueryOption{
+			Args:   []interface{}{sortedId},
+			Aom:    map[string]service.Ope{"SortedId": service.Lt},
 			Limit:  1,
 			Offset: 0,
 			Order:  "sorted_id",
 			Desc:   true,
 		}
 		option.BuildArgs()
-		if next, err = repoCmd(*repo.GlobalMysql, option); err != nil {
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-	}()
-	// get pre
-	var prev []repo.Article
-	go func() {
-		defer wg.Done()
-		option := &service.QueryOption{
-			Args:   []interface{}{sortedId},
-			Aom:    map[string]service.Ope{"SortedId": service.Gt},
-			Limit:  1,
-			Offset: 0,
-			Order:  "sorted_id",
-		}
-		option.BuildArgs()
-		if prev, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
-			return
+		if len(articles) == 1 {
+			res.Next = articles[0]
 		}
 	}()
 	wg.Wait()
 
-	if len(articles) == 0 || len(next) == 0 || len(prev) == 0 {
-		err = errors.New("article is not found")
-		BasicError.SetErr(err).AppendTo(Errors)
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	res := ArticleResponseType{
-		Article: articles[0],
-		Next:    next[0],
-		Prev:    prev[0],
-	}
 	if response, err = ParseToJson(&res); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return

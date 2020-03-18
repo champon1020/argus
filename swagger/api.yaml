@@ -32,8 +32,14 @@ paths:
                 properties:
                   article:
                     $ref: '#/components/schemas/Article'
+                  next:
+                    $ref: '#/components/schemas/Article'
+                  prev:
+                    $ref: '#/components/schemas/Article'
                 required:
                   - article
+                  - next
+                  - prev
   /api/find/article/list:
     get:
       summary: Return a list of articles.
