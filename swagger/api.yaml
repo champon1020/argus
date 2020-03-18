@@ -16,10 +16,10 @@ paths:
     get:
       summary: Return an aritlce by selected id.
       parameters:
-        - name: id
+        - name: sortedId
           in: query
           required: true
-          description: Article id.
+          description: Article sorted id.
           schema:
             type: number
       responses:
@@ -71,8 +71,8 @@ paths:
           description: A title of articles.
           schema:
             type: string
-        - name: query
-          in: path
+        - name: p
+          in: query
           required: false
           description: Page of view.
           schema:
@@ -98,7 +98,7 @@ paths:
     get:
       summary: Return a list of articles by title.
       parameters:
-        - name: create_date
+        - name: createDate
           in: query
           required: true
           description: A created date of articles.
@@ -325,7 +325,7 @@ paths:
         - name: imgName
           in: query
           required: true
-          description: page of the view (offset)
+          description: Image name.
           schema:
             type: string
       responses:
@@ -340,6 +340,8 @@ components:
       type: object
       properties:
         id:
+          type: string
+        sortedId:
           type: number
         title:
           type: string
@@ -359,6 +361,7 @@ components:
           type: boolean
       required:
         - id
+        - sortedId
         - title
         - categories
         - createDate
@@ -370,7 +373,7 @@ components:
       type: object
       properties:
         id:
-          type: number
+          type: string
         name:
           type: string
         articleNum:
@@ -383,6 +386,8 @@ components:
       type: object
       properties:
         id:
+          type: string
+        sortedId:
           type: number
         title:
           type: string
@@ -396,6 +401,7 @@ components:
           type: string
       required:
         - id
+        - sortedId
         - title
         - categories
         - contentHash
@@ -404,7 +410,7 @@ components:
       type: object
       properties:
         id:
-          type: number
+          type: string
         title:
           type: string
         categories:
@@ -413,7 +419,7 @@ components:
             type: object
             properties:
               id:
-                type: number
+                type: string
               name:
                 type: string
             required:
@@ -436,7 +442,7 @@ components:
       type: object
       properties:
         id:
-          type: number
+          type: string
         title:
           type: string
         categories:
