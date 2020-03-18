@@ -32,35 +32,10 @@ func (ac *ArticleCategory) InsertArticleCategory(tx *sql.Tx) (err error) {
 	return
 }
 
-func (ac *ArticleCategory) DeleteArticleCategoryByArticle(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM article_category WHERE article_id=?"
-	args := []interface{}{ac.ArticleId}
-	if _, err = tx.Exec(cmd, args...); err != nil {
-		CmdError.
-			SetErr(err).
-			SetValues("cmd", cmd).
-			SetValues("args", args).
-			AppendTo(Errors)
-	}
-	return
-}
-
-func (ac *ArticleCategory) DeleteArticleCategoryByCategoryId(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM article_category WHERE category_id=?"
-	args := []interface{}{ac.CategoryId}
-	if _, err = tx.Exec(cmd, args...); err != nil {
-		CmdError.
-			SetErr(err).
-			SetValues("cmd", cmd).
-			SetValues("args", args).
-			AppendTo(Errors)
-	}
-	return
-}
-
-func (ac *ArticleCategory) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM article_category WHERE article_id=? AND category_id=?"
-	args := []interface{}{ac.ArticleId, ac.CategoryId}
+func DeleteArticleCategory(tx *sql.Tx, option *service.QueryOption) (err error) {
+	args := option.Args
+	query := service.GenArgsQuery(*option)
+	cmd := "DELETE FROM article_category " + query
 	if _, err = tx.Exec(cmd, args...); err != nil {
 		CmdError.
 			SetErr(err).

@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+	"strconv"
 	"sync"
 
 	"github.com/champon1020/argus/service"
@@ -110,6 +111,7 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 			categoryId        string
 			articleCategories []Category
 		)
+
 		wg := new(sync.WaitGroup)
 		for _, c := range article.Categories {
 			wg.Add(1)
@@ -134,7 +136,19 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 		}
 		wg.Wait()
 		article.Categories = articleCategories
-		// delete func
+
+		// Delete from article_category
+		option := &service.QueryOption{
+			Args: []interface{}{article.Id},
+			Aom:  map[string]service.Ope{"ArticleId": service.Eq},
+		}
+		for i, c := range article.Categories {
+			option.Args = append(option.Args, c.Id)
+			option.Aom["CategoryId#"+strconv.Itoa(i)] = service.Ne
+		}
+		if err = DeleteArticleCategory(tx, option); err != nil {
+			return
+		}
 
 		// Insert into articles
 		if err = article.UpdateArticle(tx); err != nil {

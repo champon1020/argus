@@ -16,6 +16,17 @@ var defaultErr Error = Error{
 	},
 }
 
+func TestError(t *testing.T) {
+	err := Error{
+		Err:    nil,
+		Type:   "",
+		Values: make(map[string]interface{}),
+	}
+	err.SetErr(errors.New("test error"))
+	value := 1
+	err.SetValues("test", value)
+}
+
 func TestError_AppendTo(t *testing.T) {
 	var errs []Error
 	Error{

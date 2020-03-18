@@ -78,6 +78,68 @@ func TestRegisterArticleCmd(t *testing.T) {
 	}
 }
 
+func TestUpdateArticleCommand(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	mysql := MySQL{}
+	mysql.DB = db
+	if err != nil {
+		t.Fatalf("unable to create db mock")
+	}
+	defer db.Close()
+
+	article := Article{
+		Id:    "TEST_ID",
+		Title: "test",
+		Categories: []Category{
+			{Id: "TEST_CA_ID", Name: "c1"},
+		},
+		CreateDate:  testTime,
+		UpdateDate:  testTime,
+		ContentHash: "0123456789",
+		ImageHash:   "9876543210",
+		Private:     false,
+	}
+
+	// Start transaction
+	mock.ExpectBegin()
+
+	// category.Exist()
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT id FROM categories WHERE name=?")).
+		WithArgs("c1").
+		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}))
+
+	// InsertCategories()
+	mock.ExpectExec("INSERT INTO categories").
+		WithArgs("TEST_CA_ID", "c1", "c1").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// DeleteArticleCategory()
+	mock.ExpectExec("DELETE FROM article_category").
+		WithArgs("TEST_ID", "TEST_CA_ID").
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	// UpdateArticle()
+	mock.ExpectExec("UPDATE articles").
+		WithArgs("test", testTime, "0123456789", "9876543210", false, "TEST_ID").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// InsertArticleCategory()
+	mock.ExpectExec("INSERT INTO article_category").
+		WithArgs("TEST_ID", "TEST_CA_ID", "TEST_ID", "TEST_CA_ID").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// Commit
+	mock.ExpectCommit()
+
+	if err := UpdateArticleCommand(mysql, article); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error was occured in testing function\n")
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("different from expectation: %v\n", err)
+	}
+}
+
 func TestDraftCmd_Insert(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	mysql := MySQL{}

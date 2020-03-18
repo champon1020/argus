@@ -96,6 +96,7 @@ var (
 
 // Convert camel case string to snake case.
 func ToSnakeCase(str string) (snake string) {
+	str = strings.Split(str, "#")[0]
 	snake = matchFirstCap.ReplaceAllString(str, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
 	snake = strings.ToLower(snake)

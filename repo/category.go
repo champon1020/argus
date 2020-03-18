@@ -29,25 +29,6 @@ func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
 	return
 }
 
-func (category *Category) UpdateCategory(tx *sql.Tx) (err error) {
-	cmd := "UPDATE categories " +
-		"SET name=? " +
-		"WHERE id=? "
-
-	if _, err = tx.Exec(cmd, category.Name, category.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
-	}
-	return
-}
-
-func (category *Category) DeleteCategory(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM categories WHERE id=?"
-	if _, err = tx.Exec(cmd, category.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
-	}
-	return
-}
-
 // Get the number of articles where category_id is equal to object.
 func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int, err error) {
 	query := "SELECT COUNT(article_id) FROM article_category WHERE category_id=?"
