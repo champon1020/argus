@@ -65,13 +65,27 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 			}()
 		}
 		wg.Wait()
+
+		// Insert into articles
 		article.Categories = articleCategories
 		if err = article.InsertArticle(tx); err != nil {
 			return
 		}
-		if err = article.InsertArticleCategory(tx); err != nil {
-			return
+
+		// Insert into article_category
+		ac := ArticleCategory{ArticleId: article.Id}
+		wg = new(sync.WaitGroup)
+		for _, c := range article.Categories {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				ac.CategoryId = c.Id
+				if err = ac.InsertArticleCategory(tx); err != nil {
+					return
+				}
+			}()
 		}
+		wg.Wait()
 		return
 	})
 	// End transaction
@@ -122,12 +136,26 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 		wg.Wait()
 		article.Categories = articleCategories
 		// delete func
+
+		// Insert into articles
 		if err = article.UpdateArticle(tx); err != nil {
 			return
 		}
-		if err = article.InsertArticleCategory(tx); err != nil {
-			return
+
+		// Insert into article_category
+		ac := ArticleCategory{ArticleId: article.Id}
+		wg = new(sync.WaitGroup)
+		for _, c := range article.Categories {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				ac.CategoryId = c.Id
+				if err = ac.InsertArticleCategory(tx); err != nil {
+					return
+				}
+			}()
 		}
+		wg.Wait()
 		return
 	})
 	// End transaction

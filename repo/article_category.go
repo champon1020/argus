@@ -6,6 +6,71 @@ import (
 	"github.com/champon1020/argus/service"
 )
 
+type ArticleCategory struct {
+	ArticleId  string
+	CategoryId string
+}
+
+// Insert column to article_category table.
+func (ac *ArticleCategory) InsertArticleCategory(tx *sql.Tx) (err error) {
+	cmd := "INSERT INTO article_category (article_id, category_id) " +
+		"SELECT ?,? WHERE NOT EXISTS (" +
+		"SELECT * FROM article_category WHERE article_id=? AND category_id=?)"
+
+	args := []interface{}{
+		ac.ArticleId, ac.CategoryId,
+		ac.ArticleId, ac.CategoryId,
+	}
+	if _, err = tx.Exec(cmd, args...); err != nil {
+		CmdError.
+			SetErr(err).
+			SetValues("cmd", cmd).
+			SetValues("args", args).
+			AppendTo(Errors)
+		return
+	}
+	return
+}
+
+func (ac *ArticleCategory) DeleteArticleCategoryByArticle(tx *sql.Tx) (err error) {
+	cmd := "DELETE FROM article_category WHERE article_id=?"
+	args := []interface{}{ac.ArticleId}
+	if _, err = tx.Exec(cmd, args...); err != nil {
+		CmdError.
+			SetErr(err).
+			SetValues("cmd", cmd).
+			SetValues("args", args).
+			AppendTo(Errors)
+	}
+	return
+}
+
+func (ac *ArticleCategory) DeleteArticleCategoryByCategoryId(tx *sql.Tx) (err error) {
+	cmd := "DELETE FROM article_category WHERE category_id=?"
+	args := []interface{}{ac.CategoryId}
+	if _, err = tx.Exec(cmd, args...); err != nil {
+		CmdError.
+			SetErr(err).
+			SetValues("cmd", cmd).
+			SetValues("args", args).
+			AppendTo(Errors)
+	}
+	return
+}
+
+func (ac *ArticleCategory) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
+	cmd := "DELETE FROM article_category WHERE article_id=? AND category_id=?"
+	args := []interface{}{ac.ArticleId, ac.CategoryId}
+	if _, err = tx.Exec(cmd, args...); err != nil {
+		CmdError.
+			SetErr(err).
+			SetValues("cmd", cmd).
+			SetValues("args", args).
+			AppendTo(Errors)
+	}
+	return
+}
+
 func FindArticleByCategoryId(
 	db *sql.DB,
 	categoryNames []string,

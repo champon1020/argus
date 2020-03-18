@@ -2,7 +2,6 @@ package repo
 
 import (
 	"database/sql"
-	"sync"
 	"time"
 
 	"github.com/champon1020/argus/service"
@@ -47,26 +46,6 @@ func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 	return
 }
 
-// Insert column to article_category table.
-func (article *Article) InsertArticleCategory(tx *sql.Tx) (err error) {
-	cmd := "INSERT INTO article_category (article_id, category_id) " +
-		"SELECT ?,? WHERE NOT EXISTS (" +
-		"SELECT * FROM article_category WHERE article_id=? AND category_id=?)"
-
-	wg := new(sync.WaitGroup)
-	for _, c := range article.Categories {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if _, err = tx.Exec(cmd, article.Id, c.Id, article.Id, c.Id); err != nil {
-				CmdError.SetErr(err).AppendTo(Errors)
-			}
-		}()
-	}
-	wg.Wait()
-	return
-}
-
 func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 	cmd := "UPDATE articles " +
 		"SET title=?, update_date=?, content_hash=?, image_hash=?, private=? " +
@@ -90,33 +69,6 @@ func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 	if _, err = tx.Exec(cmd, article.Id); err != nil {
 		CmdError.SetErr(err).AppendTo(Errors)
 	}
-	return
-}
-
-// Remove column which of article_id is equal to object from article_category table.
-func (article *Article) DeleteArticleCategoryByArticle(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM article_category WHERE article_id=?"
-	if _, err = tx.Exec(cmd, article.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
-	}
-	return
-}
-
-// Remove column that both of article_id and category_id is equal to object.
-func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
-	cmd := "DELETE FROM article_category WHERE article_id=? AND category_id=?"
-
-	wg := new(sync.WaitGroup)
-	for _, c := range article.Categories {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if _, err = tx.Exec(cmd, article.Id, c.Id); err != nil {
-				CmdError.SetErr(err).AppendTo(Errors)
-			}
-		}()
-	}
-	wg.Wait()
 	return
 }
 
