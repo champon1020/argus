@@ -9,13 +9,13 @@ import (
 // Id: primary key
 // Name: category name
 type Category struct {
-	Id   int    `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
 func (category *Category) InsertCategory(tx *sql.Tx) (err error) {
 	cmd := "INSERT INTO categories (id, name) " +
-		"SELECT ?, ? " +
+		"SELECT ?,? " +
 		"WHERE NOT EXISTS (" +
 		"SELECT name FROM categories WHERE name=?)"
 
@@ -85,16 +85,15 @@ func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int
 // Difference of normal category struct is that this has property of 'ArticleNum'.
 // ArticleNum is the number of articles related to this category.
 type CategoryResponse struct {
-	Id         int    `json:"id"`
+	Id         string `json:"id"`
 	Name       string `json:"name"`
 	ArticleNum int    `json:"articleNum"`
 }
 
-func (category *Category) FindCategory(db *sql.DB, argsMask uint32, ol OffsetLimit) (categories []CategoryResponse, err error) {
-	args := service.GenArgsSlice(argsMask, category, ol)
-	whereQuery, limitQuery := service.GenArgsQuery(argsMask, category)
-	query := "SELECT * FROM categories " + whereQuery +
-		limitQuery
+func FindCategory(db *sql.DB, option *service.QueryOption) (categories []CategoryResponse, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT * FROM categories " + argsQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

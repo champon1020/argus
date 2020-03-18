@@ -3,32 +3,36 @@ CREATE DATABASE IF NOT EXISTS argus_test;
 USE argus_test;
 
 CREATE TABLE IF NOT EXISTS articles(
-    id int primary key not null,
+    id varchar(128) primary key not null,
+    sorted_id int not null auto_increment,
     title varchar(256) not null,
     create_date datetime not null,
     update_date datetime not null,
     content_hash varchar(512) not null,
     image_hash varchar(512) not null,
-    private int default 0
+    private int default 0,
+    index sorted_index (sorted_id)
 );
 
 CREATE TABLE IF NOT EXISTS drafts(
-    id int primary key not null,
+    id varchar(128) primary key not null,
+    sorted_id int not null auto_increment,
     title varchar(256) not null,
     categories varchar(256) not null,
     update_date datetime not null,
     content_hash varchar(512) not null,
-    image_hash varchar(512) not null
+    image_hash varchar(512) not null,
+    index sorted_index (sorted_id)
 );
 
 CREATE TABLE IF NOT EXISTS categories(
-    id int not null primary key,
+    id varchar(128) not null primary key,
     name varchar(128) not null
 );
 
 CREATE TABLE IF NOT EXISTS article_category(
-    article_id int not null,
-    category_id int not null,
+    article_id varchar(128) not null,
+    category_id varchar(128) not null,
     constraint fk_article_id_with_category
         foreign key (article_id)
         references articles (id)

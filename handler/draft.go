@@ -11,7 +11,7 @@ import (
 )
 
 type DraftRequestArticle struct {
-	Id          int             `json:"id"`
+	Id          string          `json:"id"`
 	Title       string          `json:"title"`
 	Categories  []repo.Category `json:"categories"`
 	ContentHash string          `json:"contentHash"`

@@ -17,7 +17,8 @@ import (
 // ImageHash: image file name
 // private: this article is whether public or not
 type Article struct {
-	Id          int        `json:"id"`
+	Id          string     `json:"id"`
+	SortedId    int        `json:"sortedId"`
 	Title       string     `json:"title"`
 	Categories  []Category `json:"categories"`
 	CreateDate  time.Time  `json:"createDate"`
@@ -121,11 +122,10 @@ func (article *Article) DeleteArticleCategoryByBoth(tx *sql.Tx) (err error) {
 // ArgFlg determines where statement's arguments.
 // For Example, 'argsMask = 0101' means
 // it includes first and third fields of objects in where statement.
-func (article *Article) FindArticle(db *sql.DB, argsMask uint32, ol OffsetLimit) (articles []Article, err error) {
-	args := service.GenArgsSlice(argsMask, article, ol)
-	whereQuery, limitQuery := service.GenArgsQuery(argsMask, article)
-	query := "SELECT * FROM articles " + whereQuery +
-		"ORDER BY create_date DESC " + limitQuery
+func FindArticle(db *sql.DB, option *service.QueryOption) (articles []Article, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT * FROM articles " + argsQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -142,6 +142,7 @@ func (article *Article) FindArticle(db *sql.DB, argsMask uint32, ol OffsetLimit)
 	for rows.Next() {
 		if err := rows.Scan(
 			&a.Id,
+			&a.SortedId,
 			&a.Title,
 			&a.CreateDate,
 			&a.UpdateDate,
@@ -190,10 +191,10 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 	return
 }
 
-func (article *Article) FindArticlesNum(db *sql.DB, argsMask uint32) (articleNum int, err error) {
-	args := service.GenArgsSlice(argsMask, article)
-	whereQuery, _ := service.GenArgsQuery(argsMask, article)
-	query := "SELECT COUNT(id) FROM articles " + whereQuery
+func FindArticlesNum(db *sql.DB, option *service.QueryOption) (articleNum int, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT COUNT(id) FROM articles " + argsQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

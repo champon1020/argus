@@ -14,7 +14,8 @@ import (
 // ContentHash: content file name (html file)
 // ImageHash: image file name
 type Draft struct {
-	Id          int       `json:"id"`
+	Id          string    `json:"id"`
+	SortedId    int       `json:"sortedId"`
 	Title       string    `json:"title"`
 	Categories  string    `json:"categories"`
 	UpdateDate  time.Time `json:"updateDate"`
@@ -24,7 +25,7 @@ type Draft struct {
 
 func (draft *Draft) InsertDraft(tx *sql.Tx) (err error) {
 	cmd := "INSERT INTO drafts " +
-		"(id, title, categories, update_date, content_hash, image_hash)" +
+		"(id, title, categories, update_date, content_hash, image_hash) " +
 		"VALUES (?, ?, ?, ?, ?, ?)"
 
 	if _, err := tx.Exec(cmd,
@@ -66,11 +67,10 @@ func (draft *Draft) DeleteDraft(tx *sql.Tx) (err error) {
 	return
 }
 
-func (draft *Draft) FindDrafts(db *sql.DB, argsMask uint32, ol OffsetLimit) (drafts []Draft, err error) {
-	args := service.GenArgsSlice(argsMask, draft, ol)
-	whereQuery, limitQuery := service.GenArgsQuery(argsMask, draft)
-	query := "SELECT * FROM drafts " + whereQuery +
-		"ORDER BY create_date DESC " + limitQuery
+func FindDrafts(db *sql.DB, option *service.QueryOption) (drafts []Draft, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT * FROM drafts " + argsQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -87,6 +87,7 @@ func (draft *Draft) FindDrafts(db *sql.DB, argsMask uint32, ol OffsetLimit) (dra
 	for rows.Next() {
 		if err := rows.Scan(
 			&d.Id,
+			&d.SortedId,
 			&d.Title,
 			&d.Categories,
 			&d.UpdateDate,
@@ -101,10 +102,10 @@ func (draft *Draft) FindDrafts(db *sql.DB, argsMask uint32, ol OffsetLimit) (dra
 	return
 }
 
-func (draft *Draft) FindDraftsNum(db *sql.DB, argsMask uint32) (draftNum int, err error) {
-	args := service.GenArgsSlice(argsMask, draft)
-	whereQuery, _ := service.GenArgsQuery(argsMask, draft)
-	query := "SELECT COUNT(id) FROM drafts " + whereQuery
+func FindDraftsNum(db *sql.DB, option *service.QueryOption) (draftNum int, err error) {
+	args := (*option).Args
+	argsQuery := service.GenArgsQuery(*option)
+	query := "SELECT COUNT(id) FROM drafts " + argsQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

@@ -9,8 +9,7 @@ import (
 func FindArticleByCategoryId(
 	db *sql.DB,
 	categoryNames []string,
-	argsMask uint32,
-	ol OffsetLimit,
+	option *service.QueryOption,
 ) (articles []Article, err error) {
 	query := "SELECT * FROM articles " +
 		"WHERE id IN (" +
@@ -22,9 +21,8 @@ func FindArticleByCategoryId(
 	query += whereQuery
 	query += ")) "
 
-	args = append(args, service.GenArgsSlice(argsMask, Article{}, ol)...)
-	_, limitQuery := service.GenArgsQuery(argsMask, Article{})
-	query += "ORDER BY create_date DESC " + limitQuery
+	args = append(args, (*option).Args...)
+	query += service.GenArgsQuery(*option)
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -41,6 +39,7 @@ func FindArticleByCategoryId(
 	for rows.Next() {
 		if err := rows.Scan(
 			&a.Id,
+			&a.SortedId,
 			&a.Title,
 			&a.CreateDate,
 			&a.UpdateDate,
