@@ -125,7 +125,7 @@ func (article *Article) FindArticle(db *sql.DB, argsFlg uint32, ol OffsetLimit) 
 	args := service.GenArgsSlice(argsFlg, article, ol)
 	whereQuery, limitQuery := service.GenArgsQuery(argsFlg, article)
 	query := "SELECT * FROM articles " + whereQuery +
-		"ORDER BY id DESC " + limitQuery
+		"ORDER BY create_date DESC " + limitQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

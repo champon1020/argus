@@ -24,7 +24,7 @@ func FindArticleByCategoryId(
 
 	args = append(args, service.GenArgsSlice(argsFlg, Article{}, ol)...)
 	_, limitQuery := service.GenArgsQuery(argsFlg, Article{})
-	query += limitQuery + "OFFSET ?"
+	query += "ORDER BY create_date DESC " + limitQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)

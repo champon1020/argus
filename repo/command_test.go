@@ -68,7 +68,7 @@ func TestRegisterArticleCmd(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1).AddRow(2))
 
 	// FindDrafts() with content hash
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY id DESC")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY create_date DESC")).
 		WithArgs("0123456789").
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
@@ -121,7 +121,7 @@ func TestDraftCmd_Insert(t *testing.T) {
 	}
 
 	// FindDrafts()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY id DESC")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY create_date DESC")).
 		WithArgs("0123456789").
 		WillReturnRows(sqlmock.NewRows([]string{}))
 
@@ -170,7 +170,7 @@ func TestDraftCmd_Update(t *testing.T) {
 	}
 
 	// FindDrafts()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY id DESC")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ORDER BY create_date DESC")).
 		WithArgs("0123456789").
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -208,7 +208,7 @@ func TestFindArticleCmd_All(t *testing.T) {
 	argsFlg := service.GenFlg(article, "Limit")
 
 	// FindArticle()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles ORDER BY id DESC LIMIT ?,?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles ORDER BY create_date DESC LIMIT ?,?")).
 		WithArgs(0, 0).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -254,7 +254,7 @@ func TestFindArticleCmd_Title(t *testing.T) {
 	argsFlg := service.GenFlg(article, "Title", "Limit")
 
 	// FindArticle()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles WHERE title=? ORDER BY id DESC LIMIT ?,?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles WHERE title=? ORDER BY create_date DESC LIMIT ?,?")).
 		WithArgs("test", 0, 0).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -304,7 +304,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 			"SELECT article_id FROM article_category "+
 			"WHERE category_id IN ("+
 			"SELECT id FROM categories "+
-			"WHERE name=? AND name=? )) LIMIT ?,?")).
+			"WHERE name=? AND name=? )) ORDER BY create_date DESC LIMIT ?,?")).
 		WithArgs("c1", "c2", 0, 0).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -389,7 +389,7 @@ func TestFindDraftCmd(t *testing.T) {
 	argsFlg := service.GenFlg(draft, "Limit")
 
 	// FindDraft()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts ORDER BY id DESC LIMIT ?,?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts ORDER BY create_date DESC LIMIT ?,?")).
 		WithArgs(0, 0).
 		WillReturnRows(
 			sqlmock.NewRows([]string{

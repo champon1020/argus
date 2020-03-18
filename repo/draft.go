@@ -70,7 +70,7 @@ func (draft *Draft) FindDrafts(db *sql.DB, argsFlg uint32, ol OffsetLimit) (draf
 	args := service.GenArgsSlice(argsFlg, draft, ol)
 	whereQuery, limitQuery := service.GenArgsQuery(argsFlg, draft)
 	query := "SELECT * FROM drafts " + whereQuery +
-		"ORDER BY id DESC " + limitQuery
+		"ORDER BY create_date DESC " + limitQuery
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
