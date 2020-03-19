@@ -1,7 +1,7 @@
 version: "3"
 services:
   api:
-    image: argus
+    image: champon1020/argus
     container_name: argus
     env_file:
       - ./.env
