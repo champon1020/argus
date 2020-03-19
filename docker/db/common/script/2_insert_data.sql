@@ -5,14 +5,16 @@ LOAD DATA LOCAL INFILE
     INTO TABLE articles
     CHARACTER SET utf8
     FIELDS TERMINATED BY ','
-    ENCLOSED BY '"';
+    ENCLOSED BY '"'
+    (id, title, create_date, update_date, content_hash, image_hash, private);
 
 LOAD DATA LOCAL INFILE
     "/docker/db/csv/drafts.csv"
     INTO TABLE drafts
     CHARACTER SET utf8
     FIELDS TERMINATED BY ','
-    ENCLOSED BY '"';
+    ENCLOSED BY '"'
+    (id, title, categories, update_date, content_hash, image_hash);
 
 LOAD DATA LOCAL INFILE
     "/docker/db/csv/categories.csv"
