@@ -113,15 +113,15 @@ func TestUpdateArticleCommand(t *testing.T) {
 		WithArgs("TEST_CA_ID", "c1", "c1").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	// DeleteArticleCategory()
-	mock.ExpectExec("DELETE FROM article_category").
-		WithArgs("TEST_ID", "TEST_CA_ID").
-		WillReturnResult(sqlmock.NewResult(0, 0))
-
 	// UpdateArticle()
 	mock.ExpectExec("UPDATE articles").
 		WithArgs("test", testTime, "0123456789", "9876543210", false, "TEST_ID").
 		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// DeleteArticleCategory()
+	mock.ExpectExec("DELETE FROM article_category").
+		WithArgs("TEST_ID", "TEST_CA_ID").
+		WillReturnResult(sqlmock.NewResult(0, 0))
 
 	// InsertArticleCategory()
 	mock.ExpectExec("INSERT INTO article_category").
@@ -235,14 +235,11 @@ func TestFindArticleCmd_All(t *testing.T) {
 	defer db.Close()
 
 	option := &service.QueryOption{
-		Args:   nil,
-		Aom:    nil,
 		Limit:  1,
 		Offset: 2,
 		Order:  "create_date",
 		Desc:   true,
 	}
-	option.BuildArgs()
 
 	// FindArticle()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles ORDER BY create_date DESC LIMIT ?,?")).
@@ -288,14 +285,18 @@ func TestFindArticleCmd_Title(t *testing.T) {
 	defer db.Close()
 
 	option := &service.QueryOption{
-		Args:   []interface{}{"test"},
-		Aom:    map[string]service.Ope{"Title": service.Eq},
+		Args: []*service.QueryArgs{
+			{
+				Value: "test",
+				Name:  "Title",
+				Ope:   service.Eq,
+			},
+		},
 		Limit:  1,
 		Offset: 2,
 		Order:  "create_date",
 		Desc:   true,
 	}
-	option.BuildArgs()
 
 	// FindArticle()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles WHERE title=? ORDER BY create_date DESC LIMIT ?,?")).
@@ -341,14 +342,11 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 
 	categoryNames := []string{"c1", "c2"}
 	option := &service.QueryOption{
-		Args:   nil,
-		Aom:    nil,
 		Limit:  1,
 		Offset: 2,
 		Order:  "create_date",
 		Desc:   true,
 	}
-	option.BuildArgs()
 
 	// FindArticleByCategoryId()
 	mock.ExpectQuery(regexp.QuoteMeta(
@@ -440,14 +438,11 @@ func TestFindDraftCmd(t *testing.T) {
 	defer db.Close()
 
 	option := &service.QueryOption{
-		Args:   nil,
-		Aom:    nil,
 		Limit:  1,
 		Offset: 2,
 		Order:  "sorted_id",
 		Desc:   true,
 	}
-	option.BuildArgs()
 
 	// FindDraft()
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts ORDER BY sorted_id DESC LIMIT ?,?")).

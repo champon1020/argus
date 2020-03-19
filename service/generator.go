@@ -23,44 +23,49 @@ const (
 	Le Ope = "<=" // Less or Equal
 )
 
-// map[<Struct Field Name>]<Operation>
-type ArgsOpeMap map[string]Ope
+type QueryArgs struct {
+	Value interface{}
+	Name  string
+	Ope   Ope
+}
 
 // Database query information.
 type QueryOption struct {
-	Args   []interface{}
-	Aom    ArgsOpeMap
+	Args   []*QueryArgs
 	Limit  int
 	Offset int
 	Order  string
 	Desc   bool
 }
 
-func (op *QueryOption) BuildArgs() {
-	if op.Limit != 0 {
-		op.Args = append(op.Args, op.Offset, op.Limit)
-	}
-}
-
 var DefaultOption = &QueryOption{
-	Args:   []interface{}{},
-	Aom:    map[string]Ope{},
+	Args:   []*QueryArgs{},
 	Limit:  0,
 	Offset: 0,
 	Order:  "",
 	Desc:   false,
 }
 
+func GenArgsSlice(option QueryOption) (args []interface{}) {
+	for _, a := range option.Args {
+		args = append(args, a.Value)
+	}
+	if option.Limit != 0 {
+		args = append(args, option.Offset, option.Limit)
+	}
+	return
+}
+
 // Generate arguments query used in database query.
 // Return values is query(query of following 'WHERE')
 func GenArgsQuery(option QueryOption) (query string) {
-	for k, v := range option.Aom {
+	for _, a := range option.Args {
 		if query == "" {
 			query += "WHERE "
 		} else {
 			query += "AND "
 		}
-		query += ToSnakeCase(k) + v.toString() + "? "
+		query += ToSnakeCase(a.Name) + a.Ope.toString() + "? "
 	}
 	if option.Order != "" {
 		query += "ORDER BY " + option.Order + " "

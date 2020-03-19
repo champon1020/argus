@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/champon1020/argus"
+
 	"github.com/champon1020/argus/service"
 )
 
@@ -76,7 +78,7 @@ func (article *Article) DeleteArticle(tx *sql.Tx) (err error) {
 // For Example, 'argsMask = 0101' means
 // it includes first and third fields of objects in where statement.
 func FindArticle(db *sql.DB, option *service.QueryOption) (articles []Article, err error) {
-	args := (*option).Args
+	args := service.GenArgsSlice(*option)
 	argsQuery := service.GenArgsQuery(*option)
 	query := "SELECT * FROM articles " + argsQuery
 
@@ -90,6 +92,9 @@ func FindArticle(db *sql.DB, option *service.QueryOption) (articles []Article, e
 			AppendTo(Errors)
 		return
 	}
+
+	argus.Logger.Println(query)
+	argus.Logger.Println(args)
 
 	var a Article
 	for rows.Next() {
@@ -145,7 +150,7 @@ func (article *Article) FindCategoryByArticleId(db *sql.DB) (categories []Catego
 }
 
 func FindArticlesNum(db *sql.DB, option *service.QueryOption) (articleNum int, err error) {
-	args := (*option).Args
+	args := service.GenArgsSlice(*option)
 	argsQuery := service.GenArgsQuery(*option)
 	query := "SELECT COUNT(id) FROM articles " + argsQuery
 

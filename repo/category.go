@@ -54,7 +54,7 @@ func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int
 }
 
 func (category *Category) Exist(tx *sql.Tx, option *service.QueryOption) (categoryId string, err error) {
-	args := (*option).Args
+	args := service.GenArgsSlice(*option)
 	argsQuery := service.GenArgsQuery(*option)
 	query := "SELECT id FROM categories " + argsQuery
 
@@ -88,7 +88,7 @@ type CategoryResponse struct {
 }
 
 func FindCategory(db *sql.DB, option *service.QueryOption) (categories []CategoryResponse, err error) {
-	args := (*option).Args
+	args := service.GenArgsSlice(*option)
 	argsQuery := service.GenArgsQuery(*option)
 	query := "SELECT * FROM categories " + argsQuery
 
