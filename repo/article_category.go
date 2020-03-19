@@ -33,7 +33,7 @@ func (ac *ArticleCategory) InsertArticleCategory(tx *sql.Tx) (err error) {
 }
 
 func DeleteArticleCategory(tx *sql.Tx, option *service.QueryOption) (err error) {
-	args := option.Args
+	args := service.GenArgsSlice(*option)
 	query := service.GenArgsQuery(*option)
 	cmd := "DELETE FROM article_category " + query
 	if _, err = tx.Exec(cmd, args...); err != nil {
@@ -61,7 +61,7 @@ func FindArticleByCategoryId(
 	query += whereQuery
 	query += ")) "
 
-	args = append(args, (*option).Args...)
+	args = append(args, service.GenArgsSlice(*option)...)
 	query += service.GenArgsQuery(*option)
 
 	var rows *sql.Rows

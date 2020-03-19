@@ -48,12 +48,18 @@ func FindArticleHandler(
 		defer wg.Done()
 		ol := ParseOffsetLimit(p)
 		option := &service.QueryOption{
+			Args: []*service.QueryArgs{
+				{
+					Value: false,
+					Name:  "Private",
+					Ope:   service.Eq,
+				},
+			},
 			Limit:  ol[1],
 			Offset: ol[0],
 			Order:  "sorted_id",
 			Desc:   true,
 		}
-		option.BuildArgs()
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -97,10 +103,7 @@ func FindArticleByIdHandler(
 	c *gin.Context,
 	repoCmd repo.FindArticleCmd,
 ) (err error) {
-	var (
-		articles []repo.Article
-		response string
-	)
+	var response string
 
 	sortedId := c.Query("sortedId")
 	res := new(ArticleResponseType)
@@ -110,35 +113,57 @@ func FindArticleByIdHandler(
 	// get current and previous article
 	go func() {
 		defer wg.Done()
+		var articles []repo.Article
 		option := &service.QueryOption{
-			Args:   []interface{}{sortedId},
-			Aom:    map[string]service.Ope{"SortedId": service.Ge},
+			Args: []*service.QueryArgs{
+				{
+					Value: false,
+					Name:  "Private",
+					Ope:   service.Eq,
+				},
+				{
+					Value: sortedId,
+					Name:  "SortedId",
+					Ope:   service.Ge,
+				},
+			},
 			Limit:  2,
 			Offset: 0,
 			Order:  "sorted_id",
 		}
-		option.BuildArgs()
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		res.Article = articles[0]
-		if len(articles) == 2 {
+		if len(articles) > 0 {
+			res.Article = articles[0]
+		}
+		if len(articles) > 1 {
 			res.Prev = articles[1]
 		}
 	}()
 	// get next article
 	go func() {
 		defer wg.Done()
+		var articles []repo.Article
 		option := &service.QueryOption{
-			Args:   []interface{}{sortedId},
-			Aom:    map[string]service.Ope{"SortedId": service.Lt},
+			Args: []*service.QueryArgs{
+				{
+					Value: false,
+					Name:  "Private",
+					Ope:   service.Eq,
+				},
+				{
+					Value: sortedId,
+					Name:  "SortedId",
+					Ope:   service.Lt,
+				},
+			},
 			Limit:  1,
 			Offset: 0,
 			Order:  "sorted_id",
 			Desc:   true,
 		}
-		option.BuildArgs()
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -187,14 +212,23 @@ func FindArticleByTitleHandler(
 		defer wg.Done()
 		ol := ParseOffsetLimit(p)
 		option := &service.QueryOption{
-			Args:   []interface{}{c.Query("title")},
-			Aom:    map[string]service.Ope{"Title": service.Eq},
+			Args: []*service.QueryArgs{
+				{
+					Value: c.Query("title"),
+					Name:  "Title",
+					Ope:   service.Eq,
+				},
+				{
+					Value: false,
+					Name:  "Private",
+					Ope:   service.Eq,
+				},
+			},
 			Limit:  ol[1],
 			Offset: ol[0],
 			Order:  "sorted_id",
 			Desc:   true,
 		}
-		option.BuildArgs()
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -204,8 +238,13 @@ func FindArticleByTitleHandler(
 	go func() {
 		defer wg.Done()
 		option := &service.QueryOption{
-			Args: []interface{}{c.Query("title")},
-			Aom:  map[string]service.Ope{"Title": service.Eq},
+			Args: []*service.QueryArgs{
+				{
+					Value: c.Query("title"),
+					Name:  "Title",
+					Ope:   service.Eq,
+				},
+			},
 		}
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
@@ -244,8 +283,6 @@ func FindArticleByCreateDateHandler(
 		p           int
 	)
 
-	createDate := c.Query("createDate")
-
 	if p, err = ParsePage(c); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
@@ -259,14 +296,23 @@ func FindArticleByCreateDateHandler(
 		defer wg.Done()
 		ol := ParseOffsetLimit(p)
 		option := &service.QueryOption{
-			Args:   []interface{}{createDate},
-			Aom:    map[string]service.Ope{"CreateDate": service.Eq},
+			Args: []*service.QueryArgs{
+				{
+					Value: c.Query("CreateDate"),
+					Name:  "CreateDate",
+					Ope:   service.Eq,
+				},
+				{
+					Value: false,
+					Name:  "Private",
+					Ope:   service.Eq,
+				},
+			},
 			Limit:  ol[1],
 			Offset: ol[0],
 			Order:  "sorted_id",
 			Desc:   true,
 		}
-		option.BuildArgs()
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -276,8 +322,13 @@ func FindArticleByCreateDateHandler(
 	go func() {
 		defer wg.Done()
 		option := &service.QueryOption{
-			Args: []interface{}{createDate},
-			Aom:  map[string]service.Ope{"CreateDate": service.Eq},
+			Args: []*service.QueryArgs{
+				{
+					Value: c.Query("CreateDate"),
+					Name:  "CreateDate",
+					Ope:   service.Eq,
+				},
+			},
 		}
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
@@ -334,12 +385,18 @@ func FindArticleByCategoryHandler(
 		defer wg.Done()
 		ol := ParseOffsetLimit(p)
 		option := &service.QueryOption{
+			Args: []*service.QueryArgs{
+				{
+					Value: false,
+					Name:  "Private",
+					Ope:   service.Eq,
+				},
+			},
 			Limit:  ol[1],
 			Offset: ol[0],
 			Order:  "sorted_id",
 			Desc:   true,
 		}
-		option.BuildArgs()
 		if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -440,7 +497,6 @@ func FindDraftHandler(
 			Order:  "sorted_id",
 			Desc:   true,
 		}
-		option.BuildArgs()
 		if drafts, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return

@@ -162,19 +162,14 @@ func TestFindArticleByIdHandler(t *testing.T) {
 		"private": false
 	},
 	"prev": {
-		"id": "TEST_ID",
-		"sortedId": 1,
-		"title": "test",
-		"categories": [
-			{
-				"id": "TEST_CA_ID",
-				"name": "c1"
-			}
-		],
-		"createDate": "2020-03-09T00:00:00+09:00",
-		"updateDate": "2020-03-09T00:00:00+09:00",
-		"contentHash": "0123456789",
-		"imageHash": "9876543210",
+		"id": "",
+		"sortedId": 0,
+		"title": "",
+		"categories": null,
+		"createDate": "0001-01-01T00:00:00Z",
+		"updateDate": "0001-01-01T00:00:00Z",
+		"contentHash": "",
+		"imageHash": "",
 		"private": false
 	}
 }`

@@ -68,7 +68,7 @@ func (draft *Draft) DeleteDraft(tx *sql.Tx) (err error) {
 }
 
 func FindDrafts(db *sql.DB, option *service.QueryOption) (drafts []Draft, err error) {
-	args := (*option).Args
+	args := service.GenArgsSlice(*option)
 	argsQuery := service.GenArgsQuery(*option)
 	query := "SELECT * FROM drafts " + argsQuery
 
@@ -103,7 +103,7 @@ func FindDrafts(db *sql.DB, option *service.QueryOption) (drafts []Draft, err er
 }
 
 func FindDraftsNum(db *sql.DB, option *service.QueryOption) (draftNum int, err error) {
-	args := (*option).Args
+	args := service.GenArgsSlice(*option)
 	argsQuery := service.GenArgsQuery(*option)
 	query := "SELECT COUNT(id) FROM drafts " + argsQuery
 

@@ -12,27 +12,15 @@ type Hoge struct {
 	Title string
 }
 
-func TestQueryOption_BuildArgs(t *testing.T) {
-	option := &service.QueryOption{
-		Args:   []interface{}{"test"},
-		Aom:    service.ArgsOpeMap{"Title": service.Eq},
-		Limit:  2,
-		Offset: 3,
-		Order:  "",
-		Desc:   false,
-	}
-
-	option.BuildArgs()
-	assert.Equal(t, 3, len(option.Args))
-	assert.Equal(t, "test", option.Args[0])
-	assert.Equal(t, 3, option.Args[1])
-	assert.Equal(t, 2, option.Args[2])
-}
-
 func TestGenArgsQuery(t *testing.T) {
 	option := &service.QueryOption{
-		Args:   []interface{}{"test"},
-		Aom:    service.ArgsOpeMap{"Title": service.Eq},
+		Args: []*service.QueryArgs{
+			{
+				Value: "TEST_TITLE",
+				Name:  "Title",
+				Ope:   service.Eq,
+			},
+		},
 		Limit:  0,
 		Offset: 0,
 		Order:  "",
@@ -46,8 +34,18 @@ func TestGenArgsQuery(t *testing.T) {
 
 func TestGenArgsQuery_Multi(t *testing.T) {
 	option := &service.QueryOption{
-		Args:   []interface{}{1, "test"},
-		Aom:    service.ArgsOpeMap{"Id": service.Ge, "Title": service.Eq},
+		Args: []*service.QueryArgs{
+			{
+				Value: "TEST_ID",
+				Name:  "Id",
+				Ope:   service.Ge,
+			},
+			{
+				Value: "TEST_TITLE",
+				Name:  "Title",
+				Ope:   service.Eq,
+			},
+		},
 		Limit:  3,
 		Offset: 2,
 		Order:  "create_date",
