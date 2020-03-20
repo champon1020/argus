@@ -35,3 +35,6 @@ cd docker/db
 docker-compose up -d
 ```
 
+### Deploy
+
+Update soon

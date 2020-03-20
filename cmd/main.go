@@ -33,7 +33,7 @@ func NewRouter() *gin.Engine {
 		AllowAllOrigins: false,
 		AllowOrigins:    []string{"http://localhost:3000"},
 		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:    []string{"Origin"},
+		AllowHeaders:    []string{"Origin, Content-Type"},
 		ExposeHeaders:   []string{"Content-Length"},
 		MaxAge:          12 * time.Hour,
 	}

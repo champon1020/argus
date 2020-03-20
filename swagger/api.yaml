@@ -6,8 +6,6 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://blog.champon.tech
-    description: staging server
   - url: http://localhost:8000
     description: local server
 

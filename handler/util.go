@@ -33,15 +33,9 @@ func ParsePage(c *gin.Context) (p int, err error) {
 }
 
 // Get LimitOffset object from p (page num).
-func ParseOffsetLimit(p int) (ol repo.OffsetLimit) {
-	mx := argus.GlobalConfig.Web.MaxViewArticleNum
-	ol[1] = mx + 2
-	if p == 1 {
-		ol[0] = 0
-		ol[1]--
-		return
-	}
-	ol[0] = (p-1)*mx - 1
+func ParseOffsetLimit(p int, maxView int) (ol repo.OffsetLimit) {
+	ol[1] = maxView
+	ol[0] = (p - 1) * ol[1]
 	return
 }
 

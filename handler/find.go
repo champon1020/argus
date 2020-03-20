@@ -46,7 +46,7 @@ func FindArticleHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		ol := ParseOffsetLimit(p)
+		ol := ParseOffsetLimit(p, argus.GlobalConfig.Web.MaxViewImageNum)
 		option := &service.QueryOption{
 			Args: []*service.QueryArgs{
 				{
@@ -210,7 +210,7 @@ func FindArticleByTitleHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		ol := ParseOffsetLimit(p)
+		ol := ParseOffsetLimit(p, argus.GlobalConfig.Web.MaxViewImageNum)
 		option := &service.QueryOption{
 			Args: []*service.QueryArgs{
 				{
@@ -294,7 +294,7 @@ func FindArticleByCreateDateHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		ol := ParseOffsetLimit(p)
+		ol := ParseOffsetLimit(p, argus.GlobalConfig.Web.MaxViewImageNum)
 		option := &service.QueryOption{
 			Args: []*service.QueryArgs{
 				{
@@ -383,7 +383,7 @@ func FindArticleByCategoryHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		ol := ParseOffsetLimit(p)
+		ol := ParseOffsetLimit(p, argus.GlobalConfig.Web.MaxViewImageNum)
 		option := &service.QueryOption{
 			Args: []*service.QueryArgs{
 				{
@@ -490,7 +490,7 @@ func FindDraftHandler(
 	// get articles
 	go func() {
 		defer wg.Done()
-		ol := ParseOffsetLimit(p)
+		ol := ParseOffsetLimit(p, argus.GlobalConfig.Web.MaxViewImageNum)
 		option := &service.QueryOption{
 			Limit:  ol[1],
 			Offset: ol[0],
