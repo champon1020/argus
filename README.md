@@ -10,38 +10,28 @@ Update soon.
 
 Update deployment usage soon.
 
-### Api server
+### Local
 
 Local
 
 ```
-cd cmd
-go build -o argus dev
-./argus
+cd docker/local
+docker-compose up -d
 ```
 
-Staging
+### Staging
+
+Api server
 
 ```
-docker build . -t argus
-
 cd docker/api
-docker-compose -f docker-compose.api_stg.yml up -d
+docker-compose up -d
 ```
 
-### Database server
-
-Local
+Database server
 
 ```
-cd docker/db/local
-docker-compose -f docker-compose.db_local.yml up -d
-```
-
-Staging
-
-```
-cd docker/db/server
-docker-compose -f docker-compose.db_stg.yml up -d
+cd docker/db
+docker-compose up -d
 ```
 

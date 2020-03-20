@@ -1,0 +1,65 @@
+version: "3"
+services:
+  api:
+    build: ../../
+    container_name: argus_dev
+    environment:
+      ARGUS_MODE: "dev"
+      ARGUS_LOG_PATH: "/logs"
+      ARGUS_CONFIG_PATH: "/config.json"
+      ARGUS_RESOURCE_PATH: "/usr/share/nginx/html"
+    ports:
+      - "8000:8000"
+    volumes:
+      - "../../resource_debug:/usr/share/nginx/html"
+      - "../../logs:/logs"
+      - "../../config.json:/config.json"
+    networks:
+      devnet_default:
+        ipv4_address: 172.30.0.2
+
+  db:
+    image: mysql:5.7
+    container_name: argus_db_dev
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: argus_test
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+      TZ: "Asia/Tokyo"
+    ports:
+      - "43306:43306"
+    volumes:
+      - "../db/entry:/docker-entrypoint-initdb.d"
+      - "../db/custom.cnf:/etc/mysql/conf.d/custom.cnf"
+      - "./data:/docker/db/csv"
+    networks:
+      devnet_default:
+        ipv4_address: 172.30.0.3
+
+  file_server:
+    image: nginx:latest
+    container_name: argus_file_dev
+    ports:
+      - "8081:80"
+    volumes:
+      - "../../resource_debug:/usr/share/nginx/html"
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: "my-swagger-ui"
+    ports:
+      - "8082:8082"
+    volumes:
+      - "../../../swagger/api.yaml:/api.yaml"
+    environment:
+      SWAGGER_JSON: /api.yaml
+
+networks:
+  devnet_default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.1/24

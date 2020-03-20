@@ -2,9 +2,9 @@ version: "3"
 services:
   db:
     image: mysql:5.7
-    container_name: argus_db
+    container_name: argus_db_stg
     env_file:
-      - ./.env
+      - .env
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
       MYSQL_DATABASE: argus_test
@@ -15,7 +15,7 @@ services:
     ports:
       - "33306:3306"
     volumes:
-      - "../common/script:/docker-entrypoint-initdb.d"
-      - "../common/custom.cnf:/etc/mysql/conf.d/custom.cnf"
-      - "../common/data:/docker/db/csv"
+      - "./entry:/docker-entrypoint-initdb.d"
+      - "./custom.cnf:/etc/mysql/conf.d/custom.cnf"
+      - "./data:/docker/db/csv"
       - "./script:/docker/db/script"

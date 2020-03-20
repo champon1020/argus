@@ -2,9 +2,9 @@ version: "3"
 services:
   api:
     image: champon1020/argus
-    container_name: argus
+    container_name: argus_stg
     env_file:
-      - ./.env
+      - .env
     environment:
       ARGUS_MODE: "staging"
       ARGUS_LOG_PATH: "${ARGUS_LOG_PATH}"
@@ -13,4 +13,4 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - "/var/www/blog_dev:/var/www/blog_dev"
+      - "${ARGUS_RESOURCE_PATH}:${ARGUS_RESOURCE_PATH}"
