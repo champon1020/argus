@@ -10,9 +10,48 @@ servers:
     description: local server
 
 paths:
+  /api/find/article/pickup:
+    get:
+      summary: Return pick up articles.
+      responses:
+        '200':
+          description: A JSON of articles array.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                required:
+                  - articles
   /api/find/article/id:
     get:
       summary: Return an aritlce by selected id.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Article id.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON of article.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    $ref: '#/components/schemas/Article'
+                required:
+                  - article
+  /api/find/article/sortedId:
+    get:
+      summary: Return an aritlce by selected sortedId and next, previous article.
       parameters:
         - name: sortedId
           in: query

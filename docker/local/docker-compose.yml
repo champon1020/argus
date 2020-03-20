@@ -1,7 +1,7 @@
 version: "3"
 services:
   api:
-    build: ../../
+    image: argus
     container_name: argus_dev
     environment:
       ARGUS_MODE: "dev"

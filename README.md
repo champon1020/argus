@@ -15,6 +15,8 @@ Update deployment usage soon.
 Local
 
 ```
+docker build . -t argus
+
 cd docker/local
 docker-compose up -d
 ```

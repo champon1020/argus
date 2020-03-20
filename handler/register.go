@@ -92,6 +92,8 @@ func RegisterImageHandler(c *gin.Context) (err error) {
 		return
 	}
 
-	fmt.Fprint(c.Writer, http.StatusOK)
+	c.Writer.Header().Set("Content-Type", "text/html")
+	c.Writer.Header().Set("location", argus.GlobalConfig.Web.Host+"/manage/images")
+	c.Writer.WriteHeader(http.StatusMovedPermanently)
 	return
 }
