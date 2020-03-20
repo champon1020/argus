@@ -71,6 +71,7 @@ func NewRouter() *gin.Engine {
 		update := private.Group("/update")
 		{
 			update.PUT("/article", handler.UpdateArticleController)
+			update.PUT("/article/object", handler.UpdateArticleObjController)
 		}
 
 		delete := private.Group("/delete")

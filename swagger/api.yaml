@@ -318,7 +318,7 @@ paths:
       responses:
         '200':
           description: Success
-        '503':
+        '500':
           description: Failed
 
   /api/private/register/image:
@@ -337,7 +337,7 @@ paths:
       responses:
         '200':
           description: Success
-        '503':
+        '500':
           description: Failed
 
   /api/private/update/article:
@@ -360,7 +360,27 @@ paths:
       responses:
         '200':
           description: Success
-        '503':
+        '500':
+          description: Failed
+
+  /api/private/update/article/object:
+    put:
+      summary: Update article only object (not include content).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                article:
+                  $ref: '#/components/schemas/RequestArticle'
+              required:
+                - article
+      responses:
+        '200':
+          description: Success
+        '500':
           description: Failed
 
   /api/private/draft/article:
