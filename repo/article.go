@@ -24,7 +24,7 @@ type Article struct {
 	UpdateDate  time.Time  `json:"updateDate"`
 	ContentHash string     `json:"contentHash"`
 	ImageHash   string     `json:"imageHash"`
-	Private     bool       `json:"private"`
+	Private     bool       `json:"isPrivate"`
 }
 
 func (article *Article) InsertArticle(tx *sql.Tx) (err error) {

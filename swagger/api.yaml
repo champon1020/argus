@@ -426,7 +426,7 @@ components:
           type: string
         imageHash:
           type: string
-        private:
+        isPrivate:
           type: boolean
       required:
         - id
@@ -437,7 +437,7 @@ components:
         - updateDate
         - contentHash
         - imageHash
-        - private
+        - isPrivate
     Category:
       type: object
       properties:
@@ -498,7 +498,7 @@ components:
           type: string
         imageHash:
           type: string
-        private:
+        isPrivate:
           type: boolean
       required:
         - id
@@ -506,7 +506,7 @@ components:
         - categories
         - contentHash
         - imageHash
-        - private
+        - isPrivate
     RequestDraft:
       type: object
       properties:
