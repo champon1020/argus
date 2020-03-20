@@ -57,6 +57,7 @@ func NewRouter() *gin.Engine {
 	{
 		find := private.Group("/find")
 		{
+			find.GET("/article/list/all", handler.FindAllArticleController)
 			find.GET("/draft/list", handler.FindDraftController)
 			find.GET("/image/list", handler.FindImageController)
 		}

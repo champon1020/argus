@@ -216,6 +216,33 @@ paths:
                       $ref: '#/components/schemas/Category'
                 required:
                   - categories
+  /api/privaate/find/article/list/all:
+    get:
+      summary: Return a list of articles (including private)
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page of view.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A JSON array of articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  maxPage:
+                    type: number
+                required:
+                  - articles
+                  - maxPage
   /api/private/find/draft/list:
     get:
       summary: Return a list of drafts.
@@ -238,13 +265,10 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Draft'
-                  draftsNum:
-                    type: number
                   maxPage:
                     type: number
                 required:
                   - drafts
-                  - draftsNum
                   - maxPage
   /api/private/find/image/list:
     get:

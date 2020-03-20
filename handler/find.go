@@ -508,6 +508,71 @@ func FindArticleByCategoryHandler(
 	return
 }
 
+func FindAllArticleController(c *gin.Context) {
+	_ = FindAllArticleHandler(
+		c,
+		repo.FindArticleCommand,
+		repo.FindArticlesNumCommand)
+}
+
+func FindAllArticleHandler(
+	c *gin.Context,
+	repoCmd repo.FindArticleCmd,
+	repoNumCmd repo.FindArticleNumCmd,
+) (err error) {
+	var (
+		articles    []repo.Article
+		articlesNum int
+		response    string
+		p           int
+	)
+
+	if p, err = ParsePage(c); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	res := new(ResponseType)
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	// get articles
+	go func() {
+		defer wg.Done()
+		ol := ParseOffsetLimit(p, argus.GlobalConfig.Web.MaxViewSettingArticleNum)
+		option := &service.QueryOption{
+			Args:   []*service.QueryArgs{},
+			Limit:  ol[1],
+			Offset: ol[0],
+			Order:  "sorted_id",
+			Desc:   true,
+		}
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		res.Articles = articles
+	}()
+	// get the number of total articles
+	go func() {
+		defer wg.Done()
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, service.DefaultOption); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		res.MaxPage = GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewSettingArticleNum)
+	}()
+	wg.Wait()
+
+	if response, err = ParseToJson(&res); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
+	return
+}
+
 type PickUpArticleResponse struct {
 	Articles []repo.Article `json:"articles"`
 }
