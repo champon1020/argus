@@ -46,23 +46,18 @@ func DeleteArticleCategory(tx *sql.Tx, option *service.QueryOption) (err error) 
 	return
 }
 
-func FindArticleByCategoryId(
-	db *sql.DB,
-	categoryNames []string,
-	option *service.QueryOption,
-) (articles []Article, err error) {
+func FindArticleByCategoryId(db *sql.DB, option *service.QueryOption) (articles []Article, err error) {
 	query := "SELECT * FROM articles " +
 		"WHERE id IN (" +
 		"SELECT article_id FROM article_category " +
 		"WHERE category_id IN (" +
 		"SELECT id FROM categories "
 
-	args, whereQuery := GenArgsFromStrSlice(categoryNames)
-	query += whereQuery
-	query += ")) "
+	query += service.GenWhereQuery(*option) + ")) "
+	query += service.GenOrderQuery(*option)
+	query += service.GenLimitQuery(*option)
 
-	args = append(args, service.GenArgsSlice(*option)...)
-	query += service.GenArgsQuery(*option)
+	args := service.GenArgsSlice(*option)
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -98,16 +93,18 @@ func FindArticleByCategoryId(
 	return
 }
 
-func FindArticlesNumByCategoryId(db *sql.DB, categoryNames []string) (articleNum int, err error) {
+func FindArticlesNumByCategoryId(db *sql.DB, option *service.QueryOption) (articleNum int, err error) {
 	query := "SELECT COUNT(id) FROM articles " +
 		"WHERE id IN (" +
 		"SELECT article_id FROM article_category " +
 		"WHERE category_id IN (" +
 		"SELECT id FROM categories "
 
-	args, whereQuery := GenArgsFromStrSlice(categoryNames)
-	query += whereQuery
-	query += ")) "
+	query += service.GenWhereQuery(*option) + ")) "
+	query += service.GenOrderQuery(*option)
+	query += service.GenLimitQuery(*option)
+
+	args := service.GenArgsSlice(*option)
 
 	var rows *sql.Rows
 	defer RowsClose(rows)
@@ -125,23 +122,6 @@ func FindArticlesNumByCategoryId(db *sql.DB, categoryNames []string) (articleNum
 			ScanError.SetErr(err).AppendTo(Errors)
 			break
 		}
-	}
-	return
-}
-
-// Generate where statement of query from string slice.
-func GenArgsFromStrSlice(sl []string) (args []interface{}, whereQuery string) {
-	const initQuery = "WHERE "
-	whereQuery = initQuery
-	for i, cn := range sl {
-		if i != 0 {
-			whereQuery += "AND "
-		}
-		whereQuery += "name=? "
-		args = append(args, cn)
-	}
-	if whereQuery == initQuery {
-		whereQuery = ""
 	}
 	return
 }

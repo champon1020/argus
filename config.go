@@ -15,9 +15,11 @@ type DbConf struct {
 }
 
 type WebConf struct {
-	MaxViewArticleNum        int `json:"maxViewArticleNum"`
-	MaxViewImageNum          int `json:"maxViewImageNum"`
-	MaxViewSettingArticleNum int `json:"maxViewSettingArticleNum"`
+	Host                     string `json:"host"`
+	Pickup                   []int  `json:"pickup"`
+	MaxViewArticleNum        int    `json:"maxViewArticleNum"`
+	MaxViewImageNum          int    `json:"maxViewImageNum"`
+	MaxViewSettingArticleNum int    `json:"maxViewSettingArticleNum"`
 }
 
 type Config struct {
@@ -64,6 +66,8 @@ func (config *Configurations) load() (err error) {
 		config.Dev = Config{
 			Db: DbConf{},
 			Web: WebConf{
+				Pickup:                   []int{1},
+				Host:                     "",
 				MaxViewArticleNum:        4,
 				MaxViewImageNum:          12,
 				MaxViewSettingArticleNum: 10,

@@ -58,7 +58,11 @@ func GenArgsSlice(option QueryOption) (args []interface{}) {
 
 // Generate arguments query used in database query.
 // Return values is query(query of following 'WHERE')
-func GenArgsQuery(option QueryOption) (query string) {
+func GenArgsQuery(option QueryOption) string {
+	return GenWhereQuery(option) + GenOrderQuery(option) + GenLimitQuery(option)
+}
+
+func GenWhereQuery(option QueryOption) (query string) {
 	for _, a := range option.Args {
 		if query == "" {
 			query += "WHERE "
@@ -67,12 +71,20 @@ func GenArgsQuery(option QueryOption) (query string) {
 		}
 		query += ToSnakeCase(a.Name) + a.Ope.toString() + "? "
 	}
+	return
+}
+
+func GenOrderQuery(option QueryOption) (query string) {
 	if option.Order != "" {
 		query += "ORDER BY " + option.Order + " "
 		if option.Desc {
 			query += "DESC "
 		}
 	}
+	return
+}
+
+func GenLimitQuery(option QueryOption) (query string) {
 	if option.Limit != 0 {
 		query += "LIMIT ?,? "
 	}

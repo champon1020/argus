@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http/httptest"
 	"os"
@@ -31,12 +30,12 @@ func TestMain(m *testing.M) {
 	os.Exit(ret)
 }
 
-func TestFindArticleHandler(t *testing.T) {
+func TestFindArticleByIdHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"GET",
-		"/api/find/article/list",
+		"/api/find/article/list/id?id=2",
 		nil)
 
 	repoCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (articles []repo.Article, _ error) {
@@ -56,36 +55,28 @@ func TestFindArticleHandler(t *testing.T) {
 		return
 	}
 
-	articlesNum := 10
-	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
-	repoNumCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (int, error) {
-		return articlesNum, nil
-	}
-
 	expectedBody := `{
-	"articles": [
-		{
-			"id": "TEST_ID",
-			"sortedId": 1,
-			"title": "test",
-			"categories": [
-				{
-					"id": "TEST_CA_ID",
-					"name": "c1"
-				}
-			],
-			"createDate": "2020-03-09T00:00:00+09:00",
-			"updateDate": "2020-03-09T00:00:00+09:00",
-			"contentHash": "0123456789",
-			"imageHash": "9876543210",
-			"private": false
-		}
-	],
-	"maxPage": ` + strconv.Itoa(mxPage) + `
+	"article": {
+		"id": "TEST_ID",
+		"sortedId": 1,
+		"title": "test",
+		"categories": [
+			{
+				"id": "TEST_CA_ID",
+				"name": "c1"
+			}
+		],
+		"createDate": "2020-03-09T00:00:00+09:00",
+		"updateDate": "2020-03-09T00:00:00+09:00",
+		"contentHash": "0123456789",
+		"imageHash": "9876543210",
+		"private": false
+	}
 }`
 
-	if err := FindArticleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
+	if err := FindArticleByIdHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
 		t.Fatalf("error happend in handler")
 	}
 
@@ -103,7 +94,7 @@ func TestFindArticleHandler(t *testing.T) {
 	buf.Reset()
 }
 
-func TestFindArticleByIdHandler(t *testing.T) {
+func TestFindArticleBySortedIdHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
@@ -174,8 +165,82 @@ func TestFindArticleByIdHandler(t *testing.T) {
 	}
 }`
 
-	if err := FindArticleByIdHandler(ctx, repoCmdMock); err != nil {
+	if err := FindArticleBySortedIdHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
+		t.Fatalf("error happend in handler")
+	}
+
+	res := w.Result()
+	assert.Equal(t, res.StatusCode, 200)
+
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
+	if err := json.Indent(&buf, body, "", "	"); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
+		t.Fatalf("Unable to indent json string\n")
+	}
+	assert.Equal(t, expectedBody, buf.String())
+	buf.Reset()
+}
+
+func TestFindArticleHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(
+		"GET",
+		"/api/find/article/list",
+		nil)
+
+	repoCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (articles []repo.Article, _ error) {
+		articles = append(articles, repo.Article{
+			Id:       "TEST_ID",
+			SortedId: 1,
+			Title:    "test",
+			Categories: []repo.Category{
+				{"TEST_CA_ID", "c1"},
+			},
+			CreateDate:  testTime,
+			UpdateDate:  testTime,
+			ContentHash: "0123456789",
+			ImageHash:   "9876543210",
+			Private:     false,
+		})
+		return
+	}
+
+	articlesNum := 10
+	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
+	repoNumCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (int, error) {
+		return articlesNum, nil
+	}
+
+	expectedBody := `{
+	"articles": [
+		{
+			"id": "TEST_ID",
+			"sortedId": 1,
+			"title": "test",
+			"categories": [
+				{
+					"id": "TEST_CA_ID",
+					"name": "c1"
+				}
+			],
+			"createDate": "2020-03-09T00:00:00+09:00",
+			"updateDate": "2020-03-09T00:00:00+09:00",
+			"contentHash": "0123456789",
+			"imageHash": "9876543210",
+			"private": false
+		}
+	],
+	"maxPage": ` + strconv.Itoa(mxPage) + `
+}`
+
+	if err := FindArticleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
 		t.Fatalf("error happend in handler")
 	}
 
@@ -347,13 +412,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 		"/api/find/article/list/category?category=c1&category=c2",
 		nil)
 
-	repoCmdMock := func(_ repo.MySQL, caNames []string, _ *service.QueryOption) (articles []repo.Article, err error) {
-		if len(caNames) != 2 {
-			err = errors.New("category names length is not valid")
-		}
-		if caNames[0] != "c1" || caNames[1] != "c2" {
-			err = errors.New("category names are not valid")
-		}
+	repoCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (articles []repo.Article, err error) {
 		articles = append(articles, repo.Article{
 			Id:       "TEST_ID",
 			SortedId: 1,
@@ -373,7 +432,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 
 	articlesNum := 10
 	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
-	repoNumCmdMock := func(_ repo.MySQL, _ []string) (int, error) {
+	repoNumCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (int, error) {
 		return articlesNum, nil
 	}
 
@@ -404,6 +463,72 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 }`
 
 	if err := FindArticleByCategoryHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
+		t.Fatalf("error happend in handler")
+	}
+
+	res := w.Result()
+	assert.Equal(t, res.StatusCode, 200)
+
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
+	if err := json.Indent(&buf, body, "", "	"); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
+		t.Fatalf("Unable to indent json string\n")
+	}
+	assert.Equal(t, expectedBody, buf.String())
+	buf.Reset()
+}
+
+func TestFindPickUpArticleHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(
+		"GET",
+		"/api/find/article/list/create-date?createDate=2020-03-09T00:00:00Z",
+		nil)
+
+	repoCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (articles []repo.Article, err error) {
+		articles = append(articles, repo.Article{
+			Id:       "TEST_ID",
+			SortedId: 1,
+			Title:    "test",
+			Categories: []repo.Category{
+				{"TEST_CA_ID", "c1"},
+			},
+			CreateDate:  testTime,
+			UpdateDate:  testTime,
+			ContentHash: "0123456789",
+			ImageHash:   "9876543210",
+			Private:     false,
+		})
+		return
+	}
+
+	expectedBody := `{
+	"articles": [
+		{
+			"id": "TEST_ID",
+			"sortedId": 1,
+			"title": "test",
+			"categories": [
+				{
+					"id": "TEST_CA_ID",
+					"name": "c1"
+				}
+			],
+			"createDate": "2020-03-09T00:00:00+09:00",
+			"updateDate": "2020-03-09T00:00:00+09:00",
+			"contentHash": "0123456789",
+			"imageHash": "9876543210",
+			"private": false
+		}
+	]
+}`
+
+	if err := FindPickUpArticleHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		*Errors = []argus.Error{}
 		t.Fatalf("error happend in handler")

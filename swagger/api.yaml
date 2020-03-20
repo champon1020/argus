@@ -6,15 +6,52 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://blog.champon.tech
-    description: staging server
   - url: http://localhost:8000
     description: local server
 
 paths:
+  /api/find/article/pickup:
+    get:
+      summary: Return pick up articles.
+      responses:
+        '200':
+          description: A JSON of articles array.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                required:
+                  - articles
   /api/find/article/id:
     get:
       summary: Return an aritlce by selected id.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Article id.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON of article.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    $ref: '#/components/schemas/Article'
+                required:
+                  - article
+  /api/find/article/sortedId:
+    get:
+      summary: Return an aritlce by selected sortedId and next, previous article.
       parameters:
         - name: sortedId
           in: query
@@ -179,7 +216,34 @@ paths:
                       $ref: '#/components/schemas/Category'
                 required:
                   - categories
-  /api/find/draft/list:
+  /api/private/find/article/list/all:
+    get:
+      summary: Return a list of articles (including private)
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page of view.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A JSON array of articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  maxPage:
+                    type: number
+                required:
+                  - articles
+                  - maxPage
+  /api/private/find/draft/list:
     get:
       summary: Return a list of drafts.
       parameters:
@@ -201,15 +265,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Draft'
-                  draftsNum:
-                    type: number
                   maxPage:
                     type: number
                 required:
                   - drafts
-                  - draftsNum
                   - maxPage
-  /api/find/image/list:
+  /api/private/find/image/list:
     get:
       summary: Return a list of image names.
       parameters:
@@ -237,7 +298,7 @@ paths:
                   - images
                   - next
 
-  /api/register/article:
+  /api/private/register/article:
     post:
       summary: Register new article.
       requestBody:
@@ -260,7 +321,7 @@ paths:
         '503':
           description: Failed
 
-  /api/register/image:
+  /api/private/register/image:
     post:
       summary: Register new image.
       requestBody:
@@ -279,7 +340,7 @@ paths:
         '503':
           description: Failed
 
-  /api/update/article:
+  /api/private/update/article:
     put:
       summary: Update article.
       requestBody:
@@ -302,7 +363,7 @@ paths:
         '503':
           description: Failed
 
-  /api/draft/article:
+  /api/private/draft/article:
     post:
       summary: Draft article.
       requestBody:
@@ -324,7 +385,7 @@ paths:
         '500':
           description: Failed
 
-  /api/delete/image:
+  /api/private/delete/image:
     delete:
       summary: Delete image.
       parameters:

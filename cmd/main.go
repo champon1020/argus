@@ -33,7 +33,7 @@ func NewRouter() *gin.Engine {
 		AllowAllOrigins: false,
 		AllowOrigins:    []string{"http://localhost:3000"},
 		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:    []string{"Origin"},
+		AllowHeaders:    []string{"Origin", "Content-Type"},
 		ExposeHeaders:   []string{"Content-Length"},
 		MaxAge:          12 * time.Hour,
 	}
@@ -43,35 +43,45 @@ func NewRouter() *gin.Engine {
 
 	find := router.Group("/api/find")
 	{
+		find.GET("/article/pickup", handler.FindPickUpArticleController)
 		find.GET("/article/id", handler.FindArticleByIdController)
+		find.GET("/article/sortedId", handler.FindArticleBySortedIdController)
 		find.GET("/article/list", handler.FindArticleController)
 		find.GET("/article/list/title", handler.FindArticleByTitleController)
 		find.GET("/article/list/create-date", handler.FindArticleByCreateDateController)
 		find.GET("/article/list/category", handler.FindArticleByCategoryController)
 		find.GET("/category/list", handler.FindCategoryController)
-		find.GET("/draft/list", handler.FindDraftController)
-		find.GET("/image/list", handler.FindImageController)
 	}
 
-	register := router.Group("/api/register")
+	private := router.Group("/api/private")
 	{
-		register.POST("/article", handler.RegisterArticleController)
-		register.POST("/image", handler.RegisterImageController)
-	}
+		find := private.Group("/find")
+		{
+			find.GET("/article/list/all", handler.FindAllArticleController)
+			find.GET("/draft/list", handler.FindDraftController)
+			find.GET("/image/list", handler.FindImageController)
+		}
 
-	update := router.Group("/api/update")
-	{
-		update.PUT("/article", handler.UpdateArticleController)
-	}
+		register := private.Group("/register")
+		{
+			register.POST("/article", handler.RegisterArticleController)
+			register.POST("/image", handler.RegisterImageController)
+		}
 
-	delete := router.Group("/api/delete")
-	{
-		delete.DELETE("/image", handler.DeleteImageController)
-	}
+		update := private.Group("/update")
+		{
+			update.PUT("/article", handler.UpdateArticleController)
+		}
 
-	draft := router.Group("/api/draft")
-	{
-		draft.POST("/article", handler.DraftController)
+		delete := private.Group("/delete")
+		{
+			delete.DELETE("/image", handler.DeleteImageController)
+		}
+
+		draft := private.Group("/draft")
+		{
+			draft.POST("/article", handler.DraftController)
+		}
 	}
 
 	return router
