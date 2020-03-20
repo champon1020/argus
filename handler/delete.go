@@ -14,11 +14,14 @@ func DeleteImageController(c *gin.Context) {
 }
 
 func DeleteImageHandler(c *gin.Context) (err error) {
-	imgName := c.Query("imgName")
-	fp := filepath.Join(argus.EnvVars.Get("resource"), "images", imgName)
-	if err = service.DeleteFile(fp); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
+	imgNames := c.QueryArray("imageNames")
+
+	for _, name := range imgNames {
+		fp := filepath.Join(argus.EnvVars.Get("resource"), "images", name)
+		if err = service.DeleteFile(fp); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	c.Writer.WriteHeader(http.StatusOK)

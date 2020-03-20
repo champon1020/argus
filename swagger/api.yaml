@@ -387,14 +387,16 @@ paths:
 
   /api/private/delete/image:
     delete:
-      summary: Delete image.
+      summary: Delete images.
       parameters:
-        - name: imgName
+        - name: imageNames
           in: query
           required: true
-          description: Image name.
+          description: Image names.
           schema:
-            type: string
+            type: array
+            items:
+              type: string
       responses:
         '200':
           description: Success

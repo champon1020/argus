@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/champon1020/argus"
-
 	"github.com/champon1020/argus/service"
 )
 
@@ -92,9 +90,6 @@ func FindArticle(db *sql.DB, option *service.QueryOption) (articles []Article, e
 			AppendTo(Errors)
 		return
 	}
-
-	argus.Logger.Println(query)
-	argus.Logger.Println(args)
 
 	var a Article
 	for rows.Next() {
