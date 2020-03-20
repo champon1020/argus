@@ -216,7 +216,7 @@ paths:
                       $ref: '#/components/schemas/Category'
                 required:
                   - categories
-  /api/find/draft/list:
+  /api/private/find/draft/list:
     get:
       summary: Return a list of drafts.
       parameters:
@@ -246,7 +246,7 @@ paths:
                   - drafts
                   - draftsNum
                   - maxPage
-  /api/find/image/list:
+  /api/private/find/image/list:
     get:
       summary: Return a list of image names.
       parameters:
@@ -274,7 +274,7 @@ paths:
                   - images
                   - next
 
-  /api/register/article:
+  /api/private/register/article:
     post:
       summary: Register new article.
       requestBody:
@@ -297,7 +297,7 @@ paths:
         '503':
           description: Failed
 
-  /api/register/image:
+  /api/private/register/image:
     post:
       summary: Register new image.
       requestBody:
@@ -316,7 +316,7 @@ paths:
         '503':
           description: Failed
 
-  /api/update/article:
+  /api/private/update/article:
     put:
       summary: Update article.
       requestBody:
@@ -339,7 +339,7 @@ paths:
         '503':
           description: Failed
 
-  /api/draft/article:
+  /api/private/draft/article:
     post:
       summary: Draft article.
       requestBody:
@@ -361,7 +361,7 @@ paths:
         '500':
           description: Failed
 
-  /api/delete/image:
+  /api/private/delete/image:
     delete:
       summary: Delete image.
       parameters:
