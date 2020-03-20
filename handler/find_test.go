@@ -489,6 +489,72 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 	buf.Reset()
 }
 
+func TestFindPickUpArticleHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(
+		"GET",
+		"/api/find/article/list/create-date?createDate=2020-03-09T00:00:00Z",
+		nil)
+
+	repoCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (articles []repo.Article, err error) {
+		articles = append(articles, repo.Article{
+			Id:       "TEST_ID",
+			SortedId: 1,
+			Title:    "test",
+			Categories: []repo.Category{
+				{"TEST_CA_ID", "c1"},
+			},
+			CreateDate:  testTime,
+			UpdateDate:  testTime,
+			ContentHash: "0123456789",
+			ImageHash:   "9876543210",
+			Private:     false,
+		})
+		return
+	}
+
+	expectedBody := `{
+	"articles": [
+		{
+			"id": "TEST_ID",
+			"sortedId": 1,
+			"title": "test",
+			"categories": [
+				{
+					"id": "TEST_CA_ID",
+					"name": "c1"
+				}
+			],
+			"createDate": "2020-03-09T00:00:00+09:00",
+			"updateDate": "2020-03-09T00:00:00+09:00",
+			"contentHash": "0123456789",
+			"imageHash": "9876543210",
+			"private": false
+		}
+	]
+}`
+
+	if err := FindPickUpArticleHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
+		t.Fatalf("error happend in handler")
+	}
+
+	res := w.Result()
+	assert.Equal(t, res.StatusCode, 200)
+
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
+	if err := json.Indent(&buf, body, "", "	"); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
+		t.Fatalf("Unable to indent json string\n")
+	}
+	assert.Equal(t, expectedBody, buf.String())
+	buf.Reset()
+}
+
 func TestFindCategoryHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)

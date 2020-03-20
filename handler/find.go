@@ -494,40 +494,27 @@ func FindPickUpArticleController(c *gin.Context) {
 }
 
 func FindPickUpArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
-	var (
-		response string
-		isErr    bool
-	)
+	var response string
 
 	res := new(PickUpArticleResponse)
-	wg := new(sync.WaitGroup)
 	pickupId := argus.GlobalConfig.Web.Pickup
 
 	for _, id := range pickupId {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			var articles []repo.Article
-			option := &service.QueryOption{
-				Args: []*service.QueryArgs{
-					{
-						Value: id,
-						Name:  "SortedId",
-						Ope:   service.Eq,
-					},
+		var articles []repo.Article
+		option := &service.QueryOption{
+			Args: []*service.QueryArgs{
+				{
+					Value: id,
+					Name:  "SortedId",
+					Ope:   service.Eq,
 				},
-			}
-			if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-				isErr = true
-				return
-			}
-			res.Articles = append(res.Articles, articles...)
-		}()
-	}
-	wg.Wait()
-	if isErr {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
+			},
+		}
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		res.Articles = append(res.Articles, articles...)
 	}
 
 	if response, err = ParseToJson(&res); err != nil {

@@ -66,6 +66,8 @@ func (config *Configurations) load() (err error) {
 		config.Dev = Config{
 			Db: DbConf{},
 			Web: WebConf{
+				Pickup:                   []int{1},
+				Host:                     "",
 				MaxViewArticleNum:        4,
 				MaxViewImageNum:          12,
 				MaxViewSettingArticleNum: 10,
