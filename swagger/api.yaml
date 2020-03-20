@@ -216,7 +216,7 @@ paths:
                       $ref: '#/components/schemas/Category'
                 required:
                   - categories
-  /api/privaate/find/article/list/all:
+  /api/private/find/article/list/all:
     get:
       summary: Return a list of articles (including private)
       parameters:
