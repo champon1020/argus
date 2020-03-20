@@ -57,9 +57,9 @@ func UpdateArticleObjController(c *gin.Context) {
 }
 
 func UpdateArticleObjHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err error) {
-	var body RequestBody
+	var body RequestArticleObjType
 
-	if err = ParseRequestBody(c.Request, &body); err != nil {
+	if err = ParseRequestArticleObj(c.Request, &body); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}

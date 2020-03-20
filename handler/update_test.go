@@ -69,7 +69,7 @@ func TestUpdateArticleObjController(t *testing.T) {
 		],
 		"contentHash": "0123456789",
 		"imageHash": "9876543210",
-		"private": false
+		"isPrivate": true
 	}
 }`
 
@@ -88,7 +88,7 @@ func TestUpdateArticleObjController(t *testing.T) {
 		assert.Equal(t, a.Categories[0].Name, "c1")
 		assert.Equal(t, a.ContentHash, "0123456789")
 		assert.Equal(t, a.ImageHash, "9876543210")
-		assert.Equal(t, a.Private, false)
+		assert.Equal(t, a.Private, true)
 		return
 	}
 
