@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http/httptest"
 	"os"
@@ -413,13 +412,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 		"/api/find/article/list/category?category=c1&category=c2",
 		nil)
 
-	repoCmdMock := func(_ repo.MySQL, caNames []string, _ *service.QueryOption) (articles []repo.Article, err error) {
-		if len(caNames) != 2 {
-			err = errors.New("category names length is not valid")
-		}
-		if caNames[0] != "c1" || caNames[1] != "c2" {
-			err = errors.New("category names are not valid")
-		}
+	repoCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (articles []repo.Article, err error) {
 		articles = append(articles, repo.Article{
 			Id:       "TEST_ID",
 			SortedId: 1,
@@ -439,7 +432,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 
 	articlesNum := 10
 	mxPage := GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum)
-	repoNumCmdMock := func(_ repo.MySQL, _ []string) (int, error) {
+	repoNumCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (int, error) {
 		return articlesNum, nil
 	}
 

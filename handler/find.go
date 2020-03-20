@@ -454,7 +454,14 @@ func FindArticleByCategoryHandler(
 			Order:  "sorted_id",
 			Desc:   true,
 		}
-		if articles, err = repoCmd(*repo.GlobalMysql, categoryNames, option); err != nil {
+		for _, c := range categoryNames {
+			option.Args = append(option.Args, &service.QueryArgs{
+				Value: c,
+				Name:  "Name",
+				Ope:   service.Eq,
+			})
+		}
+		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -462,7 +469,23 @@ func FindArticleByCategoryHandler(
 	// get the number of total articles
 	go func() {
 		defer wg.Done()
-		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, categoryNames); err != nil {
+		option := &service.QueryOption{
+			Args: []*service.QueryArgs{
+				{
+					Value: false,
+					Name:  "Private",
+					Ope:   service.Eq,
+				},
+			},
+		}
+		for _, c := range categoryNames {
+			option.Args = append(option.Args, &service.QueryArgs{
+				Value: c,
+				Name:  "Name",
+				Ope:   service.Eq,
+			})
+		}
+		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, option); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}

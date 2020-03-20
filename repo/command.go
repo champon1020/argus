@@ -238,10 +238,10 @@ func FindArticleCommand(mysql MySQL, option *service.QueryOption) ([]Article, er
 }
 
 // Find articles by category id.
-type FindArticleByCategoryCmd func(MySQL, []string, *service.QueryOption) ([]Article, error)
+type FindArticleByCategoryCmd func(MySQL, *service.QueryOption) ([]Article, error)
 
-func FindArticleByCategoryCommand(mysql MySQL, categoryNames []string, option *service.QueryOption) ([]Article, error) {
-	articles, err := FindArticleByCategoryId(mysql.DB, categoryNames, option)
+func FindArticleByCategoryCommand(mysql MySQL, option *service.QueryOption) ([]Article, error) {
+	articles, err := FindArticleByCategoryId(mysql.DB, option)
 	return articles, err
 }
 
@@ -270,10 +270,10 @@ func FindArticlesNumCommand(mysql MySQL, option *service.QueryOption) (int, erro
 }
 
 // Find the number of total articles by category id.
-type FindArticlesNumByCategoryCmd func(MySQL, []string) (int, error)
+type FindArticlesNumByCategoryCmd func(MySQL, *service.QueryOption) (int, error)
 
-func FindArticlesNumByCategoryCommand(mysql MySQL, categoryNames []string) (int, error) {
-	articleNum, err := FindArticlesNumByCategoryId(mysql.DB, categoryNames)
+func FindArticlesNumByCategoryCommand(mysql MySQL, option *service.QueryOption) (int, error) {
+	articleNum, err := FindArticlesNumByCategoryId(mysql.DB, option)
 	return articleNum, err
 }
 

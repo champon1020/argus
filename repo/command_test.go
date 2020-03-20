@@ -340,8 +340,19 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 	}
 	defer db.Close()
 
-	categoryNames := []string{"c1", "c2"}
 	option := &service.QueryOption{
+		Args: []*service.QueryArgs{
+			{
+				Value: "c1",
+				Name:  "Name",
+				Ope:   service.Eq,
+			},
+			{
+				Value: "c2",
+				Name:  "Name",
+				Ope:   service.Eq,
+			},
+		},
 		Limit:  1,
 		Offset: 2,
 		Order:  "create_date",
@@ -374,7 +385,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 				"id", "name",
 			}).AddRow("TEST_CA_ID", "c1"))
 
-	articles, err := FindArticleByCategoryCommand(mysql, categoryNames, option)
+	articles, err := FindArticleByCategoryCommand(mysql, option)
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -504,6 +515,16 @@ func TestFindArticlesNumByCategoryCommand(t *testing.T) {
 	}
 	defer db.Close()
 
+	option := &service.QueryOption{
+		Args: []*service.QueryArgs{
+			{
+				Value: "c1",
+				Name:  "Name",
+				Ope:   service.Eq,
+			},
+		},
+	}
+
 	mock.ExpectQuery(regexp.QuoteMeta(
 		"SELECT COUNT(id) FROM articles " +
 			"WHERE id IN (" +
@@ -515,7 +536,7 @@ func TestFindArticlesNumByCategoryCommand(t *testing.T) {
 		WillReturnRows(
 			sqlmock.NewRows([]string{"articlesNum"}).AddRow(1))
 
-	articlesNum, err := FindArticlesNumByCategoryCommand(mysql, []string{"c1"})
+	articlesNum, err := FindArticlesNumByCategoryCommand(mysql, option)
 
 	if err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
