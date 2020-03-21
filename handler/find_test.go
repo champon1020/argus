@@ -658,6 +658,59 @@ func TestFindDraftHandler(t *testing.T) {
 	buf.Reset()
 }
 
+func TestFindDraftByIdHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(
+		"GET",
+		"/api/find/draft",
+		nil)
+
+	repoCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (drafts []repo.Draft, _ error) {
+		drafts = append(drafts, repo.Draft{
+			Id:          "TEST_D_ID",
+			SortedId:    1,
+			Title:       "test",
+			Categories:  "c1&c2",
+			UpdateDate:  testTime,
+			ContentHash: "0123456789",
+			ImageHash:   "9876543210",
+		})
+		return
+	}
+
+	expectedBody := `{
+	"draft": {
+		"id": "TEST_D_ID",
+		"sortedId": 1,
+		"title": "test",
+		"categories": "c1\u0026c2",
+		"updateDate": "2020-03-09T00:00:00+09:00",
+		"contentHash": "0123456789",
+		"imageHash": "9876543210"
+	}
+}`
+
+	if err := FindDraftByIdHandler(ctx, repoCmdMock); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
+		t.Fatalf("error happend in handler")
+	}
+
+	res := w.Result()
+	assert.Equal(t, res.StatusCode, 200)
+
+	var buf bytes.Buffer
+	body, _ := ioutil.ReadAll(res.Body)
+	if err := json.Indent(&buf, body, "", "	"); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
+		t.Fatalf("Unable to indent json string\n")
+	}
+	assert.Equal(t, expectedBody, buf.String())
+	buf.Reset()
+}
+
 func TestFindImageHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
