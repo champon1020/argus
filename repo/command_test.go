@@ -159,8 +159,8 @@ func TestDraftCmd_Insert(t *testing.T) {
 	}
 
 	// FindDrafts()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ")).
-		WithArgs("0123456789").
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE id=? ")).
+		WithArgs("TEST_ID").
 		WillReturnRows(sqlmock.NewRows([]string{}))
 
 	mock.ExpectBegin()
@@ -200,8 +200,8 @@ func TestDraftCmd_Update(t *testing.T) {
 	}
 
 	// FindDrafts()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=? ")).
-		WithArgs("0123456789").
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE id=? ")).
+		WithArgs("TEST_ID").
 		WillReturnRows(
 			sqlmock.NewRows([]string{
 				"id", "sorted_id", "title", "categories", "update_date", "content_hash", "image_hash",

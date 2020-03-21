@@ -552,6 +552,7 @@ components:
         - sortedId
         - title
         - categories
+        - updateDate
         - contentHash
         - imageHash
     RequestArticle:
