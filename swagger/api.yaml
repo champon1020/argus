@@ -423,6 +423,28 @@ paths:
         '500':
           description: Failed
 
+  /api/private/delete/draft:
+    delete:
+      summary: Delete draft.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Draft id.
+          schema:
+            type: string
+        - name: contentHash
+          in: query
+          required: true
+          description: Draft content hash.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+        '500':
+          description: Failed
+
 components:
   schemas:
     Article:

@@ -77,7 +77,7 @@ func TestUpdateArticleObjController(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(
 		"PUT",
-		"/api/update/article",
+		"/api/private/update/article/object",
 		strings.NewReader(requestBody))
 
 	repoCmdMock := func(_ repo.MySQL, a repo.Article) (_ error) {

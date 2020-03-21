@@ -62,7 +62,11 @@ func (draft *Draft) UpdateDraft(tx *sql.Tx) (err error) {
 func (draft *Draft) DeleteDraft(tx *sql.Tx) (err error) {
 	cmd := "DELETE FROM drafts WHERE id=?"
 	if _, err := tx.Exec(cmd, draft.Id); err != nil {
-		CmdError.SetErr(err).AppendTo(Errors)
+		CmdError.
+			SetErr(err).
+			SetValues("cmd", cmd).
+			SetValues("id", draft.Id).
+			AppendTo(Errors)
 	}
 	return
 }

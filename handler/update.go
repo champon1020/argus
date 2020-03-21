@@ -40,7 +40,6 @@ func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err er
 
 	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		service.DeleteFile(fp)
 		return
 	}
 

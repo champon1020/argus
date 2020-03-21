@@ -76,6 +76,7 @@ func NewRouter() *gin.Engine {
 
 		delete := private.Group("/delete")
 		{
+			delete.DELETE("/draft", handler.DeleteDraftController)
 			delete.DELETE("/image", handler.DeleteImageController)
 		}
 
