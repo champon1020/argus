@@ -217,7 +217,6 @@ func DraftCommand(mysql MySQL, draft Draft) (err error) {
 
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
 		if len(d) == 0 {
-			service.GenNewId(service.IdLen, &draft.Id)
 			if err = draft.InsertDraft(tx); err != nil {
 				return
 			}

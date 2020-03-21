@@ -35,13 +35,19 @@ func DraftController(c *gin.Context) {
 }
 
 func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
-	var body DraftRequestBody
+	var (
+		body     DraftRequestBody
+		response string
+	)
 
 	if err = ParseDraftRequestBody(c.Request, &body); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	if body.Article.Id == "" {
+		service.GenNewId(service.IdLen, &body.Article.Id)
+	}
 	fp := service.ResolveContentFilePath(body.Article.ContentHash, "drafts")
 	draft := repo.Draft{
 		Id:          body.Article.Id,
@@ -63,10 +69,17 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
 		return
 	}
 
-	fmt.Fprint(c.Writer, DraftInfoResp{
+	res := DraftInfoResp{
 		Id:          draft.Id,
 		ContentHash: draft.ContentHash,
 		ImageHash:   draft.ImageHash,
-	})
+	}
+
+	if response, err = ParseToJson(&res); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
 	return
 }
