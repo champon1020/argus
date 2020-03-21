@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -15,11 +18,9 @@ import (
 func TestDraftHandler(t *testing.T) {
 	requestBody := `{
 	"article": {
+		"id": "TEST_ID",
 		"title": "test",
-		"categories": [
-			{"id": "TEST_CA_ID", "name": "c1"},
-			{"id": "TEST_CA_ID2", "name": "c2"}
-		],
+		"categories": "c1&c2",
 		"contentHash": "0123456789",
 		"imageHash": "9876543210"
 	},
@@ -51,6 +52,24 @@ func TestDraftHandler(t *testing.T) {
 		t.Fatalf("error happend in handler")
 	}
 
+	expectedBody := `{
+	"id": "TEST_ID",
+	"contentHash": "0123456789",
+	"imageHash": "9876543210"
+}`
+
+	var buf bytes.Buffer
+
 	res := w.Result()
 	assert.Equal(t, res.StatusCode, 200)
+
+	body, _ := ioutil.ReadAll(res.Body)
+	if err := json.Indent(&buf, body, "", "	"); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		*Errors = []argus.Error{}
+		t.Fatalf("Unable to indent json string\n")
+		return
+	}
+	assert.Equal(t, expectedBody, buf.String())
+	buf.Reset()
 }

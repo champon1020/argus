@@ -20,13 +20,14 @@ Flow:
 */
 func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 	var d []Draft
-	args := &service.QueryArgs{
-		Value: interface{}(article.ContentHash),
-		Name:  "ContentHash",
-		Ope:   service.Eq,
-	}
 	option := &service.QueryOption{
-		Args: []*service.QueryArgs{args},
+		Args: []*service.QueryArgs{
+			{
+				Value: interface{}(article.ContentHash),
+				Name:  "ContentHash",
+				Ope:   service.Eq,
+			},
+		},
 	}
 	if d, err = FindDrafts(mysql.DB, option); err != nil {
 		return
@@ -49,14 +50,15 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				args := &service.QueryArgs{
-					Value: interface{}(c.Name),
-					Name:  "Name",
-					Ope:   service.Eq,
-				}
 
 				if categoryId, err = c.Exist(tx, &service.QueryOption{
-					Args: []*service.QueryArgs{args},
+					Args: []*service.QueryArgs{
+						{
+							Value: interface{}(c.Name),
+							Name:  "Name",
+							Ope:   service.Eq,
+						},
+					},
 				}); err != nil {
 					return
 				}
@@ -126,14 +128,14 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 			go func() {
 				defer wg.Done()
 
-				args := &service.QueryArgs{
-					Value: interface{}(c.Name),
-					Name:  "Name",
-					Ope:   service.Eq,
-				}
-
 				if categoryId, err = c.Exist(tx, &service.QueryOption{
-					Args: []*service.QueryArgs{args},
+					Args: []*service.QueryArgs{
+						{
+							Value: interface{}(c.Name),
+							Name:  "Name",
+							Ope:   service.Eq,
+						},
+					},
 				}); err != nil {
 					return
 				}
@@ -158,13 +160,14 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 		}
 
 		// Delete from article_category
-		args := &service.QueryArgs{
-			Value: interface{}(article.Id),
-			Name:  "ArticleId",
-			Ope:   service.Eq,
-		}
 		option := &service.QueryOption{
-			Args: []*service.QueryArgs{args},
+			Args: []*service.QueryArgs{
+				{
+					Value: article.Id,
+					Name:  "ArticleId",
+					Ope:   service.Eq,
+				},
+			},
 		}
 		for i, c := range article.Categories {
 			option.Args = append(option.Args, &service.QueryArgs{
@@ -203,13 +206,14 @@ type DraftCmd func(MySQL, Draft) error
 
 func DraftCommand(mysql MySQL, draft Draft) (err error) {
 	var d []Draft
-	args := &service.QueryArgs{
-		Value: interface{}(draft.ContentHash),
-		Name:  "ContentHash",
-		Ope:   service.Eq,
-	}
 	option := &service.QueryOption{
-		Args: []*service.QueryArgs{args},
+		Args: []*service.QueryArgs{
+			{
+				Value: draft.Id,
+				Name:  "Id",
+				Ope:   service.Eq,
+			},
+		},
 	}
 	if d, err = FindDrafts(mysql.DB, option); err != nil {
 		return
@@ -217,7 +221,6 @@ func DraftCommand(mysql MySQL, draft Draft) (err error) {
 
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
 		if len(d) == 0 {
-			service.GenNewId(service.IdLen, &draft.Id)
 			if err = draft.InsertDraft(tx); err != nil {
 				return
 			}

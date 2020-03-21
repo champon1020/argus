@@ -718,6 +718,51 @@ func FindDraftHandler(
 	return
 }
 
+type DraftObjectResponse struct {
+	Draft repo.Draft `json:"draft"`
+}
+
+func FindDraftByIdController(c *gin.Context) {
+	_ = FindDraftByIdHandler(c, repo.FindDraftCommand)
+}
+
+func FindDraftByIdHandler(c *gin.Context, repoCmd repo.FindDraftCmd) (err error) {
+	var (
+		response string
+		drafts   []repo.Draft
+	)
+
+	id := c.Query("id")
+
+	res := new(DraftObjectResponse)
+	option := &service.QueryOption{
+		Args: []*service.QueryArgs{
+			{
+				Value: id,
+				Name:  "id",
+				Ope:   service.Eq,
+			},
+		},
+	}
+
+	if drafts, err = repoCmd(*repo.GlobalMysql, option); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if len(drafts) > 0 {
+		res.Draft = drafts[0]
+	}
+
+	if response, err = ParseToJson(&res); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprint(c.Writer, response)
+	return
+}
+
 // Response type of Image
 type ImageResponseType struct {
 	Images []string `json:"images"`

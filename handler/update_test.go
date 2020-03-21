@@ -59,7 +59,7 @@ func TestUpdateArticleHandler(t *testing.T) {
 	assert.Equal(t, w.Result().StatusCode, 200)
 }
 
-func TestUpdateArticleObjController(t *testing.T) {
+func TestUpdateArticleObjHandler(t *testing.T) {
 	requestBody := `{
 	"article": {
 		"id": "TEST_ID",

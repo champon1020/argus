@@ -270,6 +270,28 @@ paths:
                 required:
                   - drafts
                   - maxPage
+  /api/private/find/draft/id:
+    get:
+      summary: Return a list of drafts.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Draft id.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON of draft.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  draft:
+                    $ref: '#/components/schemas/Draft'
+                required:
+                  - draft
   /api/private/find/image/list:
     get:
       summary: Return a list of image names.
@@ -402,6 +424,21 @@ paths:
       responses:
         '200':
           description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  contentHash:
+                    type: string
+                  imageHash:
+                    type: string
+                required:
+                  - id
+                  - contentHash
+                  - imageHash
         '500':
           description: Failed
 
@@ -515,6 +552,7 @@ components:
         - sortedId
         - title
         - categories
+        - updateDate
         - contentHash
         - imageHash
     RequestArticle:

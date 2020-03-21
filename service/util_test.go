@@ -27,9 +27,3 @@ func TestResolveContentFilePath(t *testing.T) {
 	path := service.ResolveContentFilePath(contentHash, dirName)
 	assert.Equal(t, os.Getenv("ARGUS_RESOURCE_PATH")+"/articles/test", path)
 }
-
-func TestConvertPathToFileName(t *testing.T) {
-	path := "/this/is/test/article"
-	fn := service.ConvertPathToFileName(path)
-	assert.Equal(t, "article", fn)
-}
