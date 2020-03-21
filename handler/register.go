@@ -47,7 +47,7 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 		Categories:  body.Article.Categories,
 		CreateDate:  time.Now(),
 		UpdateDate:  time.Now(),
-		ContentHash: service.ConvertPathToFileName(fp),
+		ContentHash: filepath.Base(fp),
 		ImageHash:   body.Article.ImageHash,
 		Private:     body.Article.Private,
 	}

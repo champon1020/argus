@@ -402,6 +402,21 @@ paths:
       responses:
         '200':
           description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  contentHash:
+                    type: string
+                  imageHash:
+                    type: string
+                required:
+                  - id
+                  - contentHash
+                  - imageHash
         '500':
           description: Failed
 

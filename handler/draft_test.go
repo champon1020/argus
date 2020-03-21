@@ -16,10 +16,7 @@ func TestDraftHandler(t *testing.T) {
 	requestBody := `{
 	"article": {
 		"title": "test",
-		"categories": [
-			{"id": "TEST_CA_ID", "name": "c1"},
-			{"id": "TEST_CA_ID2", "name": "c2"}
-		],
+		"categories": "c1&c2",
 		"contentHash": "0123456789",
 		"imageHash": "9876543210"
 	},

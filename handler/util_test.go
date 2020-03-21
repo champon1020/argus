@@ -84,12 +84,7 @@ func TestParseDraftRequestBody(t *testing.T) {
 		"article": {
 			"id": "TEST_ID",
 			"title": "test",
-			"categories": [
-				{
-					"id": "TEST_CA_ID",
-					"name": "test_test"
-				}
-			],
+			"categories": "TEST_CA_NAME",
 			"contentHash": "http://localhost:2000/",
 			"imageHash": "http://localhost:1000/"
 		},
@@ -103,9 +98,7 @@ func TestParseDraftRequestBody(t *testing.T) {
 
 	assert.Equal(t, "TEST_ID", body.Article.Id)
 	assert.Equal(t, "test", body.Article.Title)
-	assert.Equal(t, 1, len(body.Article.Categories))
-	assert.Equal(t, "TEST_CA_ID", body.Article.Categories[0].Id)
-	assert.Equal(t, "test_test", body.Article.Categories[0].Name)
+	assert.Equal(t, "TEST_CA_NAME", body.Article.Categories)
 	assert.Equal(t, "http://localhost:2000/", body.Article.ContentHash)
 	assert.Equal(t, "http://localhost:1000/", body.Article.ImageHash)
 	assert.Equal(t, "<div>ok</div>", body.Contents)

@@ -2,7 +2,6 @@ package service
 
 import (
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/champon1020/argus"
@@ -32,14 +31,4 @@ func ResolveContentHash(contentHash string) string {
 func ResolveContentFilePath(contentHash string, dirName string) string {
 	fn := ResolveContentHash(contentHash)
 	return filepath.Join(argus.EnvVars.Get("resource"), dirName, fn)
-}
-
-// Get only fine name from path(uri or url).
-func ConvertPathToFileName(path string) string {
-	if path == "" {
-		return path
-	}
-	seps := strings.Split(path, "/")
-	fileName := seps[len(seps)-1]
-	return fileName
 }

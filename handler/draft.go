@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/champon1020/argus/repo"
@@ -11,16 +12,22 @@ import (
 )
 
 type DraftRequestArticle struct {
-	Id          string          `json:"id"`
-	Title       string          `json:"title"`
-	Categories  []repo.Category `json:"categories"`
-	ContentHash string          `json:"contentHash"`
-	ImageHash   string          `json:"imageHash"`
+	Id          string `json:"id"`
+	Title       string `json:"title"`
+	Categories  string `json:"categories"`
+	ContentHash string `json:"contentHash"`
+	ImageHash   string `json:"imageHash"`
 }
 
 type DraftRequestBody struct {
 	Article  DraftRequestArticle `json:"article"`
 	Contents string              `json:"contents"`
+}
+
+type DraftInfoResp struct {
+	Id          string `json:"id"`
+	ContentHash string `json:"contentHash"`
+	ImageHash   string `json:"imageHash"`
 }
 
 func DraftController(c *gin.Context) {
@@ -39,9 +46,9 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
 	draft := repo.Draft{
 		Id:          body.Article.Id,
 		Title:       body.Article.Title,
-		Categories:  resolveToDraftCategories(body.Article.Categories),
+		Categories:  body.Article.Categories,
 		UpdateDate:  time.Now(),
-		ContentHash: service.ConvertPathToFileName(fp),
+		ContentHash: filepath.Base(fp),
 		ImageHash:   body.Article.ImageHash,
 	}
 
@@ -56,17 +63,10 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
 		return
 	}
 
-	fmt.Fprint(c.Writer, http.StatusOK)
+	fmt.Fprint(c.Writer, DraftInfoResp{
+		Id:          draft.Id,
+		ContentHash: draft.ContentHash,
+		ImageHash:   draft.ImageHash,
+	})
 	return
-}
-
-func resolveToDraftCategories(categories []repo.Category) string {
-	res := ""
-	for i, c := range categories {
-		if i != 0 {
-			res += "&"
-		}
-		res += c.Name
-	}
-	return res
 }
