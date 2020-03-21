@@ -46,16 +46,6 @@ services:
     volumes:
       - "../../resource_debug:/usr/share/nginx/html"
 
-  swagger-ui:
-    image: swaggerapi/swagger-ui
-    container_name: "my-swagger-ui"
-    ports:
-      - "8082:8082"
-    volumes:
-      - "../../../swagger/api.yaml:/api.yaml"
-    environment:
-      SWAGGER_JSON: /api.yaml
-
 networks:
   devnet_default:
     driver: bridge

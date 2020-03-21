@@ -225,6 +225,37 @@ func TestDraftCmd_Update(t *testing.T) {
 	}
 }
 
+func TestDeleteDraftCommand(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	mysql := MySQL{}
+	mysql.DB = db
+	if err != nil {
+		t.Fatalf("unable to create db mock")
+	}
+	defer db.Close()
+
+	draft := Draft{
+		Id: "TEST_ID",
+	}
+
+	mock.ExpectBegin()
+
+	// UpdateDraft()
+	mock.ExpectExec("DELETE FROM drafts").
+		WithArgs("TEST_ID").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	mock.ExpectCommit()
+
+	if err := DeleteDraftCommand(mysql, draft); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error was occured in testing function\n")
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("different from expectation: %v\n", err)
+	}
+}
+
 func TestFindArticleCmd_All(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	mysql := MySQL{}

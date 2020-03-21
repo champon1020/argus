@@ -5,30 +5,12 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/champon1020/argus/repo"
+
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/service"
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 )
-
-func TestDeleteImageController(t *testing.T) {
-	w := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(w)
-	ctx.Request = httptest.NewRequest(
-		"GET",
-		"/api/delete/image?imgName=image_test1.png",
-		nil)
-
-	defer func() {
-		_ = service.OutputFile(
-			filepath.Join(argus.EnvVars.Get("resource"), "images", "image_test1.png"),
-			[]byte(""),
-		)
-	}()
-
-	DeleteImageController(ctx)
-	assert.Equal(t, w.Result().StatusCode, 200)
-}
 
 func TestDeleteImageHandler(t *testing.T) {
 	w := httptest.NewRecorder()
@@ -46,6 +28,31 @@ func TestDeleteImageHandler(t *testing.T) {
 	}()
 
 	if err := DeleteImageHandler(ctx); err != nil {
+		argus.StdLogger.ErrorLog(*Errors)
+		t.Fatalf("error happend in handler")
+	}
+}
+
+func TestDeleteDraftHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(
+		"GET",
+		"/api/private/delete/draft?id=draft_test1&contentHash=draft_test1",
+		nil)
+
+	defer func() {
+		_ = service.OutputFile(
+			filepath.Join(argus.EnvVars.Get("resource"), "drafts", "draft_test1"),
+			[]byte(""),
+		)
+	}()
+
+	repoCmd := func(_ repo.MySQL, _ repo.Draft) error {
+		return nil
+	}
+
+	if err := DeleteDraftHandler(ctx, repoCmd); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
 		t.Fatalf("error happend in handler")
 	}

@@ -70,7 +70,7 @@ func TestFindArticleByIdHandler(t *testing.T) {
 		"updateDate": "2020-03-09T00:00:00+09:00",
 		"contentHash": "0123456789",
 		"imageHash": "9876543210",
-		"private": false
+		"isPrivate": false
 	}
 }`
 
@@ -134,7 +134,7 @@ func TestFindArticleBySortedIdHandler(t *testing.T) {
 		"updateDate": "2020-03-09T00:00:00+09:00",
 		"contentHash": "0123456789",
 		"imageHash": "9876543210",
-		"private": false
+		"isPrivate": false
 	},
 	"next": {
 		"id": "TEST_ID",
@@ -150,7 +150,7 @@ func TestFindArticleBySortedIdHandler(t *testing.T) {
 		"updateDate": "2020-03-09T00:00:00+09:00",
 		"contentHash": "0123456789",
 		"imageHash": "9876543210",
-		"private": false
+		"isPrivate": false
 	},
 	"prev": {
 		"id": "",
@@ -161,7 +161,7 @@ func TestFindArticleBySortedIdHandler(t *testing.T) {
 		"updateDate": "0001-01-01T00:00:00Z",
 		"contentHash": "",
 		"imageHash": "",
-		"private": false
+		"isPrivate": false
 	}
 }`
 
@@ -232,7 +232,7 @@ func TestFindArticleHandler(t *testing.T) {
 			"updateDate": "2020-03-09T00:00:00+09:00",
 			"contentHash": "0123456789",
 			"imageHash": "9876543210",
-			"private": false
+			"isPrivate": false
 		}
 	],
 	"maxPage": ` + strconv.Itoa(mxPage) + `
@@ -305,7 +305,7 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 			"updateDate": "2020-03-09T00:00:00+09:00",
 			"contentHash": "0123456789",
 			"imageHash": "9876543210",
-			"private": false
+			"isPrivate": false
 		}
 	],
 	"maxPage": ` + strconv.Itoa(mxPage) + `
@@ -378,7 +378,7 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 			"updateDate": "2020-03-09T00:00:00+09:00",
 			"contentHash": "0123456789",
 			"imageHash": "9876543210",
-			"private": false
+			"isPrivate": false
 		}
 	],
 	"maxPage": ` + strconv.Itoa(mxPage) + `
@@ -456,7 +456,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 			"updateDate": "2020-03-09T00:00:00+09:00",
 			"contentHash": "0123456789",
 			"imageHash": "9876543210",
-			"private": false
+			"isPrivate": false
 		}
 	],
 	"maxPage": ` + strconv.Itoa(mxPage) + `
@@ -523,7 +523,7 @@ func TestFindPickUpArticleHandler(t *testing.T) {
 			"updateDate": "2020-03-09T00:00:00+09:00",
 			"contentHash": "0123456789",
 			"imageHash": "9876543210",
-			"private": false
+			"isPrivate": false
 		}
 	]
 }`

@@ -318,7 +318,7 @@ paths:
       responses:
         '200':
           description: Success
-        '503':
+        '500':
           description: Failed
 
   /api/private/register/image:
@@ -337,7 +337,7 @@ paths:
       responses:
         '200':
           description: Success
-        '503':
+        '500':
           description: Failed
 
   /api/private/update/article:
@@ -360,7 +360,27 @@ paths:
       responses:
         '200':
           description: Success
-        '503':
+        '500':
+          description: Failed
+
+  /api/private/update/article/object:
+    put:
+      summary: Update article only object (not include content).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                article:
+                  $ref: '#/components/schemas/RequestArticle'
+              required:
+                - article
+      responses:
+        '200':
+          description: Success
+        '500':
           description: Failed
 
   /api/private/draft/article:
@@ -387,12 +407,36 @@ paths:
 
   /api/private/delete/image:
     delete:
-      summary: Delete image.
+      summary: Delete images.
       parameters:
-        - name: imgName
+        - name: imageNames
           in: query
           required: true
-          description: Image name.
+          description: Image names.
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Success
+        '500':
+          description: Failed
+
+  /api/private/delete/draft:
+    delete:
+      summary: Delete draft.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Draft id.
+          schema:
+            type: string
+        - name: contentHash
+          in: query
+          required: true
+          description: Draft content hash.
           schema:
             type: string
       responses:
@@ -424,7 +468,7 @@ components:
           type: string
         imageHash:
           type: string
-        private:
+        isPrivate:
           type: boolean
       required:
         - id
@@ -435,7 +479,7 @@ components:
         - updateDate
         - contentHash
         - imageHash
-        - private
+        - isPrivate
     Category:
       type: object
       properties:
@@ -496,7 +540,7 @@ components:
           type: string
         imageHash:
           type: string
-        private:
+        isPrivate:
           type: boolean
       required:
         - id
@@ -504,7 +548,7 @@ components:
         - categories
         - contentHash
         - imageHash
-        - private
+        - isPrivate
     RequestDraft:
       type: object
       properties:

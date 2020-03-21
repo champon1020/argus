@@ -229,6 +229,16 @@ func DraftCommand(mysql MySQL, draft Draft) (err error) {
 	return
 }
 
+type DeleteDraftCmd func(MySQL, Draft) error
+
+func DeleteDraftCommand(mysql MySQL, draft Draft) (err error) {
+	err = mysql.Transact(func(tx *sql.Tx) (err error) {
+		err = draft.DeleteDraft(tx)
+		return
+	})
+	return
+}
+
 // Find articles.
 type FindArticleCmd func(MySQL, *service.QueryOption) ([]Article, error)
 

@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/champon1020/argus"
-
 	"github.com/champon1020/argus/service"
 )
 
@@ -26,7 +24,7 @@ type Article struct {
 	UpdateDate  time.Time  `json:"updateDate"`
 	ContentHash string     `json:"contentHash"`
 	ImageHash   string     `json:"imageHash"`
-	Private     bool       `json:"private"`
+	Private     bool       `json:"isPrivate"`
 }
 
 func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
@@ -92,9 +90,6 @@ func FindArticle(db *sql.DB, option *service.QueryOption) (articles []Article, e
 			AppendTo(Errors)
 		return
 	}
-
-	argus.Logger.Println(query)
-	argus.Logger.Println(args)
 
 	var a Article
 	for rows.Next() {

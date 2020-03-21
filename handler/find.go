@@ -747,7 +747,8 @@ func FindImageHandler(c *gin.Context) (err error) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	offset := (p - 1) * argus.GlobalConfig.Web.MaxViewImageNum
+	mx := argus.GlobalConfig.Web.MaxViewImageNum
+	offset := (p - 1) * mx
 
 	if offset >= len(files) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
@@ -760,9 +761,10 @@ func FindImageHandler(c *gin.Context) (err error) {
 		return
 	}
 
-	for i := offset; i < len(files); i++ {
-		if i >= argus.GlobalConfig.Web.MaxViewImageNum {
-			res.Next = true
+	res.Next = true
+	for i := offset; i < offset+mx; i++ {
+		if len(files) <= i {
+			res.Next = false
 			break
 		}
 		fileNames = append(fileNames, files[i].Name())
