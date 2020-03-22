@@ -20,8 +20,8 @@ type DraftRequestArticle struct {
 }
 
 type DraftRequestBody struct {
-	Article     DraftRequestArticle `json:"article"`
-	MdeContents string              `json:"mdContents"`
+	Article    DraftRequestArticle `json:"article"`
+	MdContents string              `json:"mdContents"`
 }
 
 type DraftInfoResp struct {
@@ -60,7 +60,7 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
 	}
 
 	mdFp := fp + "_md"
-	if err = service.OutputFile(mdFp, []byte(body.MdeContents)); err != nil {
+	if err = service.OutputFile(mdFp, []byte(body.MdContents)); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}

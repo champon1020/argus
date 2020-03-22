@@ -43,7 +43,7 @@ func TestDeleteDraftHandler(t *testing.T) {
 
 	defer func() {
 		_ = service.OutputFile(
-			filepath.Join(argus.EnvVars.Get("resource"), "drafts", "draft_test1"),
+			filepath.Join(argus.EnvVars.Get("resource"), "drafts", "draft_test1_md"),
 			[]byte(""),
 		)
 	}()

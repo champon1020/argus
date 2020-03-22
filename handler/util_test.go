@@ -25,7 +25,8 @@ func TestParseRequestBody(t *testing.T) {
 			"imageHash": "http://localhost:1000/",
 			"private": false
 		},
-		"contents": "<div>ok</div>"
+		"htmlContents": "<div>html</div>",
+		"mdContents": "<div>md</div>"
 	}`
 
 	r, _ := http.NewRequest("POST", "", bytes.NewBuffer([]byte(requestJson)))
@@ -41,7 +42,35 @@ func TestParseRequestBody(t *testing.T) {
 	assert.Equal(t, "http://localhost:2000/", body.Article.ContentHash)
 	assert.Equal(t, "http://localhost:1000/", body.Article.ImageHash)
 	assert.Equal(t, false, body.Article.Private)
-	assert.Equal(t, "<div>ok</div>", body.Contents)
+	assert.Equal(t, "<div>html</div>", body.HtmlContents)
+	assert.Equal(t, "<div>md</div>", body.MdeContents)
+}
+
+func TestParseDraftRequestBody(t *testing.T) {
+	var body DraftRequestBody
+
+	requestJson := `{
+		"article": {
+			"id": "TEST_ID",
+			"title": "test",
+			"categories": "TEST_CA_NAME",
+			"contentHash": "http://localhost:2000/",
+			"imageHash": "http://localhost:1000/"
+		},
+		"mdContents": "<div>md</div>"
+	}`
+
+	r, _ := http.NewRequest("POST", "", bytes.NewBuffer([]byte(requestJson)))
+	if err := ParseDraftRequestBody(r, &body); err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, "TEST_ID", body.Article.Id)
+	assert.Equal(t, "test", body.Article.Title)
+	assert.Equal(t, "TEST_CA_NAME", body.Article.Categories)
+	assert.Equal(t, "http://localhost:2000/", body.Article.ContentHash)
+	assert.Equal(t, "http://localhost:1000/", body.Article.ImageHash)
+	assert.Equal(t, "<div>md</div>", body.MdContents)
 }
 
 func TestParseOffsetLimit(t *testing.T) {
@@ -75,31 +104,4 @@ func TestGetMaxPage(t *testing.T) {
 	num = 12
 	c = GetMaxPage(num, mxView)
 	assert.Equal(t, 3, c)
-}
-
-func TestParseDraftRequestBody(t *testing.T) {
-	var body DraftRequestBody
-
-	requestJson := `{
-		"article": {
-			"id": "TEST_ID",
-			"title": "test",
-			"categories": "TEST_CA_NAME",
-			"contentHash": "http://localhost:2000/",
-			"imageHash": "http://localhost:1000/"
-		},
-		"contents": "<div>ok</div>"
-	}`
-
-	r, _ := http.NewRequest("POST", "", bytes.NewBuffer([]byte(requestJson)))
-	if err := ParseDraftRequestBody(r, &body); err != nil {
-		t.Error(err)
-	}
-
-	assert.Equal(t, "TEST_ID", body.Article.Id)
-	assert.Equal(t, "test", body.Article.Title)
-	assert.Equal(t, "TEST_CA_NAME", body.Article.Categories)
-	assert.Equal(t, "http://localhost:2000/", body.Article.ContentHash)
-	assert.Equal(t, "http://localhost:1000/", body.Article.ImageHash)
-	assert.Equal(t, "<div>ok</div>", body.Contents)
 }

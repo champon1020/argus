@@ -24,11 +24,23 @@ func TestUpdateArticleHandler(t *testing.T) {
 		"imageHash": "9876543210",
 		"private": false
 	},
-	"contents": "<div>ok</div>"
+	"htmlContents": "<div>html</div>",
+	"mdContents": "<div>md</div>"
 }`
 
 	defer func() {
-		_ = service.DeleteFile(service.ResolveContentFilePath("0123456789", "articles"))
+		err := service.DeleteFile(
+			service.ResolveContentFilePath(
+				"articles",
+				"0123456789_html",
+			))
+		assert.Equal(t, nil, err)
+		err = service.DeleteFile(
+			service.ResolveContentFilePath(
+				"articles",
+				"0123456789_md",
+			))
+		assert.Equal(t, nil, err)
 	}()
 
 	w := httptest.NewRecorder()
