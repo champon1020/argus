@@ -20,8 +20,8 @@ type DraftRequestArticle struct {
 }
 
 type DraftRequestBody struct {
-	Article  DraftRequestArticle `json:"article"`
-	Contents string              `json:"contents"`
+	Article     DraftRequestArticle `json:"article"`
+	MdeContents string              `json:"mdContents"`
 }
 
 type DraftInfoResp struct {
@@ -48,7 +48,8 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
 	if body.Article.Id == "" {
 		service.GenNewId(service.IdLen, &body.Article.Id)
 	}
-	fp := service.ResolveContentFilePath(body.Article.ContentHash, "drafts")
+
+	fp := service.ResolveContentFilePath("drafts", body.Article.ContentHash)
 	draft := repo.Draft{
 		Id:          body.Article.Id,
 		Title:       body.Article.Title,
@@ -58,14 +59,15 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
 		ImageHash:   body.Article.ImageHash,
 	}
 
-	if err = service.OutputFile(fp, []byte(body.Contents)); err != nil {
+	mdFp := fp + "_md"
+	if err = service.OutputFile(mdFp, []byte(body.MdeContents)); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, draft); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		_ = service.DeleteFile(fp)
+		_ = service.DeleteFile(mdFp)
 		return
 	}
 

@@ -22,7 +22,7 @@ func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err er
 		return
 	}
 
-	fp := service.ResolveContentFilePath(body.Article.ContentHash, "articles")
+	fp := service.ResolveContentFilePath("articles", body.Article.ContentHash)
 	article := repo.Article{
 		Id:          body.Article.Id,
 		Title:       body.Article.Title,
@@ -33,7 +33,16 @@ func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err er
 		Private:     body.Article.Private,
 	}
 
-	if err = service.OutputFile(fp, []byte(body.Contents)); err != nil {
+	htmlFp := fp + "_html"
+	mdFp := fp + "_md"
+
+	// output html
+	if err = service.OutputFile(htmlFp, []byte(body.HtmlContents)); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// output md
+	if err = service.OutputFile(mdFp, []byte(body.MdeContents)); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -28,7 +28,7 @@ func ResolveContentHash(contentHash string) string {
 }
 
 // Get file path uri from hash(fine name) and dir name.
-func ResolveContentFilePath(contentHash string, dirName string) string {
+func ResolveContentFilePath(dirName string, contentHash string) string {
 	fn := ResolveContentHash(contentHash)
 	return filepath.Join(argus.EnvVars.Get("resource"), dirName, fn)
 }

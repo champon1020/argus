@@ -24,6 +24,6 @@ func TestResolveContentHash(t *testing.T) {
 func TestResolveContentFilePath(t *testing.T) {
 	contentHash := "test"
 	dirName := "articles"
-	path := service.ResolveContentFilePath(contentHash, dirName)
+	path := service.ResolveContentFilePath(dirName, contentHash)
 	assert.Equal(t, os.Getenv("ARGUS_RESOURCE_PATH")+"/articles/test", path)
 }

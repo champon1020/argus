@@ -332,11 +332,14 @@ paths:
               properties:
                 article:
                   $ref: '#/components/schemas/RequestArticle'
-                contents:
+                htmlContents:
+                  type: string
+                mdContents:
                   type: string
               required:
                 - article
-                - contents
+                - htmlContents
+                - mdContents
       responses:
         '200':
           description: Success
@@ -374,11 +377,14 @@ paths:
               properties:
                 article:
                   $ref: '#/components/schemas/RequestArticle'
-                contents:
+                htmlContents:
+                  type: string
+                mdContents:
                   type: string
               required:
                 - article
-                - contents
+                - htmlContents
+                - mdContents
       responses:
         '200':
           description: Success
@@ -416,11 +422,11 @@ paths:
               properties:
                 article:
                   $ref: '#/components/schemas/RequestDraft'
-                contents:
+                mdContents:
                   type: string
               required:
                 - article
-                - contents
+                - mdContents
       responses:
         '200':
           description: Success

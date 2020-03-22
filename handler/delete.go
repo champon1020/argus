@@ -39,7 +39,7 @@ func DeleteDraftHandler(c *gin.Context, repoCmd repo.DeleteDraftCmd) (err error)
 	hash := c.Query("contentHash")
 	draft := repo.Draft{Id: id}
 
-	fp := filepath.Join(argus.EnvVars.Get("resource"), "drafts", hash)
+	fp := filepath.Join(argus.EnvVars.Get("resource"), "drafts", hash+"_md")
 	if err = service.DeleteFile(fp); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
