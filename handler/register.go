@@ -21,12 +21,20 @@ type RequestArticle struct {
 	Categories  []repo.Category `json:"categories"`
 	ContentHash string          `json:"contentHash"`
 	ImageHash   string          `json:"imageHash"`
-	Private     bool            `json:"private"`
+	Private     bool            `json:"isPrivate"`
 }
 
 type RequestBody struct {
-	Article  RequestArticle `json:"article"`
-	Contents string         `json:"contents"`
+	Article struct {
+		Id          string          `json:"id"`
+		Title       string          `json:"title"`
+		Categories  []repo.Category `json:"categories"`
+		ContentHash string          `json:"contentHash"`
+		ImageHash   string          `json:"imageHash"`
+		Private     bool            `json:"isPrivate"`
+	} `json:"article"`
+	MdeContents  string `json:"mdContents"`
+	HtmlContents string `json:"htmlContents"`
 }
 
 func RegisterArticleController(c *gin.Context) {
@@ -41,7 +49,7 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 		return
 	}
 
-	fp := service.ResolveContentFilePath(body.Article.ContentHash, "articles")
+	fp := service.ResolveContentFilePath("articles", body.Article.ContentHash)
 	article := repo.Article{
 		Title:       body.Article.Title,
 		Categories:  body.Article.Categories,
@@ -53,16 +61,35 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 	}
 	service.GenNewId(service.IdLen, &article.Id)
 
-	if err = service.OutputFile(fp, []byte(body.Contents)); err != nil {
+	htmlFp := fp + "_html"
+	mdFp := fp + "_md"
+
+	// output html
+	if err = service.OutputFile(htmlFp, []byte(body.HtmlContents)); err != nil {
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// output md
+	if err = service.OutputFile(mdFp, []byte(body.MdeContents)); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		_ = service.DeleteFile(fp)
+		// if err occurred, delete created files.
+		_ = service.DeleteFile(htmlFp)
+		_ = service.DeleteFile(mdFp)
 		return
 	}
+
+	_ = service.DeleteFile(
+		filepath.Join(
+			argus.EnvVars.Get("resource"),
+			"drafts",
+			body.Article.ContentHash+"_md",
+		),
+	)
 
 	fmt.Fprint(c.Writer, http.StatusOK)
 	return

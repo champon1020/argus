@@ -9,14 +9,6 @@ LOAD DATA LOCAL INFILE
     (id, title, create_date, update_date, content_hash, image_hash, private);
 
 LOAD DATA LOCAL INFILE
-    "/docker/db/csv/drafts.csv"
-    INTO TABLE drafts
-    CHARACTER SET utf8
-    FIELDS TERMINATED BY ','
-    ENCLOSED BY '"'
-    (id, title, categories, update_date, content_hash, image_hash);
-
-LOAD DATA LOCAL INFILE
     "/docker/db/csv/categories.csv"
     INTO TABLE categories
     CHARACTER SET utf8

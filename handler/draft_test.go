@@ -24,11 +24,16 @@ func TestDraftHandler(t *testing.T) {
 		"contentHash": "0123456789",
 		"imageHash": "9876543210"
 	},
-	"contents": "<div>ok</div>"
+	"mdContents": "<div>md</div>"
 }`
 
 	defer func() {
-		_ = service.DeleteFile(service.ResolveContentFilePath("0123456789", "drafts"))
+		err := service.DeleteFile(
+			service.ResolveContentFilePath(
+				"drafts",
+				"0123456789_md",
+			))
+		assert.Equal(t, nil, err)
 	}()
 
 	w := httptest.NewRecorder()
