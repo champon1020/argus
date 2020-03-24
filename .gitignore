@@ -1,12 +1,4 @@
 .idea/
 cmd/argus
-config.json
 logs/**
 resource_debug/**
-
-*.sh
-!docker/db/common/script/*.sh
-!docker/db/server/script/*.sh
-
-**/.env
-**.conf
