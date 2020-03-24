@@ -1,0 +1,3 @@
+[submodule "argus-private"]
+	path = argus-private
+	url = git@github.com:champon1020/argus-private.git
