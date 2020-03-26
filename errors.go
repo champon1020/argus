@@ -2,6 +2,7 @@ package argus
 
 import (
 	"encoding/json"
+	"errors"
 )
 
 type ErrorType string
@@ -34,6 +35,10 @@ const (
 
 	// multi format data
 	MultiFormatFailedOpenError ErrorType = "MultiFormatFailedOpenError"
+
+	// authenticate
+	AuthFailedVerifyError ErrorType = "AuthFailedVerifyError"
+	JwtFailedParseError   ErrorType = "JwtFailedParseError"
 )
 
 type Error struct {
@@ -71,6 +76,9 @@ func (e Error) Marshal() ([]byte, error) {
 }
 
 func (e Error) JSON() interface{} {
+	if e.Err == nil {
+		e.Err = errors.New("empty")
+	}
 	json := map[string]interface{}{
 		"Error":  e.Err.Error(),
 		"Type":   e.Type,

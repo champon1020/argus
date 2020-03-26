@@ -243,6 +243,18 @@ paths:
                 required:
                   - articles
                   - maxPage
+        '400':
+          description: no authorization header
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+
   /api/private/find/draft/list:
     get:
       summary: Return a list of drafts.
@@ -270,6 +282,18 @@ paths:
                 required:
                   - drafts
                   - maxPage
+        '400':
+          description: no authorization header
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+
   /api/private/find/draft/id:
     get:
       summary: Return a list of drafts.
@@ -292,6 +316,18 @@ paths:
                     $ref: '#/components/schemas/Draft'
                 required:
                   - draft
+        '400':
+          description: no authorization header
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+
   /api/private/find/image/list:
     get:
       summary: Return a list of image names.
@@ -319,6 +355,17 @@ paths:
                 required:
                   - images
                   - next
+        '400':
+          description: no authorization header
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/register/article:
     post:
@@ -343,8 +390,19 @@ paths:
       responses:
         '200':
           description: Success
+        '400':
+          description: no authorization header
         '500':
           description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/register/image:
     post:
@@ -362,8 +420,19 @@ paths:
       responses:
         '200':
           description: Success
+        '400':
+          description: no authorization header
         '500':
           description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/update/article:
     put:
@@ -388,8 +457,19 @@ paths:
       responses:
         '200':
           description: Success
+        '400':
+          description: no authorization header
         '500':
           description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/update/article/object:
     put:
@@ -408,8 +488,19 @@ paths:
       responses:
         '200':
           description: Success
+        '400':
+          description: no authorization header
         '500':
           description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/draft/article:
     post:
@@ -445,8 +536,19 @@ paths:
                   - id
                   - contentHash
                   - imageHash
+        '400':
+          description: no authorization header
         '500':
           description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/delete/image:
     delete:
@@ -463,8 +565,19 @@ paths:
       responses:
         '200':
           description: Success
+        '400':
+          description: no authorization header
         '500':
           description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/delete/draft:
     delete:
@@ -485,8 +598,19 @@ paths:
       responses:
         '200':
           description: Success
+        '400':
+          description: no authorization header
         '500':
           description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
 components:
   schemas:

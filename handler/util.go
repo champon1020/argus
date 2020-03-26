@@ -16,7 +16,6 @@ var (
 	BasicError       = argus.NewError(argus.BasicError)
 	IOMarshalError   = argus.NewError(argus.IOFailedMarshalError)
 	IOUnmarshalError = argus.NewError(argus.IOFailedUnmarshalError)
-	TimeParseError   = argus.NewError(argus.TimeFailedParseError)
 )
 
 // Parse page from context of gin framework.
