@@ -9,15 +9,17 @@ services:
       ARGUS_CONFIG_PATH: "/config.json"
       ARGUS_RESOURCE_PATH: "/usr/share/nginx/html"
       ARGUS_SECRET_PATH: "/secret.json"
-      ARGUS_KEY_PATH: "/key.json"
+      ARGUS_KEY_PATH: "/key.pem"
+      ARGUS_USER_PATH: "/user.json"
     ports:
       - "8000:8000"
     volumes:
       - "../../resource_debug:/usr/share/nginx/html"
       - "../../logs:/logs"
       - "../../argus-private/config.json:/config.json"
-      - "../../argus-private/secret.json:/secret.json"
-      - "${ARGUS_KEY_PATH}:/key.json"
+      - "${ARGUS_SECRET_PATH}:/secret.json"
+      - "${ARGUS_KEY_PATH}:/key.pem"
+      - "${ARGUS_USER_PATH}:/user.json"
     networks:
       devnet_default:
         ipv4_address: 172.30.0.2
