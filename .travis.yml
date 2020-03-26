@@ -19,6 +19,9 @@ env:
     - ARGUS_RESOURCE_PATH=./resource_test
     - ARGUS_CONFIG_PATH=./config.json
 
+git:
+  submodule: false
+
 branches:
   only:
     - master
