@@ -2,3 +2,5 @@
 cmd/argus
 logs/**
 resource_debug/**
+
+**/.env

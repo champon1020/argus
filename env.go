@@ -14,10 +14,16 @@ func NewEnv() Env {
 	argusResourcePath := os.Getenv("ARGUS_RESOURCE_PATH")
 	argusLogPath := os.Getenv("ARGUS_LOG_PATH")
 	argusMode := os.Getenv("ARGUS_MODE")
+	argusSecretPath := os.Getenv("ARGUS_SECRET_PATH")
+	argusUserPath := os.Getenv("ARGUS_USER_PATH")
+	argusKeyPath := os.Getenv("ARGUS_KEY_PATH")
 	e.set("config", argusConfigPath)
 	e.set("resource", argusResourcePath)
 	e.set("log", argusLogPath)
 	e.set("mode", argusMode)
+	e.set("secret", argusSecretPath)
+	e.set("user", argusUserPath)
+	e.set("key", argusKeyPath)
 	return e
 }
 

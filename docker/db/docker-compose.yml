@@ -4,7 +4,7 @@ services:
     image: mysql:5.7
     container_name: argus_db_stg
     env_file:
-      - ../../argus-private/docker/db/.env
+      - .env
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
       MYSQL_DATABASE: argus_test

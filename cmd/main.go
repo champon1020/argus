@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/champon1020/argus/argus-private/auth"
+
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/handler"
 	"github.com/champon1020/argus/repo"
@@ -53,7 +55,10 @@ func NewRouter() *gin.Engine {
 		find.GET("/category/list", handler.FindCategoryController)
 	}
 
+	router.POST("/api/verify/token", auth.VerifyHandler)
+
 	private := router.Group("/api/private")
+	private.Use(auth.Middleware)
 	{
 		find := private.Group("/find")
 		{
@@ -93,7 +98,7 @@ func NewRouter() *gin.Engine {
 func HandleError() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
-		if len(*Errors) != 0 {
+		if len(*Errors) > 0 {
 			Logger.ErrorLog(*Errors)
 			*Errors = []argus.Error{}
 			(c.Writer).WriteHeader(http.StatusInternalServerError)

@@ -4,7 +4,7 @@ services:
     image: champon1020/argus
     container_name: argus_stg
     env_file:
-      - ../../argus-private/docker/api/.env
+      - .env
     environment:
       ARGUS_MODE: "staging"
       ARGUS_LOG_PATH: "${ARGUS_LOG_PATH}"
