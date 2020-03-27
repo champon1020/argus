@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"path/filepath"
 	"time"
@@ -35,13 +34,10 @@ func DraftController(c *gin.Context) {
 }
 
 func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
-	var (
-		body     DraftRequestBody
-		response string
-	)
+	var body DraftRequestBody
 
 	if err = ParseDraftRequestBody(c.Request, &body); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -61,12 +57,12 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
 
 	mdFp := fp + "_md"
 	if err = service.OutputFile(mdFp, []byte(body.MdContents)); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, draft); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		_ = service.DeleteFile(mdFp)
 		return
 	}
@@ -77,11 +73,6 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
 		ImageHash:   draft.ImageHash,
 	}
 
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }

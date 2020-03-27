@@ -21,12 +21,12 @@ func DeleteImageHandler(c *gin.Context) (err error) {
 	for _, name := range imgNames {
 		fp := filepath.Join(argus.EnvVars.Get("resource"), "images", name)
 		if err = service.DeleteFile(fp); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}
 
-	c.Writer.WriteHeader(http.StatusOK)
+	c.AbortWithStatus(http.StatusOK)
 	return
 }
 
@@ -41,15 +41,15 @@ func DeleteDraftHandler(c *gin.Context, repoCmd repo.DeleteDraftCmd) (err error)
 
 	fp := filepath.Join(argus.EnvVars.Get("resource"), "drafts", hash+"_md")
 	if err = service.DeleteFile(fp); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, draft); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	c.Writer.WriteHeader(http.StatusOK)
+	c.AbortWithStatus(http.StatusOK)
 	return
 }

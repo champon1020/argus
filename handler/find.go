@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -26,8 +25,6 @@ func FindArticleByIdHandler(
 	c *gin.Context,
 	repoCmd repo.FindArticleCmd,
 ) (err error) {
-	var response string
-
 	id := c.Query("id")
 	res := new(ArticleResponseType)
 
@@ -42,7 +39,7 @@ func FindArticleByIdHandler(
 		},
 	}
 	if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -50,12 +47,7 @@ func FindArticleByIdHandler(
 		res.Article = articles[0]
 	}
 
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -73,8 +65,6 @@ func FindArticleBySortedIdHandler(
 	c *gin.Context,
 	repoCmd repo.FindArticleCmd,
 ) (err error) {
-	var response string
-
 	sortedId := c.Query("sortedId")
 	res := new(ArticleSortedResponseType)
 
@@ -102,7 +92,7 @@ func FindArticleBySortedIdHandler(
 			Order:  "sorted_id",
 		}
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 		if len(articles) > 0 {
@@ -135,7 +125,7 @@ func FindArticleBySortedIdHandler(
 			Desc:   true,
 		}
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 		if len(articles) == 1 {
@@ -147,12 +137,7 @@ func FindArticleBySortedIdHandler(
 		return
 	}
 
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -173,12 +158,11 @@ func FindArticleHandler(
 	var (
 		articles    []repo.Article
 		articlesNum int
-		response    string
 		p           int
 	)
 
 	if p, err = ParsePage(c); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -203,7 +187,7 @@ func FindArticleHandler(
 			Desc:   true,
 		}
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -211,7 +195,7 @@ func FindArticleHandler(
 	go func() {
 		defer wg.Done()
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, service.DefaultOption); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -224,12 +208,8 @@ func FindArticleHandler(
 		Articles: articles,
 		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
 	}
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -245,12 +225,11 @@ func FindArticleByTitleHandler(
 	var (
 		articles    []repo.Article
 		articlesNum int
-		response    string
 		p           int
 	)
 
 	if p, err = ParsePage(c); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -280,7 +259,7 @@ func FindArticleByTitleHandler(
 			Desc:   true,
 		}
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -297,7 +276,7 @@ func FindArticleByTitleHandler(
 			},
 		}
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -310,12 +289,8 @@ func FindArticleByTitleHandler(
 		Articles: articles,
 		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
 	}
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -334,12 +309,11 @@ func FindArticleByCreateDateHandler(
 	var (
 		articles    []repo.Article
 		articlesNum int
-		response    string
 		p           int
 	)
 
 	if p, err = ParsePage(c); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -369,7 +343,7 @@ func FindArticleByCreateDateHandler(
 			Desc:   true,
 		}
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -386,7 +360,7 @@ func FindArticleByCreateDateHandler(
 			},
 		}
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -399,12 +373,8 @@ func FindArticleByCreateDateHandler(
 		Articles: articles,
 		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
 	}
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -423,12 +393,11 @@ func FindArticleByCategoryHandler(
 	var (
 		articles    []repo.Article
 		articlesNum int
-		response    string
 		p           int
 	)
 
 	if p, err = ParsePage(c); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -462,7 +431,7 @@ func FindArticleByCategoryHandler(
 			})
 		}
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -486,7 +455,7 @@ func FindArticleByCategoryHandler(
 			})
 		}
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -499,12 +468,8 @@ func FindArticleByCategoryHandler(
 		Articles: articles,
 		MaxPage:  GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewArticleNum),
 	}
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -523,12 +488,11 @@ func FindAllArticleHandler(
 	var (
 		articles    []repo.Article
 		articlesNum int
-		response    string
 		p           int
 	)
 
 	if p, err = ParsePage(c); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -548,7 +512,7 @@ func FindAllArticleHandler(
 			Desc:   true,
 		}
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 		res.Articles = articles
@@ -557,19 +521,14 @@ func FindAllArticleHandler(
 	go func() {
 		defer wg.Done()
 		if articlesNum, err = repoNumCmd(*repo.GlobalMysql, service.DefaultOption); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 		res.MaxPage = GetMaxPage(articlesNum, argus.GlobalConfig.Web.MaxViewSettingArticleNum)
 	}()
 	wg.Wait()
 
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -582,8 +541,6 @@ func FindPickUpArticleController(c *gin.Context) {
 }
 
 func FindPickUpArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err error) {
-	var response string
-
 	res := new(PickUpArticleResponse)
 	pickupId := argus.GlobalConfig.Web.Pickup
 
@@ -599,18 +556,13 @@ func FindPickUpArticleHandler(c *gin.Context, repoCmd repo.FindArticleCmd) (err 
 			},
 		}
 		if articles, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 		res.Articles = append(res.Articles, articles...)
 	}
 
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -624,23 +576,16 @@ func FindCategoryController(c *gin.Context) {
 }
 
 func FindCategoryHandler(c *gin.Context, repoCmd repo.FindCategoryCmd) (err error) {
-	var (
-		categories []repo.CategoryResponse
-		response   string
-	)
+	var categories []repo.CategoryResponse
 
 	if categories, err = repoCmd(*repo.GlobalMysql, service.DefaultOption); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	res := CategoryResponseType{Categories: categories}
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -663,12 +608,11 @@ func FindDraftHandler(
 	var (
 		drafts    []repo.Draft
 		draftsNum int
-		response  string
 		p         int
 	)
 
 	if p, err = ParsePage(c); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -686,7 +630,7 @@ func FindDraftHandler(
 			Desc:   true,
 		}
 		if drafts, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -694,7 +638,7 @@ func FindDraftHandler(
 	go func() {
 		defer wg.Done()
 		if draftsNum, err = repoNumCmd(*repo.GlobalMysql, service.DefaultOption); err != nil {
-			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}()
@@ -709,12 +653,8 @@ func FindDraftHandler(
 		DraftsNum: draftsNum,
 		MaxPage:   maxPage,
 	}
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -727,10 +667,7 @@ func FindDraftByIdController(c *gin.Context) {
 }
 
 func FindDraftByIdHandler(c *gin.Context, repoCmd repo.FindDraftCmd) (err error) {
-	var (
-		response string
-		drafts   []repo.Draft
-	)
+	var drafts []repo.Draft
 
 	id := c.Query("id")
 
@@ -746,7 +683,7 @@ func FindDraftByIdHandler(c *gin.Context, repoCmd repo.FindDraftCmd) (err error)
 	}
 
 	if drafts, err = repoCmd(*repo.GlobalMysql, option); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -754,12 +691,7 @@ func FindDraftByIdHandler(c *gin.Context, repoCmd repo.FindDraftCmd) (err error)
 		res.Draft = drafts[0]
 	}
 
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
 
@@ -776,7 +708,6 @@ func FindImageController(c *gin.Context) {
 func FindImageHandler(c *gin.Context) (err error) {
 	var (
 		res       ImageResponseType
-		response  string
 		files     []os.FileInfo
 		fileNames []string
 		p         int
@@ -784,19 +715,19 @@ func FindImageHandler(c *gin.Context) (err error) {
 
 	dirPath := filepath.Join(argus.EnvVars.Get("resource"), "images")
 	if files, err = service.GetFileList(dirPath); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	if p, err = ParsePage(c); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	mx := argus.GlobalConfig.Web.MaxViewImageNum
 	offset := (p - 1) * mx
 
 	if offset >= len(files) {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		err = errors.New("error happened")
 		BasicError.
 			SetValues("len(files)", len(files)).
@@ -817,11 +748,6 @@ func FindImageHandler(c *gin.Context) (err error) {
 
 	res.Images = fileNames
 
-	if response, err = ParseToJson(&res); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprint(c.Writer, response)
+	c.JSON(http.StatusOK, res)
 	return
 }
