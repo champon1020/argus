@@ -28,7 +28,7 @@ func TestGenArgsQuery(t *testing.T) {
 	}
 
 	query := service.GenArgsQuery(*option)
-	actual := "WHERE title=? "
+	actual := "WHERE title = ? "
 	assert.Equal(t, actual, query)
 }
 
@@ -53,7 +53,7 @@ func TestGenArgsQuery_Multi(t *testing.T) {
 	}
 
 	query := service.GenArgsQuery(*option)
-	actual := "WHERE id>=? AND title=? ORDER BY create_date DESC LIMIT ?,? "
+	actual := "WHERE id >= ? AND title = ? ORDER BY create_date DESC LIMIT ?,? "
 	assert.Equal(t, actual, query)
 }
 
