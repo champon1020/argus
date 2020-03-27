@@ -27,28 +27,6 @@ paths:
                       $ref: '#/components/schemas/Article'
                 required:
                   - articles
-  /api/find/article/id:
-    get:
-      summary: Return an aritlce by selected id.
-      parameters:
-        - name: id
-          in: query
-          required: true
-          description: Article id.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: A JSON of article.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  article:
-                    $ref: '#/components/schemas/Article'
-                required:
-                  - article
   /api/find/article/sortedId:
     get:
       summary: Return an aritlce by selected sortedId and next, previous article.
@@ -250,6 +228,29 @@ paths:
                 properties:
                   verify:
                     type: boolean
+
+  /api/private/find/article/id:
+    get:
+      summary: Return an aritlce by selected id.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Article id.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON of article.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    $ref: '#/components/schemas/Article'
+                required:
+                  - article
 
   /api/private/find/article/list/all:
     get:
