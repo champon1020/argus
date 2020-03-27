@@ -27,28 +27,6 @@ paths:
                       $ref: '#/components/schemas/Article'
                 required:
                   - articles
-  /api/find/article/id:
-    get:
-      summary: Return an aritlce by selected id.
-      parameters:
-        - name: id
-          in: query
-          required: true
-          description: Article id.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: A JSON of article.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  article:
-                    $ref: '#/components/schemas/Article'
-                required:
-                  - article
   /api/find/article/sortedId:
     get:
       summary: Return an aritlce by selected sortedId and next, previous article.
@@ -216,9 +194,69 @@ paths:
                       $ref: '#/components/schemas/Category'
                 required:
                   - categories
+
+  /api/verify/token:
+    post:
+      summary: Verify token.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+        '400':
+          description: no authorization header.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+
+  /api/private/find/article/id:
+    get:
+      summary: Return an aritlce by selected id.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Article id.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON of article.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    $ref: '#/components/schemas/Article'
+                required:
+                  - article
+
   /api/private/find/article/list/all:
     get:
       summary: Return a list of articles (including private)
+      security:
+        - BearerAuth: []
       parameters:
         - name: p
           in: query
@@ -258,6 +296,8 @@ paths:
   /api/private/find/draft/list:
     get:
       summary: Return a list of drafts.
+      security:
+        - BearerAuth: []
       parameters:
         - name: p
           in: query
@@ -297,6 +337,8 @@ paths:
   /api/private/find/draft/id:
     get:
       summary: Return a list of drafts.
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: query
@@ -331,6 +373,8 @@ paths:
   /api/private/find/image/list:
     get:
       summary: Return a list of image names.
+      security:
+        - BearerAuth: []
       parameters:
         - name: p
           in: query
@@ -370,6 +414,8 @@ paths:
   /api/private/register/article:
     post:
       summary: Register new article.
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -407,6 +453,8 @@ paths:
   /api/private/register/image:
     post:
       summary: Register new image.
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -437,6 +485,8 @@ paths:
   /api/private/update/article:
     put:
       summary: Update article.
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -474,6 +524,8 @@ paths:
   /api/private/update/article/object:
     put:
       summary: Update article only object (not include content).
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -505,6 +557,8 @@ paths:
   /api/private/draft/article:
     post:
       summary: Draft article.
+      security:
+        - BearerAuth: []
       requestBody:
         content:
           application/json:
@@ -553,6 +607,8 @@ paths:
   /api/private/delete/image:
     delete:
       summary: Delete images.
+      security:
+        - BearerAuth: []
       parameters:
         - name: imageNames
           in: query
@@ -582,6 +638,8 @@ paths:
   /api/private/delete/draft:
     delete:
       summary: Delete draft.
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: query
@@ -736,3 +794,8 @@ components:
         - categories
         - contentHash
         - imageHash
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

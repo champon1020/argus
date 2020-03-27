@@ -35,7 +35,7 @@ func NewRouter() *gin.Engine {
 		AllowAllOrigins: false,
 		AllowOrigins:    []string{"http://localhost:3000"},
 		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:    []string{"Origin", "Content-Type"},
+		AllowHeaders:    []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:   []string{"Content-Length"},
 		MaxAge:          12 * time.Hour,
 	}
@@ -46,7 +46,6 @@ func NewRouter() *gin.Engine {
 	find := router.Group("/api/find")
 	{
 		find.GET("/article/pickup", handler.FindPickUpArticleController)
-		find.GET("/article/id", handler.FindArticleByIdController)
 		find.GET("/article/sortedId", handler.FindArticleBySortedIdController)
 		find.GET("/article/list", handler.FindArticleController)
 		find.GET("/article/list/title", handler.FindArticleByTitleController)
@@ -62,6 +61,7 @@ func NewRouter() *gin.Engine {
 	{
 		find := private.Group("/find")
 		{
+			find.GET("/article/id", handler.FindArticleByIdController)
 			find.GET("/draft/id", handler.FindDraftByIdController)
 			find.GET("/article/list/all", handler.FindAllArticleController)
 			find.GET("/draft/list", handler.FindDraftController)

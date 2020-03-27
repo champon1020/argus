@@ -61,7 +61,8 @@ func TestDraftHandler(t *testing.T) {
 	"id": "TEST_ID",
 	"contentHash": "0123456789",
 	"imageHash": "9876543210"
-}`
+}
+`
 
 	var buf bytes.Buffer
 

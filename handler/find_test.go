@@ -72,7 +72,8 @@ func TestFindArticleByIdHandler(t *testing.T) {
 		"imageHash": "9876543210",
 		"isPrivate": false
 	}
-}`
+}
+`
 
 	if err := FindArticleByIdHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -163,7 +164,8 @@ func TestFindArticleBySortedIdHandler(t *testing.T) {
 		"imageHash": "",
 		"isPrivate": false
 	}
-}`
+}
+`
 
 	if err := FindArticleBySortedIdHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -236,7 +238,8 @@ func TestFindArticleHandler(t *testing.T) {
 		}
 	],
 	"maxPage": ` + strconv.Itoa(mxPage) + `
-}`
+}
+`
 
 	if err := FindArticleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -309,7 +312,8 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 		}
 	],
 	"maxPage": ` + strconv.Itoa(mxPage) + `
-}`
+}
+`
 
 	if err := FindArticleByTitleHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -382,7 +386,8 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 		}
 	],
 	"maxPage": ` + strconv.Itoa(mxPage) + `
-}`
+}
+`
 
 	if err := FindArticleByCreateDateHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -460,7 +465,8 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 		}
 	],
 	"maxPage": ` + strconv.Itoa(mxPage) + `
-}`
+}
+`
 
 	if err := FindArticleByCategoryHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -526,7 +532,8 @@ func TestFindPickUpArticleHandler(t *testing.T) {
 			"isPrivate": false
 		}
 	]
-}`
+}
+`
 
 	if err := FindPickUpArticleHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -573,7 +580,8 @@ func TestFindCategoryHandler(t *testing.T) {
 			"articleNum": 3
 		}
 	]
-}`
+}
+`
 
 	if err := FindCategoryHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -636,7 +644,8 @@ func TestFindDraftHandler(t *testing.T) {
 	],
 	"draftsNum": 10,
 	"maxPage": ` + strconv.Itoa(mxPage) + `
-}`
+}
+`
 
 	if err := FindDraftHandler(ctx, repoCmdMock, repoNumCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -689,7 +698,8 @@ func TestFindDraftByIdHandler(t *testing.T) {
 		"contentHash": "0123456789",
 		"imageHash": "9876543210"
 	}
-}`
+}
+`
 
 	if err := FindDraftByIdHandler(ctx, repoCmdMock); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)
@@ -725,7 +735,8 @@ func TestFindImageHandler(t *testing.T) {
 		"image_test2.jpg"
 	],
 	"next": false
-}`
+}
+`
 
 	if err := FindImageHandler(ctx); err != nil {
 		argus.StdLogger.ErrorLog(*Errors)

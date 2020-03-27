@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -18,7 +17,7 @@ func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err er
 	var body RequestBody
 
 	if err = ParseRequestBody(c.Request, &body); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -38,21 +37,21 @@ func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err er
 
 	// output html
 	if err = service.OutputFile(htmlFp, []byte(body.HtmlContents)); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	// output md
 	if err = service.OutputFile(mdFp, []byte(body.MdeContents)); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Fprint(c.Writer, http.StatusOK)
+	c.AbortWithStatus(http.StatusOK)
 	return
 }
 
@@ -68,7 +67,7 @@ func UpdateArticleObjHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err
 	var body RequestArticleObjType
 
 	if err = ParseRequestArticleObj(c.Request, &body); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -83,10 +82,10 @@ func UpdateArticleObjHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Println(c.Writer, http.StatusOK)
+	c.AbortWithStatus(http.StatusOK)
 	return
 }

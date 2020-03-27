@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
@@ -45,7 +44,7 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 	var body RequestBody
 
 	if err = ParseRequestBody(c.Request, &body); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -66,17 +65,17 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 
 	// output html
 	if err = service.OutputFile(htmlFp, []byte(body.HtmlContents)); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	// output md
 	if err = service.OutputFile(mdFp, []byte(body.MdeContents)); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		// if err occurred, delete created files.
 		_ = service.DeleteFile(htmlFp)
 		_ = service.DeleteFile(mdFp)
@@ -91,7 +90,7 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 		),
 	)
 
-	fmt.Fprint(c.Writer, http.StatusOK)
+	c.AbortWithStatus(http.StatusOK)
 	return
 }
 
@@ -103,7 +102,7 @@ func RegisterImageHandler(c *gin.Context) (err error) {
 	var form *multipart.Form
 
 	if form, err = c.MultipartForm(); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		BasicError.
 			SetErr(err).
 			SetValues("header", c.Request.Header).
@@ -115,12 +114,12 @@ func RegisterImageHandler(c *gin.Context) (err error) {
 	fileHeaders := form.File["images"]
 	path := filepath.Join(argus.EnvVars.Get("resource"), "images")
 	if err = service.SaveMultipartFiles(path, fileHeaders); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	c.Writer.Header().Set("Content-Type", "text/html")
 	c.Writer.Header().Set("location", argus.GlobalConfig.Web.Host+"/manage/images")
-	c.Writer.WriteHeader(http.StatusMovedPermanently)
+	c.AbortWithStatus(http.StatusOK)
 	return
 }
