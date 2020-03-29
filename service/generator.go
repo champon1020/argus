@@ -15,12 +15,13 @@ func (o *Ope) toString() string {
 }
 
 const (
-	Ne Ope = "!=" // Not Equal
-	Eq Ope = "="  // Equal
-	Gt Ope = ">"  // Greater Than
-	Lt Ope = "<"  // Less Than
-	Ge Ope = ">=" // Greater or Equal
-	Le Ope = "<=" // Less or Equal
+	Ne   Ope = "!="   // Not Equal
+	Eq   Ope = "="    // Equal
+	Gt   Ope = ">"    // Greater Than
+	Lt   Ope = "<"    // Less Than
+	Ge   Ope = ">="   // Greater or Equal
+	Le   Ope = "<="   // Less or Equal
+	Like Ope = "LIKE" // Like
 )
 
 type QueryArgs struct {
@@ -69,7 +70,8 @@ func GenWhereQuery(option QueryOption) (query string) {
 		} else {
 			query += "AND "
 		}
-		query += ToSnakeCase(a.Name) + a.Ope.toString() + "? "
+
+		query += ToSnakeCase(a.Name) + " " + a.Ope.toString() + " ? "
 	}
 	return
 }

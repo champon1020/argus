@@ -243,9 +243,9 @@ func FindArticleByTitleHandler(
 		option := &service.QueryOption{
 			Args: []*service.QueryArgs{
 				{
-					Value: c.Query("title"),
+					Value: "%" + c.Query("title") + "%",
 					Name:  "Title",
-					Ope:   service.Eq,
+					Ope:   service.Like,
 				},
 				{
 					Value: false,
@@ -269,9 +269,9 @@ func FindArticleByTitleHandler(
 		option := &service.QueryOption{
 			Args: []*service.QueryArgs{
 				{
-					Value: c.Query("title"),
+					Value: "%" + c.Query("title") + "%",
 					Name:  "Title",
-					Ope:   service.Eq,
+					Ope:   service.Like,
 				},
 			},
 		}

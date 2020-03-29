@@ -87,14 +87,3 @@ func ParseDraftRequestBody(r *http.Request, reqBody *DraftRequestBody) (err erro
 	}
 	return
 }
-
-// Parse json string from object.
-func ParseToJson(st interface{}) (res string, err error) {
-	var bytes []byte
-	if bytes, err = json.Marshal(&st); err != nil {
-		IOMarshalError.SetErr(err).AppendTo(Errors)
-		return
-	}
-	res = string(bytes)
-	return
-}

@@ -39,7 +39,7 @@ func TestRegisterArticleCmd(t *testing.T) {
 	}
 
 	// FindDrafts() with content hash
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash=?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash = ?")).
 		WithArgs("0123456789").
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
@@ -47,7 +47,7 @@ func TestRegisterArticleCmd(t *testing.T) {
 	mock.ExpectBegin()
 
 	// category.Exist()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT id FROM categories WHERE name=?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT id FROM categories WHERE name = ?")).
 		WithArgs("c1").
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}))
 
@@ -104,7 +104,7 @@ func TestUpdateArticleCommand(t *testing.T) {
 	mock.ExpectBegin()
 
 	// category.Exist()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT id FROM categories WHERE name=?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT id FROM categories WHERE name = ?")).
 		WithArgs("c1").
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}))
 
@@ -159,7 +159,7 @@ func TestDraftCmd_Insert(t *testing.T) {
 	}
 
 	// FindDrafts()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE id=? ")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE id = ? ")).
 		WithArgs("TEST_ID").
 		WillReturnRows(sqlmock.NewRows([]string{}))
 
@@ -200,7 +200,7 @@ func TestDraftCmd_Update(t *testing.T) {
 	}
 
 	// FindDrafts()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE id=? ")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE id = ? ")).
 		WithArgs("TEST_ID").
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -330,7 +330,7 @@ func TestFindArticleCmd_Title(t *testing.T) {
 	}
 
 	// FindArticle()
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles WHERE title=? ORDER BY create_date DESC LIMIT ?,?")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM articles WHERE title = ? ORDER BY create_date DESC LIMIT ?,?")).
 		WithArgs("test", 2, 1).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -396,7 +396,7 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 			"SELECT article_id FROM article_category "+
 			"WHERE category_id IN ("+
 			"SELECT id FROM categories "+
-			"WHERE name=? AND name=? )) ORDER BY create_date DESC LIMIT ?,?")).
+			"WHERE name = ? AND name = ? )) ORDER BY create_date DESC LIMIT ?,?")).
 		WithArgs("c1", "c2", 2, 1).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
@@ -562,7 +562,7 @@ func TestFindArticlesNumByCategoryCommand(t *testing.T) {
 			"SELECT article_id FROM article_category " +
 			"WHERE category_id IN (" +
 			"SELECT id FROM categories " +
-			"WHERE name=? ))")).
+			"WHERE name = ? ))")).
 		WithArgs("c1").
 		WillReturnRows(
 			sqlmock.NewRows([]string{"articlesNum"}).AddRow(1))
