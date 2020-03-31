@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: argus-svc
+spec:
+  selector:
+    app: argus-api
+  ports:
+    - protocol: TCP
+      port: 8000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argus-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argus-api
+  template:
+    metadata:
+      name: argus-api
+    spec:
+      containers:
+        - name: argus
+          image: champon1020/argus:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: ARGUS_ENVIRONMENT_VARIABLES
+              value: SOMETHING
+
+        - name: argus-file-server
+          image: nginx:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html
+              name: argus-resrc-volume
+      volumes:
+        - name: argus-resrc-volume
+          persistentVolumeClaim:
+            claimName: argus-pvc
