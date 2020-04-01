@@ -44,14 +44,29 @@ Update soon
 
 ## Environment variables
 
-ARGUS_MODE := (Build mode. 
+### Api
+
+```ARGUS_MODE``` := (Build mode. 
 The types of mode are "deploy" | "staging" | "dev" | "test". 
 If not selected, it would be built as "dev")
 
-ARGUS_CONFIG_PATH := (Configuration file path)
+```ARGUS_CONFIG_PATH``` := (Configuration file path)
 
-ARGUS_LOG_PATH := (Log files directory path)
+```ARGUS_LOG_PATH``` := (Log files directory path)
 
-ARGUS_RESOURCE_PATH := (Article files(html, images, etc...) directory path)
+```ARGUS_RESOURCE_PATH``` := (Article files(html, images, etc...) directory path)
 
-GIN_MODE := (Gin framework mode)
+```GIN_MODE``` := (Gin framework mode)
+
+
+### Db (MySQL)
+
+```MYSQL_ROOT_PASSWORD```
+
+```MYSQL_ROOT_HOST```
+
+```MYSQL_USER```
+
+```MYSQL_PASSWORD```
+
+```MYSQL_DATABASE```

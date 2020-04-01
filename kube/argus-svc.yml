@@ -1,13 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: argus-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "argus-external"
+spec:
+  backend:
+    serviceName: argus-svc
+    servicePort: 8000
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: argus-file-server-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "argus-file-server-external"
+spec:
+  backend:
+    serviceName: argus-svc
+    servicePort: 8001
+
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: argus-svc
 spec:
+  type: NodePort
+  clusterIP: 10.76.14.88
   selector:
     app: argus-api
   ports:
-    - protocol: TCP
+    - name: api
       port: 8000
+      targetPort: 8000
+    - name: file-server
+      port: 8001
+      targetPort: 8001
 
 ---
 apiVersion: apps/v1
@@ -22,26 +52,46 @@ spec:
   template:
     metadata:
       name: argus-api
+      labels:
+        app: argus-api
     spec:
       containers:
         - name: argus
           image: champon1020/argus:latest
           imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /api/find/article/list
+              port: 8000
           ports:
             - containerPort: 8000
           env:
-            - name: ARGUS_ENVIRONMENT_VARIABLES
-              value: SOMETHING
-
+            - name: ARGUS_MODE
+              value: deploy
+          envFrom:
+            - secretRef:
+                name: argus-env
+          volumeMounts:
+            - name: argus-files-volume
+              mountPath: /secret/argus
+              readOnly: true
+            - name: argus-resrc-volume
+              mountPath: /argus/resrc
+              readOnly: false
         - name: argus-file-server
           image: nginx:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8001
           volumeMounts:
-            - mountPath: /usr/share/nginx/html
-              name: argus-resrc-volume
+            - name: argus-resrc-volume
+              mountPath: /usr/share/nginx/html
+      imagePullSecrets:
+        - name: regcred
       volumes:
         - name: argus-resrc-volume
           persistentVolumeClaim:
             claimName: argus-pvc
+        - name: argus-files-volume
+          secret:
+            secretName: argus-file
