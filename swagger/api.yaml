@@ -8,6 +8,8 @@ info:
 servers:
   - url: http://localhost:8000
     description: local server
+  - url: https://argus.champonian.com
+    description: domain
 
 paths:
   /api/find/article/pickup:

@@ -1,7 +1,6 @@
 package argus
 
 import (
-	"io"
 	"log"
 	"os"
 	"runtime"
@@ -27,21 +26,22 @@ func init() {
 
 func NewLogger() *LogHandler {
 	l := new(LogHandler)
-	var (
-		logFile *os.File
-		err     error
-	)
+	//var (
+	//	logFile *os.File
+	//	err     error
+	//)
 	l.SetFlags(log.Ldate | log.Ltime)
-	if EnvVars.Get("travis") == "on" {
-		l.SetOutput(os.Stdout)
-		return l
-	}
-	if logFile, err = os.Create(
-		EnvVars.Get("log") + "/debug.log",
-	); err != nil {
-		StdLogger.Fatalf("Unable to open log file: %s\n", err)
-	}
-	l.SetOutput(io.Writer(logFile))
+	l.SetOutput(os.Stdout)
+	//if EnvVars.Get("travis") == "on" {
+	//	l.SetOutput(os.Stdout)
+	//	return l
+	//}
+	//if logFile, err = os.Create(
+	//	EnvVars.Get("log") + "/debug.log",
+	//); err != nil {
+	//	StdLogger.Fatalf("Unable to open log file: %s\n", err)
+	//}
+	//l.SetOutput(io.Writer(logFile))
 	return l
 }
 

@@ -4,15 +4,12 @@
 
 ## Description
 My blog's server side api. (New version)
-Update soon.
+Developing and Updating.
+
 
 ## Usage
 
-Update deployment usage soon.
-
 ### Local
-
-Local
 
 ```
 docker build . -t argus
@@ -21,37 +18,52 @@ cd docker/local
 docker-compose up -d
 ```
 
-### Staging
-
-Api server
-
-```
-cd docker/api
-docker-compose up -d
-```
-
-Database server
-
-```
-cd docker/db
-docker-compose up -d
-```
-
 ### Deploy
 
-Update soon
+※Before this step, deploy some components in argus-private repository.
 
+```
+cd kube
+
+kubeclt apply -f mysql-pvc
+kubectl apply -f argus-pvc
+kubectl apply -f mysql-svc
+kubectl apply -f argus-svc
+```
 
 ## Environment variables
 
-ARGUS_MODE := (Build mode. 
-The types of mode are "deploy" | "staging" | "dev" | "test". 
-If not selected, it would be built as "dev")
+### Api
 
-ARGUS_CONFIG_PATH := (Configuration file path)
+- ```ARGUS_MODE```: Build mode. 
+The types of mode are "deploy" | "dev" | "test". 
+If not selected, it would be built as "dev".
 
-ARGUS_LOG_PATH := (Log files directory path)
+- ```ARGUS_CONFIG_PATH```: Configuration file path.
 
-ARGUS_RESOURCE_PATH := (Article files(html, images, etc...) directory path)
+- ```ARGUS_LOG_PATH```: Log files directory path.
 
-GIN_MODE := (Gin framework mode)
+- ```ARGUS_RESOURCE_PATH```: Article files(html, images, etc...) directory path.
+
+- ```ARGUS_KEY_PATH```: something.
+
+- ```ARGUS_SECRET_PATH```: something.
+
+- ```ARGUS_USER_PATH```: something.
+
+- ```ARGUS_SECRET_FILES_PATH```: something.
+
+- ```GIN_MODE```: Gin framework mode (default is release).
+
+
+### Db (MySQL)
+
+- ```MYSQL_ROOT_PASSWORD```: MySQL root user password.
+
+- ```INTERNAL_IP```: MySQL user host (in this case, cluster IP).
+
+- ```MYSQL_USER```: MySQL user name.
+
+- ```MYSQL_PASSWORD```: MySQL user password.
+
+- ```MYSQL_DATABASE```: MySQL database name.
