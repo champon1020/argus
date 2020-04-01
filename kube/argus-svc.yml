@@ -37,7 +37,7 @@ spec:
       targetPort: 8000
     - name: file-server
       port: 8001
-      targetPort: 8001
+      targetPort: 80
 
 ---
 apiVersion: apps/v1
@@ -57,7 +57,7 @@ spec:
     spec:
       containers:
         - name: argus
-          image: champon1020/argus:latest
+          image: champon1020/argus:0.1
           imagePullPolicy: Always
           readinessProbe:
             httpGet:
@@ -79,10 +79,15 @@ spec:
               mountPath: /argus/resrc
               readOnly: false
         - name: argus-file-server
-          image: nginx:latest
+          image: champon1020/argus-file-server:0.1
           imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 80
+            failureThreshold: 2
           ports:
-            - containerPort: 8001
+            - containerPort: 80
           volumeMounts:
             - name: argus-resrc-volume
               mountPath: /usr/share/nginx/html
