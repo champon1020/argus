@@ -4,6 +4,7 @@ metadata:
   name: argus-ingress
   annotations:
     kubernetes.io/ingress.global-static-ip-name: "argus-external"
+    networking.gke.io/managed-certificates: argus-crt
 spec:
   backend:
     serviceName: argus-svc
@@ -15,7 +16,8 @@ kind: Ingress
 metadata:
   name: argus-file-server-ingress
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: "argus-file-server-external"
+    kubernetes.io/ingress.global-static-ip-name: "resrc-external"
+    networking.gke.io/managed-certificates: resrc-crt
 spec:
   backend:
     serviceName: argus-svc
@@ -57,7 +59,7 @@ spec:
     spec:
       containers:
         - name: argus
-          image: champon1020/argus:0.1
+          image: champon1020/argus:0.2
           imagePullPolicy: Always
           readinessProbe:
             httpGet:
