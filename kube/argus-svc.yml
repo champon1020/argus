@@ -59,7 +59,7 @@ spec:
     spec:
       containers:
         - name: argus
-          image: champon1020/argus:0.2
+          image: champon1020/argus:0.3
           imagePullPolicy: Always
           readinessProbe:
             httpGet:
