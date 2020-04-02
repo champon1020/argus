@@ -9,7 +9,7 @@ services:
       ARGUS_CONFIG_PATH: "/config.json"
       ARGUS_RESOURCE_PATH: "/usr/share/nginx/html"
       ARGUS_SECRET_PATH: "/secret.json"
-      ARGUS_KEY_PATH: "/key.pem"
+      ARGUS_KEY_PATH: "/key/public_key.pem"
       ARGUS_USER_PATH: "/user.json"
     ports:
       - "8000:8000"
@@ -18,7 +18,6 @@ services:
       - "../../logs:/logs"
       - "../../argus-private/config.json:/config.json"
       - "${ARGUS_SECRET_PATH}:/secret.json"
-      - "${ARGUS_KEY_PATH}:/key.pem"
       - "${ARGUS_USER_PATH}:/user.json"
     networks:
       devnet_default:
