@@ -49,8 +49,6 @@ If not selected, it would be built as "dev".
 
 - ```ARGUS_USER_PATH```: something.
 
-- ```ARGUS_SECRET_FILES_PATH```: something.
-
 - ```GIN_MODE```: Gin framework mode (default is release).
 
 
