@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: argus-db
-          image: mysql:5.7
+          image: champon1020/argus-db:0.1
           imagePullPolicy: Always
           args: ["--ignore-db-dir=lost+found"]
           ports:
@@ -42,25 +42,7 @@ spec:
           volumeMounts:
             - name: argus-db-volume
               mountPath: /var/lib/mysql
-            - name: argus-db-files
-              mountPath: /docker-entrypoint-initdb.d
-            - name: argus-db-cnf
-              mountPath: /etc/mysql/conf.d
       volumes:
         - name: argus-db-volume
           persistentVolumeClaim:
             claimName: mysql-pvc
-        - name: argus-db-files
-          configMap:
-            name: mysql-map
-            items:
-              - key: 1_init.sql
-                path: 1_init.sql
-              - key: 2_user.sh
-                path: 2_user.sh
-        - name: argus-db-cnf
-          configMap:
-            name: mysql-map
-            items:
-              - key: custom.cnf
-                path: custom.cnf
