@@ -427,14 +427,8 @@ paths:
               properties:
                 article:
                   $ref: '#/components/schemas/RequestArticle'
-                htmlContents:
-                  type: string
-                mdContents:
-                  type: string
               required:
                 - article
-                - htmlContents
-                - mdContents
       responses:
         '200':
           description: Success
@@ -498,45 +492,6 @@ paths:
               properties:
                 article:
                   $ref: '#/components/schemas/RequestArticle'
-                htmlContents:
-                  type: string
-                mdContents:
-                  type: string
-              required:
-                - article
-                - htmlContents
-                - mdContents
-      responses:
-        '200':
-          description: Success
-        '400':
-          description: no authorization header
-        '500':
-          description: Failed
-        '403':
-          description: expired or firbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
-
-  /api/private/update/article/object:
-    put:
-      summary: Update article only object (not include content).
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                article:
-                  $ref: '#/components/schemas/RequestArticle'
               required:
                 - article
       responses:
@@ -584,13 +539,13 @@ paths:
                 properties:
                   id:
                     type: string
-                  contentHash:
+                  content:
                     type: string
                   imageHash:
                     type: string
                 required:
                   - id
-                  - contentHash
+                  - content
                   - imageHash
         '400':
           description: no authorization header
@@ -649,12 +604,6 @@ paths:
           description: Draft id.
           schema:
             type: string
-        - name: contentHash
-          in: query
-          required: true
-          description: Draft content hash.
-          schema:
-            type: string
       responses:
         '200':
           description: Success
@@ -691,7 +640,7 @@ components:
           type: string
         updateDate:
           type: string
-        contentHash:
+        content:
           type: string
         imageHash:
           type: string
@@ -704,7 +653,7 @@ components:
         - categories
         - createDate
         - updateDate
-        - contentHash
+        - content
         - imageHash
         - isPrivate
     Category:
@@ -733,7 +682,7 @@ components:
           type: string
         updateDate:
           type: string
-        contentHash:
+        content:
           type: string
         imageHash:
           type: string
@@ -743,7 +692,7 @@ components:
         - title
         - categories
         - updateDate
-        - contentHash
+        - content
         - imageHash
     RequestArticle:
       type: object
@@ -764,7 +713,7 @@ components:
             required:
               - id
               - name
-        contentHash:
+        content:
           type: string
         imageHash:
           type: string
@@ -774,7 +723,7 @@ components:
         - id
         - title
         - categories
-        - contentHash
+        - content
         - imageHash
         - isPrivate
     RequestDraft:
@@ -786,7 +735,7 @@ components:
           type: string
         categories:
           type: string
-        contentHash:
+        content:
           type: string
         imageHash:
           type: string
@@ -794,7 +743,7 @@ components:
         - id
         - title
         - categories
-        - contentHash
+        - content
         - imageHash
   securitySchemes:
     BearerAuth:
