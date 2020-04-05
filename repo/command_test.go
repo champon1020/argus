@@ -31,16 +31,16 @@ func TestRegisterArticleCmd(t *testing.T) {
 		Categories: []Category{
 			{Id: "TEST_CA_ID", Name: "c1"},
 		},
-		CreateDate:  testTime,
-		UpdateDate:  testTime,
-		ContentHash: "0123456789",
-		ImageHash:   "9876543210",
-		Private:     false,
+		CreateDate: testTime,
+		UpdateDate: testTime,
+		Content:    "TEST_CONTENT",
+		ImageHash:  "9876543210",
+		Private:    false,
 	}
 
-	// FindDrafts() with content hash
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE content_hash = ?")).
-		WithArgs("0123456789").
+	// FindDrafts() by id
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM drafts WHERE id = ?")).
+		WithArgs("TEST_ID").
 		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 	// Start transaction
@@ -58,7 +58,7 @@ func TestRegisterArticleCmd(t *testing.T) {
 
 	// InsertArticles()
 	mock.ExpectExec("INSERT INTO articles").
-		WithArgs("TEST_ID", "test", testTime, testTime, "0123456789", "9876543210", false).
+		WithArgs("TEST_ID", "test", testTime, testTime, "TEST_CONTENT", "9876543210", false).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	// InsertArticleCategory()
@@ -93,11 +93,11 @@ func TestUpdateArticleCommand(t *testing.T) {
 		Categories: []Category{
 			{Id: "TEST_CA_ID", Name: "c1"},
 		},
-		CreateDate:  testTime,
-		UpdateDate:  testTime,
-		ContentHash: "0123456789",
-		ImageHash:   "9876543210",
-		Private:     false,
+		CreateDate: testTime,
+		UpdateDate: testTime,
+		Content:    "TEST_CONTENT",
+		ImageHash:  "9876543210",
+		Private:    false,
 	}
 
 	// Start transaction
@@ -115,7 +115,7 @@ func TestUpdateArticleCommand(t *testing.T) {
 
 	// UpdateArticle()
 	mock.ExpectExec("UPDATE articles").
-		WithArgs("test", testTime, "0123456789", "9876543210", false, "TEST_ID").
+		WithArgs("test", testTime, "TEST_CONTENT", "9876543210", false, "TEST_ID").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	// DeleteArticleCategory()
@@ -150,12 +150,12 @@ func TestDraftCmd_Insert(t *testing.T) {
 	defer db.Close()
 
 	draft := Draft{
-		Id:          "TEST_ID",
-		Title:       "draft",
-		Categories:  "c1&c2",
-		UpdateDate:  testTime,
-		ContentHash: "0123456789",
-		ImageHash:   "9876543210",
+		Id:         "TEST_ID",
+		Title:      "draft",
+		Categories: "c1&c2",
+		UpdateDate: testTime,
+		Content:    "TEST_CONTENT",
+		ImageHash:  "9876543210",
 	}
 
 	// FindDrafts()
@@ -167,7 +167,7 @@ func TestDraftCmd_Insert(t *testing.T) {
 
 	// InsertDraft()
 	mock.ExpectExec("INSERT INTO drafts").
-		WithArgs("TEST_ID", "draft", "c1&c2", testTime, "0123456789", "9876543210").
+		WithArgs("TEST_ID", "draft", "c1&c2", testTime, "TEST_CONTENT", "9876543210").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	mock.ExpectCommit()
@@ -191,12 +191,12 @@ func TestDraftCmd_Update(t *testing.T) {
 	defer db.Close()
 
 	draft := Draft{
-		Id:          "TEST_ID",
-		Title:       "draft",
-		Categories:  "c1&c2",
-		UpdateDate:  testTime,
-		ContentHash: "0123456789",
-		ImageHash:   "9876543210",
+		Id:         "TEST_ID",
+		Title:      "draft",
+		Categories: "c1&c2",
+		UpdateDate: testTime,
+		Content:    "TEST_CONTENT",
+		ImageHash:  "9876543210",
 	}
 
 	// FindDrafts()
@@ -204,14 +204,14 @@ func TestDraftCmd_Update(t *testing.T) {
 		WithArgs("TEST_ID").
 		WillReturnRows(
 			sqlmock.NewRows([]string{
-				"id", "sorted_id", "title", "categories", "update_date", "content_hash", "image_hash",
-			}).AddRow("TEST_ID", 1, "draft", "c1&c2", testTime, "0123456789", "9876543210"))
+				"id", "sorted_id", "title", "categories", "update_date", "content", "image_hash",
+			}).AddRow("TEST_ID", 1, "draft", "c1&c2", testTime, "TEST_CONTENT", "9876543210"))
 
 	mock.ExpectBegin()
 
 	// UpdateDraft()
 	mock.ExpectExec("UPDATE drafts").
-		WithArgs("draft", "c1&c2", testTime, "0123456789", "9876543210", "TEST_ID").
+		WithArgs("draft", "c1&c2", testTime, "TEST_CONTENT", "9876543210", "TEST_ID").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	mock.ExpectCommit()
@@ -277,8 +277,8 @@ func TestFindArticleCmd_All(t *testing.T) {
 		WithArgs(2, 1).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
-				"id", "sorted_id", "title", "create_date", "update_date", "content_hash", "image_hash", "private",
-			}).AddRow("TEST_ID", "1", "test", testTime, testTime, "0123456789", "9876543210", false))
+				"id", "sorted_id", "title", "create_date", "update_date", "content", "image_hash", "private",
+			}).AddRow("TEST_ID", "1", "test", testTime, testTime, "TEST_CONTENT", "9876543210", false))
 
 	// FindCategoriesByArticleId()
 	// Called by article.go: FindArticle()
@@ -334,8 +334,8 @@ func TestFindArticleCmd_Title(t *testing.T) {
 		WithArgs("test", 2, 1).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
-				"id", "sorted_id", "title", "create_date", "update_date", "content_hash", "image_hash", "private",
-			}).AddRow("TEST_ID", "2", "test", testTime, testTime, "0123456789", "9876543210", false))
+				"id", "sorted_id", "title", "create_date", "update_date", "content", "image_hash", "private",
+			}).AddRow("TEST_ID", "2", "test", testTime, testTime, "TEST_CONTENT", "9876543210", false))
 
 	// FindCategoriesByArticleId()
 	// Called by article.go: FindArticle()
@@ -400,8 +400,8 @@ func TestFindArticleByCategoryCmd(t *testing.T) {
 		WithArgs("c1", "c2", 2, 1).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
-				"id", "sorted_id", "title", "create_date", "update_date", "content_hash", "image_hash", "private",
-			}).AddRow("TEST_ID", "1", "test", testTime, testTime, "0123456789", "9876543210", false))
+				"id", "sorted_id", "title", "create_date", "update_date", "content", "image_hash", "private",
+			}).AddRow("TEST_ID", "1", "test", testTime, testTime, "TEST_CONTENT", "9876543210", false))
 
 	// FindCategoriesByArticleId()
 	// Called by article.go: FindArticle()
@@ -491,8 +491,8 @@ func TestFindDraftCmd(t *testing.T) {
 		WithArgs(2, 1).
 		WillReturnRows(
 			sqlmock.NewRows([]string{
-				"id", "sortedId", "title", "categories", "update_date", "content_hash", "image_hsah",
-			}).AddRow("TEST_D_ID", 1, "draft", "c1&c2", testTime, "0123456789", "9876543210"))
+				"id", "sortedId", "title", "categories", "update_date", "content", "image_hsah",
+			}).AddRow("TEST_D_ID", 1, "draft", "c1&c2", testTime, "TEST_CONTENT", "9876543210"))
 
 	d, err := FindDraftCommand(mysql, option)
 

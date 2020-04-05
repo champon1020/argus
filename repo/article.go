@@ -16,20 +16,20 @@ import (
 // ImageHash: image file name
 // private: this article is whether public or not
 type Article struct {
-	Id          string     `json:"id"`
-	SortedId    int        `json:"sortedId"`
-	Title       string     `json:"title"`
-	Categories  []Category `json:"categories"`
-	CreateDate  time.Time  `json:"createDate"`
-	UpdateDate  time.Time  `json:"updateDate"`
-	ContentHash string     `json:"contentHash"`
-	ImageHash   string     `json:"imageHash"`
-	Private     bool       `json:"isPrivate"`
+	Id         string     `json:"id"`
+	SortedId   int        `json:"sortedId"`
+	Title      string     `json:"title"`
+	Categories []Category `json:"categories"`
+	CreateDate time.Time  `json:"createDate"`
+	UpdateDate time.Time  `json:"updateDate"`
+	Content    string     `json:"content"`
+	ImageHash  string     `json:"imageHash"`
+	Private    bool       `json:"isPrivate"`
 }
 
 func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 	cmd := "INSERT INTO articles " +
-		"(id, title, create_date, update_date, content_hash, image_hash, private)" +
+		"(id, title, create_date, update_date, content, image_hash, private)" +
 		"VALUES (?, ?, ?, ?, ?, ?, ?)"
 
 	if _, err := tx.Exec(cmd,
@@ -37,7 +37,7 @@ func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 		article.Title,
 		article.CreateDate,
 		article.UpdateDate,
-		article.ContentHash,
+		article.Content,
 		article.ImageHash,
 		article.Private,
 	); err != nil {
@@ -48,13 +48,13 @@ func (article *Article) InsertArticle(tx *sql.Tx) (err error) {
 
 func (article *Article) UpdateArticle(tx *sql.Tx) (err error) {
 	cmd := "UPDATE articles " +
-		"SET title=?, update_date=?, content_hash=?, image_hash=?, private=? " +
+		"SET title=?, update_date=?, content=?, image_hash=?, private=? " +
 		"WHERE id=?"
 
 	if _, err = tx.Exec(cmd,
 		article.Title,
 		article.UpdateDate,
-		article.ContentHash,
+		article.Content,
 		article.ImageHash,
 		article.Private,
 		article.Id,
@@ -99,7 +99,7 @@ func FindArticle(db *sql.DB, option *service.QueryOption) (articles []Article, e
 			&a.Title,
 			&a.CreateDate,
 			&a.UpdateDate,
-			&a.ContentHash,
+			&a.Content,
 			&a.ImageHash,
 			&a.Private,
 		); err != nil {

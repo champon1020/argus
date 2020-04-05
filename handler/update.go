@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/champon1020/argus/repo"
-	"github.com/champon1020/argus/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,64 +20,14 @@ func UpdateArticleHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err er
 		return
 	}
 
-	fp := service.ResolveContentFilePath("articles", body.Article.ContentHash)
 	article := repo.Article{
-		Id:          body.Article.Id,
-		Title:       body.Article.Title,
-		Categories:  body.Article.Categories,
-		UpdateDate:  time.Now(),
-		ContentHash: body.Article.ContentHash,
-		ImageHash:   body.Article.ImageHash,
-		Private:     body.Article.Private,
-	}
-
-	htmlFp := fp + "_html"
-	mdFp := fp + "_md"
-
-	// output html
-	if err = service.OutputFile(htmlFp, []byte(body.HtmlContents)); err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	// output md
-	if err = service.OutputFile(mdFp, []byte(body.MdeContents)); err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	c.AbortWithStatus(http.StatusOK)
-	return
-}
-
-type RequestArticleObjType struct {
-	Article repo.Article `json:"article"`
-}
-
-func UpdateArticleObjController(c *gin.Context) {
-	_ = UpdateArticleObjHandler(c, repo.UpdateArticleCommand)
-}
-
-func UpdateArticleObjHandler(c *gin.Context, repoCmd repo.UpdateArticleCmd) (err error) {
-	var body RequestArticleObjType
-
-	if err = ParseRequestArticleObj(c.Request, &body); err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	article := repo.Article{
-		Id:          body.Article.Id,
-		Title:       body.Article.Title,
-		Categories:  body.Article.Categories,
-		UpdateDate:  time.Now(),
-		ContentHash: body.Article.ContentHash,
-		ImageHash:   body.Article.ImageHash,
-		Private:     body.Article.Private,
+		Id:         body.Article.Id,
+		Title:      body.Article.Title,
+		Categories: body.Article.Categories,
+		UpdateDate: time.Now(),
+		Content:    body.Article.Content,
+		ImageHash:  body.Article.ImageHash,
+		Private:    body.Article.Private,
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, article); err != nil {

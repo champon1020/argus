@@ -28,13 +28,14 @@ services:
     container_name: argus_db_dev
     environment:
       MYSQL_ROOT_PASSWORD: toor
-      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_HOST: '%'
       MYSQL_DATABASE: argus_test
       MYSQL_USER: docker
       MYSQL_PASSWORD: docker
+      INTERNAL_IP: 127.0.0.1
       TZ: "Asia/Tokyo"
     ports:
-      - "43306:43306"
+      - "43306:3306"
     volumes:
       - "../db/entry:/docker-entrypoint-initdb.d"
       - "../db/custom.cnf:/etc/mysql/conf.d/custom.cnf"

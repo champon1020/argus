@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS articles(
     title varchar(256) not null,
     create_date datetime not null,
     update_date datetime not null,
-    content_hash varchar(512) not null,
+    content longtext character set utf8mb4,
     image_hash varchar(512) not null,
     private int default 0,
     index sorted_index (sorted_id)
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS drafts(
     title varchar(256) not null,
     categories varchar(256) not null,
     update_date datetime not null,
-    content_hash varchar(512) not null,
+    content longtext character set utf8mb4,
     image_hash varchar(512) not null,
     index sorted_index (sorted_id)
 );

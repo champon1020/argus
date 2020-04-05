@@ -78,7 +78,7 @@ func FindArticleByCategoryId(db *sql.DB, option *service.QueryOption) (articles 
 			&a.Title,
 			&a.CreateDate,
 			&a.UpdateDate,
-			&a.ContentHash,
+			&a.Content,
 			&a.ImageHash,
 			&a.Private,
 		); err != nil {

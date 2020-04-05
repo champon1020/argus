@@ -10,7 +10,6 @@ import (
 
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/repo"
-	"github.com/champon1020/argus/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,20 +20,10 @@ func TestDraftHandler(t *testing.T) {
 		"id": "TEST_ID",
 		"title": "test",
 		"categories": "c1&c2",
-		"contentHash": "0123456789",
+		"content": "TEST_CONTENT",
 		"imageHash": "9876543210"
-	},
-	"mdContents": "<div>md</div>"
+	}	
 }`
-
-	defer func() {
-		err := service.DeleteFile(
-			service.ResolveContentFilePath(
-				"drafts",
-				"0123456789_md",
-			))
-		assert.Equal(t, nil, err)
-	}()
 
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
@@ -46,7 +35,7 @@ func TestDraftHandler(t *testing.T) {
 	repoCmdMock := func(_ repo.MySQL, d repo.Draft) (_ error) {
 		assert.Equal(t, d.Title, "test")
 		assert.Equal(t, d.Categories, "c1&c2")
-		assert.Equal(t, d.ContentHash, "0123456789")
+		assert.Equal(t, d.Content, "TEST_CONTENT")
 		assert.Equal(t, d.ImageHash, "9876543210")
 		return
 	}
@@ -59,7 +48,7 @@ func TestDraftHandler(t *testing.T) {
 
 	expectedBody := `{
 	"id": "TEST_ID",
-	"contentHash": "0123456789",
+	"content": "TEST_CONTENT",
 	"imageHash": "9876543210"
 }
 `
