@@ -25,10 +25,7 @@ docker-compose up -d
 ```
 cd kube
 
-kubeclt apply -f mysql-pvc
-kubectl apply -f argus-pvc
-kubectl apply -f mysql-svc
-kubectl apply -f argus-svc
+kubeclt apply -f mysql-pvc argus-pvc mysql-svc argus-svc
 ```
 
 ## Environment variables
@@ -48,6 +45,16 @@ If not selected, it would be built as "dev".
 - ```ARGUS_SECRET_PATH```: something.
 
 - ```ARGUS_USER_PATH```: something.
+
+- ```ARGUS_DB_USER```: db user name.
+
+- ```ARGUS_DB_PASS```: db user pass.
+
+- ```ARGUS_DB_PORT```: db port.
+
+- ```ARGUS_DB_HOST```: db host.
+
+- ```ARGUS_DB_NAME```: db name.
 
 - ```GIN_MODE```: Gin framework mode (default is release).
 

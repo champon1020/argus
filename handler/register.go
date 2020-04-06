@@ -57,10 +57,6 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 		Private:    body.Article.Private,
 	}
 
-	if article.Id != "" {
-		service.GenNewId(service.IdLen, &article.Id)
-	}
-
 	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

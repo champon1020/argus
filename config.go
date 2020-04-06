@@ -28,9 +28,8 @@ type Config struct {
 }
 
 type Configurations struct {
-	Deploy  Config `json:"deploy"`
-	Staging Config `json:"staging"`
-	Dev     Config `json:"dev"`
+	Deploy Config `json:"deploy"`
+	Dev    Config `json:"dev"`
 }
 
 var (
@@ -49,15 +48,19 @@ func NewConfig() *Config {
 	if EnvVars.Get("mode") == "deploy" {
 		*config = configurations.Deploy
 		Logger.Println("deploy mode")
-		return config
+	} else {
+		*config = configurations.Dev
+		Logger.Println("dev mode")
 	}
-	if EnvVars.Get("mode") == "staging" {
-		*config = configurations.Staging
-		Logger.Println("staging mode")
-		return config
+
+	config.Db = DbConf{
+		User:   EnvVars.Get("dbUser"),
+		Pass:   EnvVars.Get("dbPass"),
+		Port:   EnvVars.Get("dbPort"),
+		Host:   EnvVars.Get("dbHost"),
+		DbName: EnvVars.Get("dbName"),
 	}
-	*config = configurations.Dev
-	Logger.Println("dev mode")
+
 	return config
 }
 
@@ -86,6 +89,6 @@ func (config *Configurations) load() (err error) {
 		return
 	}
 
-	json.Unmarshal(row, &config)
+	_ = json.Unmarshal(row, &config)
 	return
 }

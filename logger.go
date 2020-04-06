@@ -1,6 +1,7 @@
 package argus
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"runtime"
@@ -58,18 +59,16 @@ func (l *LogHandler) ErrorLog(errs []Error) {
 	if len(errs) == 0 {
 		return
 	}
-	var rows []string
+	var rows []interface{}
 	for _, v := range errs {
-		j, ok := v.Marshal()
-		if ok != nil {
-			Logger.Fatalf("Unable to parse error to json\n")
-		}
-		rows = append(rows, string(j))
+		rows = append(rows, v.JSON())
 	}
 
 	jsonMap := map[string]interface{}{
 		"Errors":     rows,
 		"StackTrace": l.StackTrace(),
 	}
-	l.Println(jsonMap)
+
+	bytes, _ := json.MarshalIndent(jsonMap, "", "   ")
+	l.Printf("%s\n", string(bytes))
 }

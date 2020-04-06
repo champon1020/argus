@@ -71,6 +71,7 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 		wg.Wait()
 
 		// Insert into articles
+		service.GenNewId(service.IdLen, &article.Id)
 		article.Categories = articleCategories
 		if err = article.InsertArticle(tx); err != nil {
 			return

@@ -524,11 +524,8 @@ paths:
               properties:
                 article:
                   $ref: '#/components/schemas/RequestDraft'
-                mdContents:
-                  type: string
               required:
                 - article
-                - mdContents
       responses:
         '200':
           description: Success
