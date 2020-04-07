@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: argus-db
-          image: champon1020/argus-db:0.1
+          image: champon1020/argus-db:0.2
           imagePullPolicy: Always
           args: ["--ignore-db-dir=lost+found"]
           ports:
