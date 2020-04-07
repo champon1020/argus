@@ -727,7 +727,7 @@ func FindImageHandler(c *gin.Context) (err error) {
 	mx := argus.GlobalConfig.Web.MaxViewImageNum
 	offset := (p - 1) * mx
 
-	if offset >= len(files) {
+	if offset != 0 && offset >= len(files) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		err = errors.New("error happened")
 		BasicError.
