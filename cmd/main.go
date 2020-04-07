@@ -47,6 +47,8 @@ func NewRouter() *gin.Engine {
 	router.Use(cors.New(corsConfig))
 	router.Use(HandleError())
 
+	router.GET("/healthcheck", HealthCheck)
+
 	find := router.Group("/api/find")
 	{
 		find.GET("/article/pickup", handler.FindPickUpArticleController)
@@ -96,6 +98,11 @@ func NewRouter() *gin.Engine {
 	}
 
 	return router
+}
+
+func HealthCheck(c *gin.Context) {
+	c.AbortWithStatus(200)
+	return
 }
 
 func HandleError() gin.HandlerFunc {
