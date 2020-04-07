@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: argus
-          image: champon1020/argus:0.4
+          image: champon1020/argus:0.5
           imagePullPolicy: Always
           readinessProbe:
             periodSeconds: 600
