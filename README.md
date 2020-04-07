@@ -1,11 +1,21 @@
 # argus
 
 [![Build Status](https://travis-ci.com/champon1020/argus.svg?token=aSPPKuPzB5pbM6AFGxtS&branch=master)](https://travis-ci.com/champon1020/argus)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+
+## Development Tools
+
+[![](https://img.shields.io/badge/golang-1.13.4-blue)](https://golang.org/doc/)
+[![](https://img.shields.io/badge/gin-1.5.0-blue)](https://github.com/gin-gonic/gin)
+[![](https://img.shields.io/badge/gosqldriver-1.5.0-blue)](https://github.com/go-sql-driver/mysql)
+[![](https://img.shields.io/badge/jwtgo-3.2.0-red)](https://github.com/dgrijalva/jwt-go)
 
 ## Description
 My blog's server side api. (New version)
+
 Developing and Updating.
 
+front side => https://github.com/champon1020/alfheim
 
 ## Usage
 
