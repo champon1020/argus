@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/champon1020/argus/argus-private/auth"
@@ -29,7 +31,30 @@ func main() {
 }
 
 func NewRouter() *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
+
+	gin.ForceConsoleColor()
+	router.Use(gin.LoggerWithConfig(gin.LoggerConfig{
+		Formatter: func(param gin.LogFormatterParams) string {
+			return fmt.Sprintf("[GIN] %s | %s |%s %d %s| %15s | %15s |%s %s %s %s \n",
+				param.Request.Proto,
+				param.TimeStamp.Format("2006-01-02 15:04:05 MST -0700"),
+				param.StatusCodeColor(),
+				param.StatusCode,
+				param.ResetColor(),
+				param.Latency,
+				param.ClientIP,
+				param.MethodColor(),
+				param.Method,
+				param.ResetColor(),
+				param.Path,
+			)
+		},
+		Output:    os.Stdout,
+		SkipPaths: []string{"/healthcheck"},
+	}))
+
+	router.Use(gin.Recovery())
 
 	corsConfig := cors.Config{
 		AllowAllOrigins: false,
