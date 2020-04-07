@@ -33,7 +33,6 @@ func main() {
 func NewRouter() *gin.Engine {
 	router := gin.New()
 
-	gin.ForceConsoleColor()
 	router.Use(gin.LoggerWithConfig(gin.LoggerConfig{
 		Formatter: func(param gin.LogFormatterParams) string {
 			return fmt.Sprintf("[GIN] %s | %s |%s %d %s| %15s | %15s |%s %s %s %s \n",

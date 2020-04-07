@@ -31,7 +31,6 @@ spec:
           image: champon1020/argus-file-server:0.2
           imagePullPolicy: Always
           readinessProbe:
-            periodSeconds: 600
             timeoutSeconds: 30
             failureThreshold: 3
             httpGet:
@@ -41,7 +40,7 @@ spec:
             - containerPort: 80
           volumeMounts:
             - name: argus-resrc-volume
-              mountPath: /usr/share/nginx/html
+              mountPath: /usr/share/nginx/html/resrc
       volumes:
         - name: argus-resrc-volume
           persistentVolumeClaim:

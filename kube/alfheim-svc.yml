@@ -31,7 +31,6 @@ spec:
           image: champon1020/alfheim:0.5
           imagePullPolicy: Always
           readinessProbe:
-            periodSeconds: 600
             timeoutSeconds: 30
             failureThreshold: 3
             httpGet:
