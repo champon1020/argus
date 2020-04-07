@@ -72,6 +72,10 @@ func (e Error) String() string {
 }
 
 func (e Error) Marshal() ([]byte, error) {
+	return json.Marshal(e.JSON())
+}
+
+func (e Error) MarshalIndent() ([]byte, error) {
 	return json.MarshalIndent(e.JSON(), "", "  ")
 }
 
@@ -79,10 +83,11 @@ func (e Error) JSON() interface{} {
 	if e.Err == nil {
 		e.Err = errors.New("empty")
 	}
-	json := map[string]interface{}{
+
+	jsonMap := map[string]interface{}{
 		"Error":  e.Err.Error(),
 		"Type":   e.Type,
 		"Values": e.Values,
 	}
-	return json
+	return jsonMap
 }

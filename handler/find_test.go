@@ -46,11 +46,11 @@ func TestFindArticleByIdHandler(t *testing.T) {
 			Categories: []repo.Category{
 				{"TEST_CA_ID", "c1"},
 			},
-			CreateDate:  testTime,
-			UpdateDate:  testTime,
-			ContentHash: "0123456789",
-			ImageHash:   "9876543210",
-			Private:     false,
+			CreateDate: testTime,
+			UpdateDate: testTime,
+			Content:    "TEST_CONTENT",
+			ImageHash:  "9876543210",
+			Private:    false,
 		})
 		return
 	}
@@ -68,7 +68,7 @@ func TestFindArticleByIdHandler(t *testing.T) {
 		],
 		"createDate": "2020-03-09T00:00:00+09:00",
 		"updateDate": "2020-03-09T00:00:00+09:00",
-		"contentHash": "0123456789",
+		"content": "TEST_CONTENT",
 		"imageHash": "9876543210",
 		"isPrivate": false
 	}
@@ -111,11 +111,11 @@ func TestFindArticleBySortedIdHandler(t *testing.T) {
 			Categories: []repo.Category{
 				{"TEST_CA_ID", "c1"},
 			},
-			CreateDate:  testTime,
-			UpdateDate:  testTime,
-			ContentHash: "0123456789",
-			ImageHash:   "9876543210",
-			Private:     false,
+			CreateDate: testTime,
+			UpdateDate: testTime,
+			Content:    "TEST_CONTENT",
+			ImageHash:  "9876543210",
+			Private:    false,
 		})
 		return
 	}
@@ -133,7 +133,7 @@ func TestFindArticleBySortedIdHandler(t *testing.T) {
 		],
 		"createDate": "2020-03-09T00:00:00+09:00",
 		"updateDate": "2020-03-09T00:00:00+09:00",
-		"contentHash": "0123456789",
+		"content": "TEST_CONTENT",
 		"imageHash": "9876543210",
 		"isPrivate": false
 	},
@@ -149,7 +149,7 @@ func TestFindArticleBySortedIdHandler(t *testing.T) {
 		],
 		"createDate": "2020-03-09T00:00:00+09:00",
 		"updateDate": "2020-03-09T00:00:00+09:00",
-		"contentHash": "0123456789",
+		"content": "TEST_CONTENT",
 		"imageHash": "9876543210",
 		"isPrivate": false
 	},
@@ -160,7 +160,7 @@ func TestFindArticleBySortedIdHandler(t *testing.T) {
 		"categories": null,
 		"createDate": "0001-01-01T00:00:00Z",
 		"updateDate": "0001-01-01T00:00:00Z",
-		"contentHash": "",
+		"content": "",
 		"imageHash": "",
 		"isPrivate": false
 	}
@@ -203,11 +203,11 @@ func TestFindArticleHandler(t *testing.T) {
 			Categories: []repo.Category{
 				{"TEST_CA_ID", "c1"},
 			},
-			CreateDate:  testTime,
-			UpdateDate:  testTime,
-			ContentHash: "0123456789",
-			ImageHash:   "9876543210",
-			Private:     false,
+			CreateDate: testTime,
+			UpdateDate: testTime,
+			Content:    "TEST_CONTENT",
+			ImageHash:  "9876543210",
+			Private:    false,
 		})
 		return
 	}
@@ -232,7 +232,7 @@ func TestFindArticleHandler(t *testing.T) {
 			],
 			"createDate": "2020-03-09T00:00:00+09:00",
 			"updateDate": "2020-03-09T00:00:00+09:00",
-			"contentHash": "0123456789",
+			"content": "TEST_CONTENT",
 			"imageHash": "9876543210",
 			"isPrivate": false
 		}
@@ -277,11 +277,11 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 			Categories: []repo.Category{
 				{"TEST_CA_ID", "c1"},
 			},
-			CreateDate:  testTime,
-			UpdateDate:  testTime,
-			ContentHash: "0123456789",
-			ImageHash:   "9876543210",
-			Private:     false,
+			CreateDate: testTime,
+			UpdateDate: testTime,
+			Content:    "TEST_CONTENT",
+			ImageHash:  "9876543210",
+			Private:    false,
 		})
 		return
 	}
@@ -306,7 +306,7 @@ func TestFindArticleByTitleHandler(t *testing.T) {
 			],
 			"createDate": "2020-03-09T00:00:00+09:00",
 			"updateDate": "2020-03-09T00:00:00+09:00",
-			"contentHash": "0123456789",
+			"content": "TEST_CONTENT",
 			"imageHash": "9876543210",
 			"isPrivate": false
 		}
@@ -351,11 +351,11 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 			Categories: []repo.Category{
 				{"TEST_CA_ID", "c1"},
 			},
-			CreateDate:  testTime,
-			UpdateDate:  testTime,
-			ContentHash: "0123456789",
-			ImageHash:   "9876543210",
-			Private:     false,
+			CreateDate: testTime,
+			UpdateDate: testTime,
+			Content:    "TEST_CONTENT",
+			ImageHash:  "9876543210",
+			Private:    false,
 		})
 		return
 	}
@@ -380,7 +380,7 @@ func TestFindArticleByCreateDateHandler(t *testing.T) {
 			],
 			"createDate": "2020-03-09T00:00:00+09:00",
 			"updateDate": "2020-03-09T00:00:00+09:00",
-			"contentHash": "0123456789",
+			"content": "TEST_CONTENT",
 			"imageHash": "9876543210",
 			"isPrivate": false
 		}
@@ -426,11 +426,11 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 				{"TEST_CA_ID", "c1"},
 				{"TEST_CA_ID2", "c2"},
 			},
-			CreateDate:  testTime,
-			UpdateDate:  testTime,
-			ContentHash: "0123456789",
-			ImageHash:   "9876543210",
-			Private:     false,
+			CreateDate: testTime,
+			UpdateDate: testTime,
+			Content:    "TEST_CONTENT",
+			ImageHash:  "9876543210",
+			Private:    false,
 		})
 		return
 	}
@@ -459,7 +459,7 @@ func TestFindArticleByCategoryHandler(t *testing.T) {
 			],
 			"createDate": "2020-03-09T00:00:00+09:00",
 			"updateDate": "2020-03-09T00:00:00+09:00",
-			"contentHash": "0123456789",
+			"content": "TEST_CONTENT",
 			"imageHash": "9876543210",
 			"isPrivate": false
 		}
@@ -504,11 +504,11 @@ func TestFindPickUpArticleHandler(t *testing.T) {
 			Categories: []repo.Category{
 				{"TEST_CA_ID", "c1"},
 			},
-			CreateDate:  testTime,
-			UpdateDate:  testTime,
-			ContentHash: "0123456789",
-			ImageHash:   "9876543210",
-			Private:     false,
+			CreateDate: testTime,
+			UpdateDate: testTime,
+			Content:    "TEST_CONTENT",
+			ImageHash:  "9876543210",
+			Private:    false,
 		})
 		return
 	}
@@ -527,7 +527,7 @@ func TestFindPickUpArticleHandler(t *testing.T) {
 			],
 			"createDate": "2020-03-09T00:00:00+09:00",
 			"updateDate": "2020-03-09T00:00:00+09:00",
-			"contentHash": "0123456789",
+			"content": "TEST_CONTENT",
 			"imageHash": "9876543210",
 			"isPrivate": false
 		}
@@ -613,13 +613,13 @@ func TestFindDraftHandler(t *testing.T) {
 
 	repoCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (drafts []repo.Draft, _ error) {
 		drafts = append(drafts, repo.Draft{
-			Id:          "TEST_D_ID",
-			SortedId:    1,
-			Title:       "test",
-			Categories:  "c1&c2",
-			UpdateDate:  testTime,
-			ContentHash: "0123456789",
-			ImageHash:   "9876543210",
+			Id:         "TEST_D_ID",
+			SortedId:   1,
+			Title:      "test",
+			Categories: "c1&c2",
+			UpdateDate: testTime,
+			Content:    "TEST_CONTENT",
+			ImageHash:  "9876543210",
 		})
 		return
 	}
@@ -638,7 +638,7 @@ func TestFindDraftHandler(t *testing.T) {
 			"title": "test",
 			"categories": "c1\u0026c2",
 			"updateDate": "2020-03-09T00:00:00+09:00",
-			"contentHash": "0123456789",
+			"content": "TEST_CONTENT",
 			"imageHash": "9876543210"
 		}
 	],
@@ -677,13 +677,13 @@ func TestFindDraftByIdHandler(t *testing.T) {
 
 	repoCmdMock := func(_ repo.MySQL, _ *service.QueryOption) (drafts []repo.Draft, _ error) {
 		drafts = append(drafts, repo.Draft{
-			Id:          "TEST_D_ID",
-			SortedId:    1,
-			Title:       "test",
-			Categories:  "c1&c2",
-			UpdateDate:  testTime,
-			ContentHash: "0123456789",
-			ImageHash:   "9876543210",
+			Id:         "TEST_D_ID",
+			SortedId:   1,
+			Title:      "test",
+			Categories: "c1&c2",
+			UpdateDate: testTime,
+			Content:    "TEST_CONTENT",
+			ImageHash:  "9876543210",
 		})
 		return
 	}
@@ -695,7 +695,7 @@ func TestFindDraftByIdHandler(t *testing.T) {
 		"title": "test",
 		"categories": "c1\u0026c2",
 		"updateDate": "2020-03-09T00:00:00+09:00",
-		"contentHash": "0123456789",
+		"content": "TEST_CONTENT",
 		"imageHash": "9876543210"
 	}
 }

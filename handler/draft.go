@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"path/filepath"
 	"time"
 
 	"github.com/champon1020/argus/repo"
@@ -10,23 +9,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type DraftRequestArticle struct {
-	Id          string `json:"id"`
-	Title       string `json:"title"`
-	Categories  string `json:"categories"`
-	ContentHash string `json:"contentHash"`
-	ImageHash   string `json:"imageHash"`
-}
-
 type DraftRequestBody struct {
-	Article    DraftRequestArticle `json:"article"`
-	MdContents string              `json:"mdContents"`
+	Article struct {
+		Id         string `json:"id"`
+		Title      string `json:"title"`
+		Categories string `json:"categories"`
+		Content    string `json:"content"`
+		ImageHash  string `json:"imageHash"`
+	} `json:"article"`
 }
 
 type DraftInfoResp struct {
-	Id          string `json:"id"`
-	ContentHash string `json:"contentHash"`
-	ImageHash   string `json:"imageHash"`
+	Id        string `json:"id"`
+	Content   string `json:"content"`
+	ImageHash string `json:"imageHash"`
 }
 
 func DraftController(c *gin.Context) {
@@ -45,32 +41,24 @@ func DraftHandler(c *gin.Context, repoCmd repo.DraftCmd) (err error) {
 		service.GenNewId(service.IdLen, &body.Article.Id)
 	}
 
-	fp := service.ResolveContentFilePath("drafts", body.Article.ContentHash)
 	draft := repo.Draft{
-		Id:          body.Article.Id,
-		Title:       body.Article.Title,
-		Categories:  body.Article.Categories,
-		UpdateDate:  time.Now(),
-		ContentHash: filepath.Base(fp),
-		ImageHash:   body.Article.ImageHash,
-	}
-
-	mdFp := fp + "_md"
-	if err = service.OutputFile(mdFp, []byte(body.MdContents)); err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+		Id:         body.Article.Id,
+		Title:      body.Article.Title,
+		Categories: body.Article.Categories,
+		UpdateDate: time.Now(),
+		Content:    body.Article.Content,
+		ImageHash:  body.Article.ImageHash,
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, draft); err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
-		_ = service.DeleteFile(mdFp)
 		return
 	}
 
 	res := DraftInfoResp{
-		Id:          draft.Id,
-		ContentHash: draft.ContentHash,
-		ImageHash:   draft.ImageHash,
+		Id:        draft.Id,
+		Content:   draft.Content,
+		ImageHash: draft.ImageHash,
 	}
 
 	c.JSON(http.StatusOK, res)

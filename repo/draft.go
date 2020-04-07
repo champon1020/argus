@@ -14,18 +14,18 @@ import (
 // ContentHash: content file name (html file)
 // ImageHash: image file name
 type Draft struct {
-	Id          string    `json:"id"`
-	SortedId    int       `json:"sortedId"`
-	Title       string    `json:"title"`
-	Categories  string    `json:"categories"`
-	UpdateDate  time.Time `json:"updateDate"`
-	ContentHash string    `json:"contentHash"`
-	ImageHash   string    `json:"imageHash"`
+	Id         string    `json:"id"`
+	SortedId   int       `json:"sortedId"`
+	Title      string    `json:"title"`
+	Categories string    `json:"categories"`
+	UpdateDate time.Time `json:"updateDate"`
+	Content    string    `json:"content"`
+	ImageHash  string    `json:"imageHash"`
 }
 
 func (draft *Draft) InsertDraft(tx *sql.Tx) (err error) {
 	cmd := "INSERT INTO drafts " +
-		"(id, title, categories, update_date, content_hash, image_hash) " +
+		"(id, title, categories, update_date, content, image_hash) " +
 		"VALUES (?, ?, ?, ?, ?, ?)"
 
 	if _, err := tx.Exec(cmd,
@@ -33,7 +33,7 @@ func (draft *Draft) InsertDraft(tx *sql.Tx) (err error) {
 		draft.Title,
 		draft.Categories,
 		draft.UpdateDate,
-		draft.ContentHash,
+		draft.Content,
 		draft.ImageHash,
 	); err != nil {
 		CmdError.SetErr(err).AppendTo(Errors)
@@ -43,14 +43,14 @@ func (draft *Draft) InsertDraft(tx *sql.Tx) (err error) {
 
 func (draft *Draft) UpdateDraft(tx *sql.Tx) (err error) {
 	cmd := "UPDATE drafts " +
-		"SET title=?, categories=?, update_date=?, content_hash=?, image_hash=? " +
+		"SET title=?, categories=?, update_date=?, content=?, image_hash=? " +
 		"WHERE id=?"
 
 	if _, err := tx.Exec(cmd,
 		draft.Title,
 		draft.Categories,
 		draft.UpdateDate,
-		draft.ContentHash,
+		draft.Content,
 		draft.ImageHash,
 		draft.Id,
 	); err != nil {
@@ -95,7 +95,7 @@ func FindDrafts(db *sql.DB, option *service.QueryOption) (drafts []Draft, err er
 			&d.Title,
 			&d.Categories,
 			&d.UpdateDate,
-			&d.ContentHash,
+			&d.Content,
 			&d.ImageHash,
 		); err != nil {
 			ScanError.SetErr(err).AppendTo(Errors)

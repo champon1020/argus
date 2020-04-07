@@ -14,26 +14,24 @@ import (
 
 // Property of 'categories' has -1 of id absolutely.
 // This is because client side cannot fetch categories information interactively,
-type RequestArticle struct {
-	Id          string          `json:"id"`
-	Title       string          `json:"title"`
-	Categories  []repo.Category `json:"categories"`
-	ContentHash string          `json:"contentHash"`
-	ImageHash   string          `json:"imageHash"`
-	Private     bool            `json:"isPrivate"`
-}
+//type RequestArticle struct {
+//	Id         string          `json:"id"`
+//	Title      string          `json:"title"`
+//	Categories []repo.Category `json:"categories"`
+//	Content    string          `json:"content"`
+//	ImageHash  string          `json:"imageHash"`
+//	Private    bool            `json:"isPrivate"`
+//}
 
 type RequestBody struct {
 	Article struct {
-		Id          string          `json:"id"`
-		Title       string          `json:"title"`
-		Categories  []repo.Category `json:"categories"`
-		ContentHash string          `json:"contentHash"`
-		ImageHash   string          `json:"imageHash"`
-		Private     bool            `json:"isPrivate"`
+		Id         string          `json:"id"`
+		Title      string          `json:"title"`
+		Categories []repo.Category `json:"categories"`
+		Content    string          `json:"content"`
+		ImageHash  string          `json:"imageHash"`
+		Private    bool            `json:"isPrivate"`
 	} `json:"article"`
-	MdeContents  string `json:"mdContents"`
-	HtmlContents string `json:"htmlContents"`
 }
 
 func RegisterArticleController(c *gin.Context) {
@@ -48,47 +46,21 @@ func RegisterArticleHandler(c *gin.Context, repoCmd repo.RegisterArticleCmd) (er
 		return
 	}
 
-	fp := service.ResolveContentFilePath("articles", body.Article.ContentHash)
 	article := repo.Article{
-		Title:       body.Article.Title,
-		Categories:  body.Article.Categories,
-		CreateDate:  time.Now(),
-		UpdateDate:  time.Now(),
-		ContentHash: filepath.Base(fp),
-		ImageHash:   body.Article.ImageHash,
-		Private:     body.Article.Private,
-	}
-	service.GenNewId(service.IdLen, &article.Id)
-
-	htmlFp := fp + "_html"
-	mdFp := fp + "_md"
-
-	// output html
-	if err = service.OutputFile(htmlFp, []byte(body.HtmlContents)); err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	// output md
-	if err = service.OutputFile(mdFp, []byte(body.MdeContents)); err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+		Id:         body.Article.Id,
+		Title:      body.Article.Title,
+		Categories: body.Article.Categories,
+		CreateDate: time.Now(),
+		UpdateDate: time.Now(),
+		Content:    body.Article.Content,
+		ImageHash:  body.Article.ImageHash,
+		Private:    body.Article.Private,
 	}
 
 	if err = repoCmd(*repo.GlobalMysql, article); err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
-		// if err occurred, delete created files.
-		_ = service.DeleteFile(htmlFp)
-		_ = service.DeleteFile(mdFp)
 		return
 	}
-
-	_ = service.DeleteFile(
-		filepath.Join(
-			argus.EnvVars.Get("resource"),
-			"drafts",
-			body.Article.ContentHash+"_md",
-		),
-	)
 
 	c.AbortWithStatus(http.StatusOK)
 	return

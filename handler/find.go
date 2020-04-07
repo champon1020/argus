@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Find article by id
 type ArticleResponseType struct {
 	Article repo.Article `json:"article"`
 }

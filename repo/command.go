@@ -23,8 +23,8 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 	option := &service.QueryOption{
 		Args: []*service.QueryArgs{
 			{
-				Value: interface{}(article.ContentHash),
-				Name:  "ContentHash",
+				Value: interface{}(article.Id),
+				Name:  "Id",
 				Ope:   service.Eq,
 			},
 		},
@@ -35,12 +35,6 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 
 	// Start transaction
 	err = mysql.Transact(func(tx *sql.Tx) (err error) {
-		if len(d) > 0 {
-			if err = d[0].DeleteDraft(tx); err != nil {
-				return
-			}
-		}
-
 		var (
 			categoryId        string
 			articleCategories []Category
@@ -77,9 +71,17 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 		wg.Wait()
 
 		// Insert into articles
+		service.GenNewId(service.IdLen, &article.Id)
 		article.Categories = articleCategories
 		if err = article.InsertArticle(tx); err != nil {
 			return
+		}
+
+		// If draft is exist, delete draft.
+		if len(d) > 0 {
+			if err = d[0].DeleteDraft(tx); err != nil {
+				return
+			}
 		}
 
 		// Insert into article_category

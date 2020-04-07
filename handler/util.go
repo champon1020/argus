@@ -65,17 +65,6 @@ func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {
 	return
 }
 
-func ParseRequestArticleObj(r *http.Request, reqBody *RequestArticleObjType) (err error) {
-	var body []byte
-	if body, err = service.ReadBody(r.Body); err != nil {
-		return
-	}
-	if err = json.Unmarshal(body, &reqBody); err != nil {
-		IOUnmarshalError.SetErr(err).AppendTo(Errors)
-	}
-	return
-}
-
 // Parse draft request object from http.Request.
 func ParseDraftRequestBody(r *http.Request, reqBody *DraftRequestBody) (err error) {
 	var body []byte

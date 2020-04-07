@@ -6,7 +6,7 @@ LOAD DATA LOCAL INFILE
     CHARACTER SET utf8
     FIELDS TERMINATED BY ','
     ENCLOSED BY '"'
-    (id, title, create_date, update_date, content_hash, image_hash, private);
+    (id, title, create_date, update_date, content, image_hash, private);
 
 LOAD DATA LOCAL INFILE
     "/docker/db/csv/categories.csv"

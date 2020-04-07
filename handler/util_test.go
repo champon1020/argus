@@ -21,12 +21,10 @@ func TestParseRequestBody(t *testing.T) {
 					"name": "test_test"
 				}
 			],
-			"contentHash": "http://localhost:2000/",
+			"content": "TEST_CONTENT",
 			"imageHash": "http://localhost:1000/",
 			"private": false
-		},
-		"htmlContents": "<div>html</div>",
-		"mdContents": "<div>md</div>"
+		}
 	}`
 
 	r, _ := http.NewRequest("POST", "", bytes.NewBuffer([]byte(requestJson)))
@@ -39,11 +37,9 @@ func TestParseRequestBody(t *testing.T) {
 	assert.Equal(t, 1, len(body.Article.Categories))
 	assert.Equal(t, "TEST_CA_ID", body.Article.Categories[0].Id)
 	assert.Equal(t, "test_test", body.Article.Categories[0].Name)
-	assert.Equal(t, "http://localhost:2000/", body.Article.ContentHash)
+	assert.Equal(t, "TEST_CONTENT", body.Article.Content)
 	assert.Equal(t, "http://localhost:1000/", body.Article.ImageHash)
 	assert.Equal(t, false, body.Article.Private)
-	assert.Equal(t, "<div>html</div>", body.HtmlContents)
-	assert.Equal(t, "<div>md</div>", body.MdeContents)
 }
 
 func TestParseDraftRequestBody(t *testing.T) {
@@ -54,7 +50,7 @@ func TestParseDraftRequestBody(t *testing.T) {
 			"id": "TEST_ID",
 			"title": "test",
 			"categories": "TEST_CA_NAME",
-			"contentHash": "http://localhost:2000/",
+			"content": "TEST_CONTENT",
 			"imageHash": "http://localhost:1000/"
 		},
 		"mdContents": "<div>md</div>"
@@ -68,9 +64,8 @@ func TestParseDraftRequestBody(t *testing.T) {
 	assert.Equal(t, "TEST_ID", body.Article.Id)
 	assert.Equal(t, "test", body.Article.Title)
 	assert.Equal(t, "TEST_CA_NAME", body.Article.Categories)
-	assert.Equal(t, "http://localhost:2000/", body.Article.ContentHash)
+	assert.Equal(t, "TEST_CONTENT", body.Article.Content)
 	assert.Equal(t, "http://localhost:1000/", body.Article.ImageHash)
-	assert.Equal(t, "<div>md</div>", body.MdContents)
 }
 
 func TestParseOffsetLimit(t *testing.T) {
