@@ -32,8 +32,11 @@ spec:
           image: champon1020/argus:0.4
           imagePullPolicy: Always
           readinessProbe:
+            periodSeconds: 600
+            timeoutSeconds: 30
+            failureThreshold: 3
             httpGet:
-              path: /api/find/article/list
+              path: /healthcheck
               port: 8000
           ports:
             - containerPort: 8000

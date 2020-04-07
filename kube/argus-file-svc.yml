@@ -31,10 +31,12 @@ spec:
           image: champon1020/argus-file-server:0.2
           imagePullPolicy: Always
           readinessProbe:
+            periodSeconds: 600
+            timeoutSeconds: 30
+            failureThreshold: 3
             httpGet:
               path: /healthcheck
               port: 80
-            failureThreshold: 2
           ports:
             - containerPort: 80
           volumeMounts:
