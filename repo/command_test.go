@@ -128,6 +128,10 @@ func TestUpdateArticleCommand(t *testing.T) {
 		WithArgs("TEST_ID", "TEST_CA_ID", "TEST_ID", "TEST_CA_ID").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
+	// DeleteUnusedCategory()
+	mock.ExpectExec("DELETE FROM categories").
+		WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
+
 	// Commit
 	mock.ExpectCommit()
 
