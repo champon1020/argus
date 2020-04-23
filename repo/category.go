@@ -53,6 +53,7 @@ func (category *Category) FindArticleNumByCategoryId(db *sql.DB) (articleNum int
 	return
 }
 
+// Check if the category exists or not.
 func (category *Category) Exist(tx *sql.Tx, option *service.QueryOption) (categoryId string, err error) {
 	args := service.GenArgsSlice(*option)
 	argsQuery := service.GenArgsQuery(*option)
@@ -74,6 +75,17 @@ func (category *Category) Exist(tx *sql.Tx, option *service.QueryOption) (catego
 			ScanError.SetErr(err).AppendTo(Errors)
 			break
 		}
+	}
+	return
+}
+
+// Delete unused category.
+func DeleteUnusedCategory(tx *sql.Tx) (err error) {
+	cmd := "DELETE FROM categories WHERE id NOT IN " +
+		"(SELECT DISTINCT(category_id) FROM article_category)"
+
+	if _, err = tx.Exec(cmd); err != nil {
+		CmdError.SetErr(err).AppendTo(Errors)
 	}
 	return
 }

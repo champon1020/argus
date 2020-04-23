@@ -156,12 +156,12 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 		wg.Wait()
 		article.Categories = articleCategories
 
-		// Insert into articles
+		// Update article
 		if err = article.UpdateArticle(tx); err != nil {
 			return
 		}
 
-		// Delete from article_category
+		// Delete categories from article_category which are unused
 		option := &service.QueryOption{
 			Args: []*service.QueryArgs{
 				{
@@ -196,6 +196,8 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 			}(c)
 		}
 		wg.Wait()
+
+		err = DeleteUnusedCategory(tx)
 		return
 	})
 	// End transaction
