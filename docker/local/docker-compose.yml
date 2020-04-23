@@ -1,7 +1,7 @@
 version: "3"
 services:
   api:
-    image: champon1020/argus:0.5
+    image: champon1020/argus:0.6
     container_name: argus_dev
     environment:
       ARGUS_MODE: "dev"
