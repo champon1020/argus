@@ -42,13 +42,13 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 		wg := new(sync.WaitGroup)
 		for _, c := range article.Categories {
 			wg.Add(1)
-			go func() {
+			go func(cNow Category) {
 				defer wg.Done()
 
-				if categoryId, err = c.Exist(tx, &service.QueryOption{
+				if categoryId, err = cNow.Exist(tx, &service.QueryOption{
 					Args: []*service.QueryArgs{
 						{
-							Value: interface{}(c.Name),
+							Value: interface{}(cNow.Name),
 							Name:  "Name",
 							Ope:   service.Eq,
 						},
@@ -58,15 +58,15 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 				}
 
 				if categoryId == "" {
-					service.GenNewId(service.IdLen, &c.Id)
-					if err = c.InsertCategory(tx); err != nil {
+					service.GenNewId(service.IdLen, &cNow.Id)
+					if err = cNow.InsertCategory(tx); err != nil {
 						return
 					}
 				} else {
-					c.Id = categoryId
+					cNow.Id = categoryId
 				}
-				articleCategories = append(articleCategories, c)
-			}()
+				articleCategories = append(articleCategories, cNow)
+			}(c)
 		}
 		wg.Wait()
 
@@ -89,13 +89,13 @@ func RegisterArticleCommand(mysql MySQL, article Article) (err error) {
 		wg = new(sync.WaitGroup)
 		for _, c := range article.Categories {
 			wg.Add(1)
-			go func() {
+			go func(cNow Category) {
 				defer wg.Done()
-				ac.CategoryId = c.Id
+				ac.CategoryId = cNow.Id
 				if err = ac.InsertArticleCategory(tx); err != nil {
 					return
 				}
-			}()
+			}(c)
 		}
 		wg.Wait()
 		return
@@ -127,13 +127,13 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 		wg := new(sync.WaitGroup)
 		for _, c := range article.Categories {
 			wg.Add(1)
-			go func() {
+			go func(cNow Category) {
 				defer wg.Done()
 
-				if categoryId, err = c.Exist(tx, &service.QueryOption{
+				if categoryId, err = cNow.Exist(tx, &service.QueryOption{
 					Args: []*service.QueryArgs{
 						{
-							Value: interface{}(c.Name),
+							Value: interface{}(cNow.Name),
 							Name:  "Name",
 							Ope:   service.Eq,
 						},
@@ -143,15 +143,15 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 				}
 
 				if categoryId == "" {
-					service.GenNewId(service.IdLen, &c.Id)
-					if err = c.InsertCategory(tx); err != nil {
+					service.GenNewId(service.IdLen, &cNow.Id)
+					if err = cNow.InsertCategory(tx); err != nil {
 						return
 					}
 				} else {
-					c.Id = categoryId
+					cNow.Id = categoryId
 				}
-				articleCategories = append(articleCategories, c)
-			}()
+				articleCategories = append(articleCategories, cNow)
+			}(c)
 		}
 		wg.Wait()
 		article.Categories = articleCategories
@@ -187,13 +187,13 @@ func UpdateArticleCommand(mysql MySQL, article Article) (err error) {
 		wg = new(sync.WaitGroup)
 		for _, c := range article.Categories {
 			wg.Add(1)
-			go func() {
+			go func(cNow Category) {
 				defer wg.Done()
-				ac.CategoryId = c.Id
+				ac.CategoryId = cNow.Id
 				if err = ac.InsertArticleCategory(tx); err != nil {
 					return
 				}
-			}()
+			}(c)
 		}
 		wg.Wait()
 		return
