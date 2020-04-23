@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
         - name: argus
-          image: champon1020/argus:0.6
+          image: champon1020/argus:0.6.1
           imagePullPolicy: Always
           readinessProbe:
             timeoutSeconds: 30

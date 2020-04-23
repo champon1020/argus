@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: alfheim
-          image: champon1020/alfheim:0.8
+          image: champon1020/alfheim:0.8.5
           imagePullPolicy: Always
           readinessProbe:
             timeoutSeconds: 30

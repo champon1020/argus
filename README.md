@@ -35,7 +35,12 @@ docker-compose up -d
 ```
 cd kube
 
-kubeclt apply -f mysql-pvc argus-pvc mysql-svc argus-svc
+kubeclt apply -f mysql-pvc
+kubectl apply -f argus-pvc 
+kubectl apply -f mysql-svc 
+kubectl apply -f argus-svc
+kubectl apply -f alfheim-svc (front side)
+kubectl apply -f myblog-ingress.yml
 ```
 
 ## Environment variables
