@@ -1,7 +1,7 @@
 version: "3"
 services:
   api:
-    image: argus
+    image: champon1020/argus:0.6
     container_name: argus_dev
     environment:
       ARGUS_MODE: "dev"
@@ -28,7 +28,7 @@ services:
         ipv4_address: 172.30.0.2
 
   db:
-    image: mysql:5.7
+    image: champon1020/argus-db:0.2
     container_name: argus_db_dev
     environment:
       MYSQL_ROOT_PASSWORD: toor
@@ -40,21 +40,21 @@ services:
       TZ: "Asia/Tokyo"
     ports:
       - "43306:3306"
-    volumes:
-      - "../db/entry:/docker-entrypoint-initdb.d"
-      - "../db/custom.cnf:/etc/mysql/conf.d/custom.cnf"
-      - "./data:/docker/db/csv"
+#    volumes:
+#      - "../db/entry:/docker-entrypoint-initdb.d"
+#      - "../db/custom.cnf:/etc/mysql/conf.d/custom.cnf"
+#      - "../db/data:/docker/db/csv"
     networks:
       devnet_default:
         ipv4_address: 172.30.0.3
 
   file_server:
-    image: nginx:latest
+    image: champon1020/argus-file-server:0.2
     container_name: argus_file_dev
     ports:
       - "8081:80"
     volumes:
-      - "../../resource_debug:/usr/share/nginx/html"
+      - "../../resource_debug:/usr/share/nginx/html/resrc"
 
 networks:
   devnet_default:

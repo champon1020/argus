@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: alfheim
-          image: champon1020/alfheim:0.5
+          image: champon1020/alfheim:0.8
           imagePullPolicy: Always
           readinessProbe:
             timeoutSeconds: 30
@@ -41,3 +41,5 @@ spec:
           env:
             - name: REACT_APP_TRAVIS
               value: "false"
+            - name: REACT_APP_ALFHEIM_MODE
+              value: "deploy"

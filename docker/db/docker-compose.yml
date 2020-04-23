@@ -1,0 +1,15 @@
+version: "3"
+services:
+  db:
+    image: champon1020/argus-db:0.2
+    container_name: argus_db_dev
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: argus_test
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+      INTERNAL_IP: 127.0.0.1
+      TZ: "Asia/Tokyo"
+    ports:
+      - "43306:3306"
