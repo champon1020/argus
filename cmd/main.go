@@ -58,14 +58,16 @@ func NewRouter() *gin.Engine {
 	corsConfig := cors.Config{
 		AllowAllOrigins: false,
 		AllowOrigins: []string{
-			"http://localhost:3000",
-			"http://blog.champonian.com",
 			"https://blog.champonian.com",
 		},
 		AllowMethods:  []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:  []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders: []string{"Content-Length"},
 		MaxAge:        12 * time.Hour,
+	}
+
+	if argus.EnvVars.Get("mode") == "dev" {
+		corsConfig.AllowOrigins = append(corsConfig.AllowOrigins, "http://localhost:3000")
 	}
 
 	router.Use(cors.New(corsConfig))
