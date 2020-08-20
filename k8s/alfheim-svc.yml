@@ -28,8 +28,8 @@ spec:
     spec:
       containers:
         - name: alfheim
-          image: champon1020/alfheim:0.8.5
-          imagePullPolicy: Always
+          image: champon1020/alfheim:0.8.7
+          imagePullPolicy: IfNotPresent
           readinessProbe:
             timeoutSeconds: 30
             failureThreshold: 3
