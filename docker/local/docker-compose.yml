@@ -1,7 +1,7 @@
 version: "3"
 services:
   api:
-    image: champon1020/argus:0.6
+    build: .
     container_name: argus_dev
     environment:
       ARGUS_MODE: "dev"
@@ -19,16 +19,19 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - "../../:/go/src/github.com/champon1020/argus"
       - "../../resource_debug:/usr/share/nginx/html"
       - "../../argus-private/config.json:/config.json"
       - "${ARGUS_SECRET_PATH}:/secret.json"
       - "${ARGUS_USER_PATH}:/user.json"
+    working_dir: /go/src/github.com/champon1020/argus
+    command: air
     networks:
       devnet_default:
         ipv4_address: 172.30.0.2
 
   db:
-    image: champon1020/argus-db:0.2
+    build: ../db
     container_name: argus_db_dev
     environment:
       MYSQL_ROOT_PASSWORD: toor
@@ -49,7 +52,7 @@ services:
         ipv4_address: 172.30.0.3
 
   file_server:
-    image: champon1020/argus-file-server:0.2
+    build: ../file_server
     container_name: argus_file_dev
     ports:
       - "8081:80"
