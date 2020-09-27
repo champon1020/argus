@@ -1,7 +1,5 @@
 package database
 
-import mgorm "github.com/champon1020/minigorm"
-
 // Category is the struct including category information.
 type Category struct {
 	// unique id (primary key)
@@ -12,7 +10,8 @@ type Category struct {
 }
 
 // FindCategories searches for article categories.
-func FindCategories(db *mgorm.DB, c *[]Category) error {
-	ctx := db.Select(c, "categories")
+func (db *Database) FindCategories(c *[]Category, op *QueryOptions) error {
+	ctx := db.DB.Select(c, "categories")
+	op.apply(ctx)
 	return ctx.Do()
 }

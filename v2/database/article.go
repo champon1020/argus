@@ -2,8 +2,6 @@ package database
 
 import (
 	"time"
-
-	mgorm "github.com/champon1020/minigorm"
 )
 
 // Article is the struct including article information.
@@ -38,8 +36,8 @@ type Article struct {
 
 // FindArticleByID searched for the article
 // whose id is the specified id string.
-func FindArticleByID(db *mgorm.DB, a *[]Article, id string) error {
-	ctx := db.Select(a, "articles").
+func (db *Database) FindArticleByID(a *[]Article, id string) error {
+	ctx := db.DB.Select(a, "articles").
 		Where("id = ?", id)
 
 	return ctx.Do()
@@ -48,8 +46,8 @@ func FindArticleByID(db *mgorm.DB, a *[]Article, id string) error {
 // FindPublicArticlesGeSortedID searches for public articles
 // whose sorted id is greater than and equal to the specified
 // sortedID integer.
-func FindPublicArticlesGeSortedID(db *mgorm.DB, a *[]Article, sortedID int, op *QueryOptions) error {
-	ctx := db.Select(a, "articles").
+func (db *Database) FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op *QueryOptions) error {
+	ctx := db.DB.Select(a, "articles").
 		Where("private = ?", false).
 		Where("sorted_id >= ?", sortedID)
 
@@ -59,8 +57,8 @@ func FindPublicArticlesGeSortedID(db *mgorm.DB, a *[]Article, sortedID int, op *
 }
 
 // FindAllArticles searches for all articles.
-func FindAllArticles(db *mgorm.DB, a *[]Article, op *QueryOptions) error {
-	ctx := db.Select(a, "articles")
+func (db *Database) FindAllArticles(a *[]Article, op *QueryOptions) error {
+	ctx := db.DB.Select(a, "articles")
 
 	op.apply(ctx)
 
@@ -68,8 +66,8 @@ func FindAllArticles(db *mgorm.DB, a *[]Article, op *QueryOptions) error {
 }
 
 // FindPublicArticles searches for public articles.
-func FindPublicArticles(db *mgorm.DB, a *[]Article, op *QueryOptions) error {
-	ctx := db.Select(a, "articles").
+func (db *Database) FindPublicArticles(a *[]Article, op *QueryOptions) error {
+	ctx := db.DB.Select(a, "articles").
 		Where("private = ?", false)
 
 	op.apply(ctx)
@@ -79,8 +77,8 @@ func FindPublicArticles(db *mgorm.DB, a *[]Article, op *QueryOptions) error {
 
 // FindPublicArticlesByTitle searches for public articles
 // whose title is part of the specified title string.
-func FindPublicArticlesByTitle(db *mgorm.DB, a *[]Article, title string, op *QueryOptions) error {
-	ctx := db.Select(a, "articles").
+func (db *Database) FindPublicArticlesByTitle(a *[]Article, title string, op *QueryOptions) error {
+	ctx := db.DB.Select(a, "articles").
 		Where("private = ?", false).
 		Where("title LIKE %?%", title)
 
@@ -90,12 +88,12 @@ func FindPublicArticlesByTitle(db *mgorm.DB, a *[]Article, title string, op *Que
 }
 
 // FindPublicArticlesByCategory searches for public articles
-// which belongs to the specified category.
-func FindPublicArticlesByCategory(db *mgorm.DB, a *[]Article, category Category, op *QueryOptions) error {
-	idCtx := db.Select(nil, "categoreis", "article_id").
-		Where("category_id = ?", category.ID)
+// which belongs to the specified category id.
+func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID int, op *QueryOptions) error {
+	idCtx := db.DB.Select(nil, "categoreis", "article_id").
+		Where("category_id = ?", categoryID)
 
-	ctx := db.Select(a, "articles").
+	ctx := db.DB.Select(a, "articles").
 		Where("private = ?", false).
 		WhereCtx("id IN", idCtx)
 
@@ -104,12 +102,14 @@ func FindPublicArticlesByCategory(db *mgorm.DB, a *[]Article, category Category,
 	return ctx.Do()
 }
 
-// FindNewPublicArticles searches for new public articles.
-func FindNewPublicArticles(db *mgorm.DB, a *[]Article) error {
-	op := &QueryOptions{
-		Limit:   5,
-		OrderBy: "sorted_id",
-		Desc:    true,
-	}
-	return FindPublicArticles(db, a, op)
+// InsertArticle inserts new article.
+func (db *Database) InsertArticle(a *Article) error {
+	ctx := db.TX.InsertWithModel(a, "articles")
+	return ctx.Do()
+}
+
+// UpdateArticle updates the article contents.
+func (db *Database) UpdateArticle(a *Article) error {
+	ctx := db.TX.UpdateWithModel(a, "articles")
+	return ctx.Do()
 }
