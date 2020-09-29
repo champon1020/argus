@@ -1,4 +1,4 @@
-package database
+package model
 
 // Category is the struct including category information.
 type Category struct {

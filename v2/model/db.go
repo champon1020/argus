@@ -1,12 +1,12 @@
-package database
+package model
 
 import (
 	"github.com/champon1020/argus"
 	mgorm "github.com/champon1020/minigorm"
 )
 
-// DbIface is the interface of the Database struct.
-type DbIface interface {
+// DatabaseIface is the interface of the Database struct.
+type DatabaseIface interface {
 	Connect(config argus.DbConf)
 }
 

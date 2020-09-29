@@ -1,13 +1,17 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"os"
+	"time"
+
+	"github.com/champon1020/argus/v2/database"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 var (
 	db *database.Database
-	
 )
 
 func main() {
@@ -19,16 +23,16 @@ func newRouter() *gin.Engine {
 	r := gin.New()
 
 	// Set the loggin configuration
-	r.Use(gin.LoggerWithConfig(loggerConfig()))
+	r.Use(gin.LoggerWithConfig(&loggerConfig()))
 
 	r.Use(gin.Recovery())
 
 	// Set the cors configuration
-	r.Use(cors.New(corsConfig()))
+	r.Use(cors.New(&corsConfig()))
 
 	/*
-     Add endpoints
-    */
+	   Add endpoints
+	*/
 }
 
 func loggerConfig() *gin.LoggerConfig {

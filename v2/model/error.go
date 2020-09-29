@@ -1,4 +1,4 @@
-package database
+package model
 
 import "github.com/champon1020/argus/v2"
 
