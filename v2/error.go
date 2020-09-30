@@ -1,23 +1,15 @@
 package argus
 
-// NewError creates new error.
-func NewError(typ *ErrorType, err error) error {
-	return Error{
-		Type: typ,
-		Err:  err,
-	}
-}
-
 // Error is the base error type of this project
 // which implements error interface.
 type Error struct {
-	// error type information
+	// Type is error type information.
 	Type *ErrorType
 
-	// default error
+	// Err is default error.
 	Err error
 
-	// values for debugging
+	// Values is for helping debug.
 	Values map[string]interface{}
 }
 
@@ -32,7 +24,7 @@ func (e Error) JSON() interface{} {
 	}
 
 	jsonMap := map[string]interface{}{
-		"Type":   e.Type.Name,
+		"Pkg":    e.Type.Pkg,
 		"Msg":    e.Type.Msg,
 		"Error":  e.Err.Error(),
 		"Values": e.Values,
@@ -40,16 +32,32 @@ func (e Error) JSON() interface{} {
 	return jsonMap
 }
 
+// NewError creates new error.
+func NewError(typ *ErrorType, err error) error {
+	return Error{
+		Type: typ,
+		Err:  err,
+	}
+}
+
 // ErrorType is the type of error.
 type ErrorType struct {
-	// error type
-	Name string
+	// Pkg is the package name error is occurred.
+	Pkg string
 
-	// errro messgae
+	// Msg is errro messgae.
 	Msg string
 }
 
-// ErrorsHandler handles some errors occurred in the api stream.
+// NewErrorType creates new error type.
+func NewErrorType(pkg string, msg string) *ErrorType {
+	return &ErrorType{
+		Pkg: pkg,
+		Msg: msg,
+	}
+}
+
+// ErrorsHandler handles some errors occurred in the api call.
 type ErrorsHandler struct {
 	Errs *[]error
 }
