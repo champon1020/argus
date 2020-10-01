@@ -2,14 +2,14 @@ package argus
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 )
 
-// Errors returned at this file.
 var (
-	ErrConfReadFailed      = NewErrorType("arugs", "Failed to read configuration file")
-	ErrConfUnmarshalFailed = NewErrorType("argus", "Failed to unmarshal into json")
+	errConfReadFailed      = errors.New("argus.config: Failed to read configuration file")
+	errConfUnmarshalFailed = errors.New("argus.config: Failed to unmarshal configuration")
 )
 
 // DbConf contains database configurations.
@@ -39,28 +39,28 @@ type WebConf struct {
 	MaxDisplaySettingArticle int `json:"maxDisplaySettingArticle"`
 }
 
-// Config contains all configurations.
-type Config struct {
+// Configuration contains all configurations.
+type Configuration struct {
 	Db  DbConf  `json:"db"`
 	Web WebConf `json:"web"`
 }
 
-// Configs contains some configurations splitted by argus mode.
-type Configs struct {
-	Deploy Config `json:"deploy"`
-	Dev    Config `json:"dev"`
+// Configurations contains some configurations splitted by argus mode.
+type Configurations struct {
+	Deploy Configuration `json:"deploy"`
+	Dev    Configuration `json:"dev"`
 }
 
 // NewConfig initialize the struct of Config.
-func NewConfig() *Config {
+func NewConfig() *Configuration {
 	// Load from config file.
-	configs := new(Configs)
+	configs := new(Configurations)
 	if err := configs.load(); err != nil {
 		os.Exit(1)
 	}
 
 	// Config will be returned.
-	var config Config
+	var config Configuration
 
 	// Branch by the project built mode.
 	switch Env.Get("mode") {
@@ -71,7 +71,7 @@ func NewConfig() *Config {
 	case "test":
 		// If test mode, configuration file wouldn't be mounted on CI.
 		// So this function returns the mock Config.
-		return &Config{
+		return &Configuration{
 			Db: DbConf{},
 			Web: WebConf{
 				Host:                     "",
@@ -95,17 +95,19 @@ func NewConfig() *Config {
 }
 
 // Load from configuration file.
-func (config *Configs) load() error {
+func (config *Configurations) load() error {
 	var row []byte
 
 	configPath := Env.Get("config")
 	row, err := ioutil.ReadFile(configPath)
 	if err != nil {
-		return NewError(ErrConfReadFailed, err)
+		return NewError(errConfReadFailed, err).
+			AppendValue("config path", configPath)
 	}
 
 	if err := json.Unmarshal(row, &config); err != nil {
-		return NewError(ErrConfUnmarshalFailed, err)
+		return NewError(errConfUnmarshalFailed, err).
+			AppendValue("config", config)
 	}
 
 	return nil

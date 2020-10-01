@@ -1,7 +1,15 @@
 package model
 
 import (
+	"errors"
 	"time"
+
+	"github.com/champon1020/argus/v2"
+)
+
+var (
+	errArticleDbNil = errors.New("model.article: model.Database.DB is nil")
+	errArticleTxNil = errors.New("model.article: model.Database.TX is nil")
 )
 
 // Article is the struct including article information.
@@ -37,6 +45,10 @@ type Article struct {
 // FindArticleByID searched for the article
 // whose id is the specified id string.
 func (db *Database) FindArticleByID(a *[]Article, id string) error {
+	if db.DB == nil {
+		return argus.NewError(errArticleDbNil, nil)
+	}
+
 	ctx := db.DB.Select(a, "articles").
 		Where("id = ?", id)
 
@@ -47,6 +59,10 @@ func (db *Database) FindArticleByID(a *[]Article, id string) error {
 // whose sorted id is greater than and equal to the specified
 // sortedID integer.
 func (db *Database) FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op *QueryOptions) error {
+	if db.DB == nil {
+		return argus.NewError(errArticleDbNil, nil)
+	}
+
 	ctx := db.DB.Select(a, "articles").
 		Where("private = ?", false).
 		Where("sorted_id >= ?", sortedID)
@@ -58,8 +74,11 @@ func (db *Database) FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op 
 
 // FindAllArticles searches for all articles.
 func (db *Database) FindAllArticles(a *[]Article, op *QueryOptions) error {
-	ctx := db.DB.Select(a, "articles")
+	if db.DB == nil {
+		return argus.NewError(errArticleDbNil, nil)
+	}
 
+	ctx := db.DB.Select(a, "articles")
 	op.apply(ctx)
 
 	return ctx.Do()
@@ -67,6 +86,10 @@ func (db *Database) FindAllArticles(a *[]Article, op *QueryOptions) error {
 
 // FindPublicArticles searches for public articles.
 func (db *Database) FindPublicArticles(a *[]Article, op *QueryOptions) error {
+	if db.DB == nil {
+		return argus.NewError(errArticleDbNil, nil)
+	}
+
 	ctx := db.DB.Select(a, "articles").
 		Where("private = ?", false)
 
@@ -90,6 +113,10 @@ func (db *Database) FindPublicArticlesByTitle(a *[]Article, title string, op *Qu
 // FindPublicArticlesByCategory searches for public articles
 // which belongs to the specified category id.
 func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID int, op *QueryOptions) error {
+	if db.DB == nil {
+		return argus.NewError(errArticleDbNil, nil)
+	}
+
 	idCtx := db.DB.Select(nil, "categoreis", "article_id").
 		Where("category_id = ?", categoryID)
 
@@ -104,12 +131,20 @@ func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID int, o
 
 // InsertArticle inserts new article.
 func (db *Database) InsertArticle(a *Article) error {
+	if db.TX == nil {
+		return argus.NewError(errArticleTxNil, nil)
+	}
+
 	ctx := db.TX.InsertWithModel(a, "articles")
 	return ctx.Do()
 }
 
 // UpdateArticle updates the article contents.
 func (db *Database) UpdateArticle(a *Article) error {
+	if db.TX == nil {
+		return argus.NewError(errArticleTxNil, nil)
+	}
+
 	ctx := db.TX.UpdateWithModel(a, "articles")
 	return ctx.Do()
 }

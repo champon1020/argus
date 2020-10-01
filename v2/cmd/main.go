@@ -5,14 +5,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/champon1020/argus/v2/database"
+	"github.com/champon1020/argus/v2"
+	"github.com/champon1020/argus/v2/model"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	db *database.Database
-)
+func init() {
+	argus.Init()
+	model.InitDatabase()
+}
 
 func main() {
 	r := newRouter()
@@ -23,16 +25,17 @@ func newRouter() *gin.Engine {
 	r := gin.New()
 
 	// Set the loggin configuration
-	r.Use(gin.LoggerWithConfig(&loggerConfig()))
+	r.Use(gin.LoggerWithConfig(*loggerConfig()))
 
 	r.Use(gin.Recovery())
 
 	// Set the cors configuration
-	r.Use(cors.New(&corsConfig()))
+	r.Use(cors.New(*corsConfig()))
 
 	/*
 	   Add endpoints
 	*/
+	return r
 }
 
 func loggerConfig() *gin.LoggerConfig {

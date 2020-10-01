@@ -1,13 +1,28 @@
 package model
 
 import (
-	"github.com/champon1020/argus"
+	"errors"
+
+	"github.com/champon1020/argus/v2"
 	mgorm "github.com/champon1020/minigorm"
+)
+
+// Db contains database or transaction instance.
+var Db *Database
+
+// InitDatabase initializes model.Database instance.
+func InitDatabase() {
+	Db = new(Database)
+	Db.Connect(&argus.Config.Db)
+}
+
+var (
+	errDbFailedConnect = errors.New("model.db: Failed to connect database")
 )
 
 // DatabaseIface is the interface of the Database struct.
 type DatabaseIface interface {
-	Connect(config argus.DbConf)
+	Connect(config *argus.DbConf)
 }
 
 // Database contains mgorm.DB.
@@ -17,7 +32,7 @@ type Database struct {
 }
 
 // Connect of Database initializes database settings.
-func (db *Database) Connect(config argus.DbConf) {
+func (db *Database) Connect(config *argus.DbConf) {
 	dataSource :=
 		config.User + ":" +
 			config.Pass + "@tcp(" +
@@ -26,6 +41,7 @@ func (db *Database) Connect(config argus.DbConf) {
 			config.DbName + "?parseTime=true"
 	_db, err := mgorm.New("mysql", dataSource)
 	if err != nil {
+		err = argus.NewError(errDbFailedConnect, err)
 		argus.Logger.Fatalf("%v\n", err)
 	}
 	db.DB = &_db
@@ -36,7 +52,7 @@ type MockDatabase struct{}
 
 // Connect of MockDatabase is dummy function.
 // This function is declared for implementing DatabaseIface.
-func (db *MockDatabase) Connect(config argus.DbConf) {
+func (db *MockDatabase) Connect(config *argus.DbConf) {
 	// dummy function
 }
 

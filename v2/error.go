@@ -3,8 +3,8 @@ package argus
 // Error is the base error type of this project
 // which implements error interface.
 type Error struct {
-	// Type is error type information.
-	Type *ErrorType
+	// Msg is custom error.
+	Msg error
 
 	// Err is default error.
 	Err error
@@ -17,6 +17,12 @@ func (e Error) Error() string {
 	return e.Err.Error()
 }
 
+// AppendValue adds new value for helping debug.
+func (e *Error) AppendValue(key string, val interface{}) *Error {
+	e.Values[key] = val
+	return e
+}
+
 // JSON parses Error to json format.
 func (e Error) JSON() interface{} {
 	if e.Err == nil {
@@ -24,8 +30,7 @@ func (e Error) JSON() interface{} {
 	}
 
 	jsonMap := map[string]interface{}{
-		"Pkg":    e.Type.Pkg,
-		"Msg":    e.Type.Msg,
+		"Msg":    e.Msg,
 		"Error":  e.Err.Error(),
 		"Values": e.Values,
 	}
@@ -33,27 +38,10 @@ func (e Error) JSON() interface{} {
 }
 
 // NewError creates new error.
-func NewError(typ *ErrorType, err error) error {
-	return Error{
-		Type: typ,
-		Err:  err,
-	}
-}
-
-// ErrorType is the type of error.
-type ErrorType struct {
-	// Pkg is the package name error is occurred.
-	Pkg string
-
-	// Msg is errro messgae.
-	Msg string
-}
-
-// NewErrorType creates new error type.
-func NewErrorType(pkg string, msg string) *ErrorType {
-	return &ErrorType{
-		Pkg: pkg,
+func NewError(msg error, err error) *Error {
+	return &Error{
 		Msg: msg,
+		Err: err,
 	}
 }
 

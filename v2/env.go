@@ -2,9 +2,6 @@ package argus
 
 import "os"
 
-// Env is the global handler of environment variables.
-var Env EnvMap
-
 // EnvMap is the environment variable mapping type.
 type EnvMap map[string]string
 
