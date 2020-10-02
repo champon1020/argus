@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/champon1020/argus/v2"
+	"github.com/champon1020/argus/v2/handler"
 	"github.com/champon1020/argus/v2/model"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -32,10 +33,20 @@ func newRouter() *gin.Engine {
 	// Set the cors configuration
 	r.Use(cors.New(*corsConfig()))
 
-	/*
-	   Add endpoints
-	*/
+	find := r.Group("/api/find")
+	{
+		find.GET("/article/list", wrapHandler(handler.FindArticlesList))
+	}
 	return r
+}
+
+func wrapHandler(h func(c *gin.Context, db model.DatabaseIface) error) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := h(c, model.Db)
+		if err != nil {
+			// parse error
+		}
+	}
 }
 
 func loggerConfig() *gin.LoggerConfig {

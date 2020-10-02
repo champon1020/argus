@@ -22,7 +22,10 @@ var (
 
 // DatabaseIface is the interface of the Database struct.
 type DatabaseIface interface {
+	// Connect to database.
 	Connect(config *argus.DbConf)
+
+	FindArticlesList(a *[]Article, op *QueryOptions) error
 }
 
 // Database contains mgorm.DB.
@@ -31,26 +34,26 @@ type Database struct {
 	TX *mgorm.TX
 }
 
-// Connect of Database initializes database settings.
+// Connect initializes database settings.
 func (db *Database) Connect(config *argus.DbConf) {
+	var err error
 	dataSource :=
 		config.User + ":" +
 			config.Pass + "@tcp(" +
 			config.Host + ":" +
 			config.Port + ")/" +
 			config.DbName + "?parseTime=true"
-	_db, err := mgorm.New("mysql", dataSource)
-	if err != nil {
+
+	if db.DB, err = mgorm.New("mysql", dataSource); err != nil {
 		err = argus.NewError(errDbFailedConnect, err)
 		argus.Logger.Fatalf("%v\n", err)
 	}
-	db.DB = &_db
 }
 
 // MockDatabase is the mock Database struct for test.
 type MockDatabase struct{}
 
-// Connect of MockDatabase is dummy function.
+// Connect is dummy function.
 // This function is declared for implementing DatabaseIface.
 func (db *MockDatabase) Connect(config *argus.DbConf) {
 	// dummy function

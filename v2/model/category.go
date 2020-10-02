@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	errCategoryDbNil = errors.New("model.category: model.Database.DB is nil")
+	errCategoryDbNil       = errors.New("model.category: model.Database.DB is nil")
+	errCategoryQueryFailed = errors.New("model.category: Failed to execute query")
 )
 
 // Category is the struct including category information.
@@ -27,5 +28,11 @@ func (db *Database) FindCategories(c *[]Category, op *QueryOptions) error {
 
 	ctx := db.DB.Select(c, "categories")
 	op.apply(ctx)
-	return ctx.Do()
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errCategoryQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }

@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	errArticleDbNil = errors.New("model.article: model.Database.DB is nil")
-	errArticleTxNil = errors.New("model.article: model.Database.TX is nil")
+	errArticleDbNil       = errors.New("model.article: model.Database.DB is nil")
+	errArticleTxNil       = errors.New("model.article: model.Database.TX is nil")
+	errArticleQueryFailed = errors.New("model.article: Failed to execute query")
 )
 
 // Article is the struct including article information.
@@ -52,7 +53,12 @@ func (db *Database) FindArticleByID(a *[]Article, id string) error {
 	ctx := db.DB.Select(a, "articles").
 		Where("id = ?", id)
 
-	return ctx.Do()
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // FindPublicArticlesGeSortedID searches for public articles
@@ -69,7 +75,12 @@ func (db *Database) FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op 
 
 	op.apply(ctx)
 
-	return ctx.Do()
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // FindAllArticles searches for all articles.
@@ -81,7 +92,12 @@ func (db *Database) FindAllArticles(a *[]Article, op *QueryOptions) error {
 	ctx := db.DB.Select(a, "articles")
 	op.apply(ctx)
 
-	return ctx.Do()
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // FindPublicArticles searches for public articles.
@@ -95,7 +111,12 @@ func (db *Database) FindPublicArticles(a *[]Article, op *QueryOptions) error {
 
 	op.apply(ctx)
 
-	return ctx.Do()
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // FindPublicArticlesByTitle searches for public articles
@@ -107,7 +128,12 @@ func (db *Database) FindPublicArticlesByTitle(a *[]Article, title string, op *Qu
 
 	op.apply(ctx)
 
-	return ctx.Do()
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // FindPublicArticlesByCategory searches for public articles
@@ -126,7 +152,12 @@ func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID int, o
 
 	op.apply(ctx)
 
-	return ctx.Do()
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // InsertArticle inserts new article.
@@ -136,7 +167,13 @@ func (db *Database) InsertArticle(a *Article) error {
 	}
 
 	ctx := db.TX.InsertWithModel(a, "articles")
-	return ctx.Do()
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // UpdateArticle updates the article contents.
@@ -146,5 +183,11 @@ func (db *Database) UpdateArticle(a *Article) error {
 	}
 
 	ctx := db.TX.UpdateWithModel(a, "articles")
-	return ctx.Do()
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }

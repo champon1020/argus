@@ -44,18 +44,3 @@ func NewError(msg error, err error) *Error {
 		Err: err,
 	}
 }
-
-// ErrorsHandler handles some errors occurred in the api call.
-type ErrorsHandler struct {
-	Errs *[]error
-}
-
-// AppendError appends new error.
-func (eh *ErrorsHandler) AppendError(err error) {
-	*eh.Errs = append(*eh.Errs, err)
-}
-
-// Count returns the number of Errs elements.
-func (eh ErrorsHandler) Count() int {
-	return len(*eh.Errs)
-}

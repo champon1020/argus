@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	errDraftDbNil = errors.New("model.draft: model.Database.DB is nil")
-	errDraftTxNil = errors.New("model.draft: model.Database.TX is nil")
+	errDraftDbNil       = errors.New("model.draft: model.Database.DB is nil")
+	errDraftTxNil       = errors.New("model.draft: model.Database.TX is nil")
+	errDraftQueryFailed = errors.New("model.draft: Failed to execute query")
 )
 
 // Draft is the struct including draft information.
@@ -44,7 +45,13 @@ func (db *Database) FindDrafts(d *[]Draft, op *QueryOptions) error {
 
 	ctx := db.DB.Select(d, "drafts")
 	op.apply(ctx)
-	return ctx.Do()
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errDraftQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // FindDraftByID searches for draft
@@ -57,7 +64,12 @@ func (db *Database) FindDraftByID(d *[]Draft, id string) error {
 	ctx := db.DB.Select(d, "drafts").
 		Where("id = ?", id)
 
-	return ctx.Do()
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errDraftQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // InsertDraft inserts new draft.
@@ -67,7 +79,13 @@ func (db *Database) InsertDraft(d *Draft) error {
 	}
 
 	ctx := db.TX.InsertWithModel(d, "drafts")
-	return ctx.Do()
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errDraftQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // UpdateDraft updates the draft contents.
@@ -78,7 +96,13 @@ func (db *Database) UpdateDraft(d *Draft) error {
 
 	ctx := db.TX.UpdateWithModel(d, "drafts").
 		Where("id = ?", d.ID)
-	return ctx.Do()
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errDraftQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
 
 // DeleteDraft deletes the draft.
@@ -90,5 +114,10 @@ func (db *Database) DeleteDraft(id int) error {
 	ctx := db.TX.Delete("drafts").
 		Where("id = ?", id)
 
-	return ctx.Do()
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errDraftQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }
