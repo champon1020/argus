@@ -11,6 +11,7 @@ var (
 	errArticleDbNil       = errors.New("model.article: model.Database.DB is nil")
 	errArticleTxNil       = errors.New("model.article: model.Database.TX is nil")
 	errArticleQueryFailed = errors.New("model.article: Failed to execute query")
+	errArticleNoResult    = errors.New("model.article: Query result is nothing")
 )
 
 // Article is the struct including article information.
@@ -45,18 +46,24 @@ type Article struct {
 
 // FindArticleByID searched for the article
 // whose id is the specified id string.
-func (db *Database) FindArticleByID(a *[]Article, id string) error {
+func (db *Database) FindArticleByID(a *Article, id string) error {
 	if db.DB == nil {
 		return argus.NewError(errArticleDbNil, nil)
 	}
 
-	ctx := db.DB.Select(a, "articles").
+	var _a []Article
+	ctx := db.DB.Select(&_a, "articles").
 		Where("id = ?", id)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errArticleQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
 	}
+
+	if len(_a) == 0 {
+		return argus.NewError(errArticleNoResult, nil)
+	}
+	a = &_a[0]
 
 	return nil
 }

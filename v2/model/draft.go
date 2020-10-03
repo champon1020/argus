@@ -11,6 +11,7 @@ var (
 	errDraftDbNil       = errors.New("model.draft: model.Database.DB is nil")
 	errDraftTxNil       = errors.New("model.draft: model.Database.TX is nil")
 	errDraftQueryFailed = errors.New("model.draft: Failed to execute query")
+	errDraftNoResult    = errors.New("model.draft: Query result is nothing")
 )
 
 // Draft is the struct including draft information.
@@ -56,18 +57,24 @@ func (db *Database) FindDrafts(d *[]Draft, op *QueryOptions) error {
 
 // FindDraftByID searches for draft
 // whose id is the specified id string.
-func (db *Database) FindDraftByID(d *[]Draft, id string) error {
+func (db *Database) FindDraftByID(d *Draft, id string) error {
 	if db.DB == nil {
 		return argus.NewError(errDraftDbNil, nil)
 	}
 
-	ctx := db.DB.Select(d, "drafts").
+	var _d []Draft
+	ctx := db.DB.Select(&_d, "drafts").
 		Where("id = ?", id)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errDraftQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
 	}
+
+	if len(_d) == 0 {
+		return argus.NewError(errDraftNoResult, nil)
+	}
+	d = &_d[0]
 
 	return nil
 }
