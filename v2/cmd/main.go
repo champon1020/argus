@@ -12,12 +12,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func init() {
+func main() {
 	argus.Init()
 	model.InitDatabase()
-}
 
-func main() {
 	r := newRouter()
 	_ = r.Run(":8000")
 }
@@ -44,7 +42,9 @@ func wrapHandler(h func(c *gin.Context, db model.DatabaseIface) error) gin.Handl
 	return func(c *gin.Context) {
 		err := h(c, model.Db)
 		if err != nil {
-			// parse error
+			if e, ok := err.(*argus.Error); ok {
+				e.Log()
+			}
 		}
 	}
 }

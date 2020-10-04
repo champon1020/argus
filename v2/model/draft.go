@@ -74,7 +74,7 @@ func (db *Database) FindDraftByID(d *Draft, id string) error {
 	if len(_d) == 0 {
 		return argus.NewError(errDraftNoResult, nil)
 	}
-	d = &_d[0]
+	*d = _d[0]
 
 	return nil
 }

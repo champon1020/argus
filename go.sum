@@ -10,6 +10,8 @@ github.com/champon1020/minigorm v0.0.0-20200901002557-86b13fe64443 h1:R1Q8NPnNtm
 github.com/champon1020/minigorm v0.0.0-20200901002557-86b13fe64443/go.mod h1:VlmlGEZ7Fp5jmRyFU2pkfjGAxztk8ghx3AfDgRx2hBE=
 github.com/champon1020/minigorm v0.0.0-20201002204225-cb6dfb9c82e0 h1:6oy/CgOKyjimoBXsSRTS67QF105xz3Yau13TQKuC6tM=
 github.com/champon1020/minigorm v0.0.0-20201002204225-cb6dfb9c82e0/go.mod h1:VlmlGEZ7Fp5jmRyFU2pkfjGAxztk8ghx3AfDgRx2hBE=
+github.com/champon1020/minigorm v0.0.0-20201004150436-82520fec1403 h1:SWKrRLIanmbIfF1ZdHMMPWn5Nq71AR1aT/SGfS9yBz8=
+github.com/champon1020/minigorm v0.0.0-20201004150436-82520fec1403/go.mod h1:VlmlGEZ7Fp5jmRyFU2pkfjGAxztk8ghx3AfDgRx2hBE=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

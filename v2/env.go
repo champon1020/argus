@@ -27,6 +27,6 @@ func NewEnv() *EnvMap {
 	e.set("dbPass", os.Getenv("ARGUS_DB_PASS"))
 	e.set("dbPort", os.Getenv("ARGUS_DB_PORT"))
 	e.set("dbHost", os.Getenv("ARGUS_DB_HOST"))
-	e.set("dbName", os.Getenv("ARGUS_DB_Name"))
+	e.set("dbName", os.Getenv("ARGUS_DB_NAME"))
 	return &e
 }

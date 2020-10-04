@@ -63,7 +63,7 @@ func (db *Database) FindArticleByID(a *Article, id string) error {
 	if len(_a) == 0 {
 		return argus.NewError(errArticleNoResult, nil)
 	}
-	a = &_a[0]
+	*a = _a[0]
 
 	return nil
 }

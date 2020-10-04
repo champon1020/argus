@@ -5,6 +5,9 @@ import (
 
 	"github.com/champon1020/argus/v2"
 	mgorm "github.com/champon1020/minigorm"
+
+	// Import mysql driver.
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // Db contains database or transaction instance.
@@ -25,7 +28,8 @@ type DatabaseIface interface {
 	// Connect to database.
 	Connect(config *argus.DbConf)
 
-	FindArticlesList(a *[]Article, op *QueryOptions) error
+	FindPublicArticles(a *[]Article, op *QueryOptions) error
+	CountArticles(cnt *int) error
 }
 
 // Database contains mgorm.DB.
