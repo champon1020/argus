@@ -1,0 +1,493 @@
+openapi: 3.0.0
+
+info:
+  title: argus
+  description: My blog
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: local server
+  - url: https://argus.champonian.com
+    description: domain
+
+paths:
+  /api/find/article/sortedId:
+    summary: Return an article whose sortedId is selected.
+    parameters:
+      - name: sortedId
+        in: query
+        required: true
+        description: Article sorted id.
+        schema:
+          type: number
+    responses:
+      '200':
+        description: Success.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                article:
+                  $ref: '#/components/schemas/Article'
+                nextTitle:
+                  type: string
+                prevTitle:
+                  type: string
+              required:
+                - article
+                - next
+                - prev
+          
+  /api/find/article/list:
+    get:
+      summary: Return articles list.
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: Number of articles.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  articleCount:
+                    type: number
+                required:
+                  - articles
+                  - articleCount
+
+  /api/find/article/list/title:
+    get:
+      summary: Return articles list by title.
+      parameters:
+        - name: title
+          in: query
+          required: true
+          description: Article title.
+          schema:
+            type: string
+        - name: p
+          in: query
+          required: false
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: Number of articles.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  articleCount:
+                    type: number
+                required:
+                  - articles
+                  - articleCount
+
+  /api/find/article/list/category:
+    get:
+      summary: Return articles list by category.
+      parameters:
+        - name: category
+          in: query
+          required: true
+          description: Category name.
+          schema:
+            type: array
+            items:
+              type: string
+        - name: p
+          in: query
+          required: false
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: number of articles.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  articleCount:
+                    type: number
+                required:
+                  - articles
+                  - articleCount
+
+  /api/find/category/list:
+    get:
+      summary: Return categories list.
+      parameters:
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+                required:
+                  - categories
+
+  /api/private/find/article/id:
+    get:
+      summary: Return an article whose id is selected
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Article id.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    $ref: '#/components/schemas/Article'
+                required:
+                  - article
+
+  /api/private/find/article/list/all:
+    get:
+      summary: Return all articles list.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: Number of articles.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  articleCount:
+                    type: number
+                required:
+                  - articles
+                  - articleCount
+
+  /api/private/find/draft/id:
+    get:
+      summary: Return a draft whose id is selected.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Draft id.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  draft:
+                    $ref: '#/components/schemas/Draft'
+                required:
+                  - draft
+
+  /api/private/find/draft/list/all:
+    get:
+      summary: Return all drafts list.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: Number of drafts.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  drafts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Draft'
+                  draftCount:
+                    type: number
+                required:
+                  - drafts
+                  - draftCount
+
+  /api/private/find/image/list:
+    get:
+      summary: Return images list.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: Number of images.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  images:
+                    type: array
+                    items:
+                      type: string
+                  imageCount:
+                    type: number
+                required:
+                  - images
+                  - imageCount
+
+  /api/private/register/article:
+    post:
+      summary: Register new article.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                article:
+                  $ref: '#/components/schemas/RequestArticle'
+              required:
+                - article
+      responses:
+        '200':
+          description: Success.
+
+  /api/private/update/article:
+    put:
+      summary: Update article.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                article:
+                  $ref: '#/components/schemas/RequestArticle'
+              required:
+                - article
+      responses:
+        '200':
+          description: Success.
+
+  /api/private/register/draft:
+    post:
+      summary: Register new draft.
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                article:
+                  $ref: '#/components/schemas/RequestDraft'
+              required:
+                - article
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  content:
+                    type: string
+                  imageHash:
+                    type: string
+                required:
+                  - id
+                  - content
+                  - imageHash
+
+  /api/private/delete/draft:
+    delete:
+      summary: Delete draft.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Draft id.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success.
+
+  /api/private/register/image:
+    post:
+      summary: Register new image.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Success.
+
+  /api/private/delete/image:
+    delete:
+      summary: Delete images.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: imageNames
+          in: query
+          required: true
+          description: Image names.
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Success.
+
+  /api/verify/token:
+    post:
+      summary: Verify token.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+        '400':
+          description: No authorization header.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
