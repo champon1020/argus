@@ -29,7 +29,9 @@ type DatabaseIface interface {
 	Connect(config *argus.DbConf)
 
 	FindPublicArticles(a *[]Article, op *QueryOptions) error
-	CountArticles(cnt *int) error
+	FindPublicArticlesByTitle(a *[]Article, title string, op *QueryOptions) error
+	CountPublicArticles(cnt *int, op *QueryOptions) error
+	CountPublicArticlesByTitle(cnt *int, title string, op *QueryOptions) error
 }
 
 // Database contains mgorm.DB.
@@ -99,4 +101,27 @@ func (op *QueryOptions) apply(ctx *mgorm.Context) {
 			ctx.OrderBy(op.OrderBy)
 		}
 	}
+}
+
+// NewOp create new QueryOptions object.
+func NewOp(limit int, offset int, orderby string, desc bool) *QueryOptions {
+	op := new(QueryOptions)
+
+	if limit > 0 {
+		op.Limit = limit
+	}
+
+	if offset > 0 {
+		op.Offset = offset
+	}
+
+	if orderby != "" {
+		op.OrderBy = orderby
+	}
+
+	if !desc {
+		op.Desc = desc
+	}
+
+	return op
 }

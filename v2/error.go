@@ -2,6 +2,7 @@ package argus
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/champon1020/argus"
 )
@@ -30,29 +31,29 @@ func (e *Error) AppendValue(key string, val interface{}) *Error {
 }
 
 // MarshalIndent makes json indentation format.
-func (e Error) MarshalIndent() ([]byte, error) {
+func (e *Error) MarshalIndent() ([]byte, error) {
 	return json.MarshalIndent(e.JSON(), "", "  ")
 }
 
 // JSON parses Error to json format.
-func (e Error) JSON() interface{} {
+func (e *Error) JSON() interface{} {
 	if e.Err == nil {
-		return nil
+		e.Err = errors.New("nil")
 	}
 
 	jsonMap := map[string]interface{}{
-		"Msg":    e.Msg,
+		"Msg":    e.Msg.Error(),
 		"Error":  e.Err.Error(),
 		"Values": e.Values,
 	}
+
 	return jsonMap
 }
 
 // Log outputs error log as json.
-func (e Error) Log() {
-	jsonMap := e.JSON()
-	bytes, _ := json.MarshalIndent(jsonMap, "", "  ")
-	argus.Logger.Printf("%v\n", string(bytes))
+func (e *Error) Log() {
+	bytes, _ := e.MarshalIndent()
+	argus.Logger.Printf("%s\n", string(bytes))
 }
 
 // NewError creates new error.

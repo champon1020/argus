@@ -33,7 +33,7 @@ func newRouter() *gin.Engine {
 
 	find := r.Group("/api/find")
 	{
-		find.GET("/article/list", wrapHandler(handler.FindArticlesList))
+		find.GET("/article/list", wrapHandler(handler.FindArticles))
 	}
 	return r
 }
@@ -41,6 +41,8 @@ func newRouter() *gin.Engine {
 func wrapHandler(h func(c *gin.Context, db model.DatabaseIface) error) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		err := h(c, model.Db)
+
+		// If error was occurred in handler, output error log as standard output.
 		if err != nil {
 			if e, ok := err.(*argus.Error); ok {
 				e.Log()

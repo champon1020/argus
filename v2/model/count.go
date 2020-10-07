@@ -18,13 +18,14 @@ type Count struct {
 }
 
 // CountArticles counts the number of articles.
-func (db *Database) CountArticles(cnt *int) error {
+func (db *Database) CountPublicArticles(cnt *int, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
 
 	var c []Count
 	ctx := db.DB.Select(&c, "articles", "COUNT(*) AS count")
+	op.apply(ctx)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errCountQueryFailed, err).
@@ -34,19 +35,47 @@ func (db *Database) CountArticles(cnt *int) error {
 	if len(c) == 0 {
 		return argus.NewError(errCountNoResult, nil)
 	}
+
+	*cnt = c[0].Value
+
+	return nil
+}
+
+func (db *Database) CountPublicArticlesByTitle(cnt *int, title string, op *QueryOptions) error {
+	if db.DB == nil {
+		return argus.NewError(errCountDbNil, nil)
+	}
+
+	var c []Count
+	ctx := db.DB.Select(&c, "articles", "COUNT(*) AS count").
+		Where("private = ?", false).
+		Where("title LIKE %?%", title)
+
+	op.apply(ctx)
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errCountQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	if len(c) == 0 {
+		return argus.NewError(errCountNoResult, nil)
+	}
+
 	*cnt = c[0].Value
 
 	return nil
 }
 
 // CountDrafts counts the number of drafts.
-func (db *Database) CountDrafts(cnt *Count) error {
+func (db *Database) CountDrafts(cnt *Count, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
 
 	var c []Count
 	ctx := db.DB.Select(&c, "drafts", "COUNT(*) AS count")
+	op.apply(ctx)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errCountQueryFailed, err).
@@ -56,6 +85,7 @@ func (db *Database) CountDrafts(cnt *Count) error {
 	if len(c) == 0 {
 		return argus.NewError(errCountNoResult, nil)
 	}
+
 	*cnt = c[0]
 
 	return nil
