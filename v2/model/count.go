@@ -17,7 +17,7 @@ type Count struct {
 	Value int `mgorm:"count"`
 }
 
-// CountArticles counts the number of articles.
+// CountPublicArticles counts the number of articles.
 func (db *Database) CountPublicArticles(cnt *int, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
@@ -41,6 +41,7 @@ func (db *Database) CountPublicArticles(cnt *int, op *QueryOptions) error {
 	return nil
 }
 
+// CountPublicArticlesByTitle counts the number of articles with title.
 func (db *Database) CountPublicArticlesByTitle(cnt *int, title string, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)

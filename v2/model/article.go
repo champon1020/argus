@@ -17,31 +17,31 @@ var (
 // Article is the struct including article information.
 type Article struct {
 	// unique id (primary key)
-	ID string `json:"id"`
+	ID string `mgorm:"id" json:"id"`
 
 	// id for sorting articles
-	SortedID int `json:"sortedId"`
+	SortedID int `mgorm:"sorted_id" json:"sortedId"`
 
 	// article title
-	Title string `json:"title"`
+	Title string `mgorm:"title" json:"title"`
 
 	// categories of article
-	Categories []Category `json:"categories"`
+	Categories []Category `mgorm:"categories" json:"categories"`
 
 	// date article is posted on
-	CreateDate time.Time `json:"createDate"`
+	CreateDate time.Time `mgorm:"create_date" json:"createDate"`
 
 	// date article is updated
-	UpdateDate time.Time `json:"updateDate"`
+	UpdateDate time.Time `mgorm:"update_date" json:"updateDate"`
 
 	// content of article
-	Content string `json:"content"`
+	Content string `mgorm:"content" json:"content"`
 
 	// image file name
-	ImageHash string `json:"imageHash"`
+	ImageHash string `mgorm:"image_hash" json:"imageHash"`
 
 	// article is private or not
-	Private bool `json:"isPrivate"`
+	Private bool `mgorm:"is_private" json:"isPrivate"`
 }
 
 // FindArticleByID searched for the article
@@ -64,28 +64,6 @@ func (db *Database) FindArticleByID(a *Article, id string) error {
 		return argus.NewError(errArticleNoResult, nil)
 	}
 	*a = _a[0]
-
-	return nil
-}
-
-// FindPublicArticlesGeSortedID searches for public articles
-// whose sorted id is greater than and equal to the specified
-// sortedID integer.
-func (db *Database) FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op *QueryOptions) error {
-	if db.DB == nil {
-		return argus.NewError(errArticleDbNil, nil)
-	}
-
-	ctx := db.DB.Select(a, "articles").
-		Where("private = ?", false).
-		Where("sorted_id >= ?", sortedID)
-
-	op.apply(ctx)
-
-	if err := ctx.Do(); err != nil {
-		return argus.NewError(errArticleQueryFailed, err).
-			AppendValue("query", ctx.ToSQLString())
-	}
 
 	return nil
 }
@@ -115,6 +93,28 @@ func (db *Database) FindPublicArticles(a *[]Article, op *QueryOptions) error {
 
 	ctx := db.DB.Select(a, "articles").
 		Where("private = ?", false)
+
+	op.apply(ctx)
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
+}
+
+// FindPublicArticlesGeSortedID searches for public articles
+// whose sorted id is greater than and equal to the specified
+// sortedID integer.
+func (db *Database) FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op *QueryOptions) error {
+	if db.DB == nil {
+		return argus.NewError(errArticleDbNil, nil)
+	}
+
+	ctx := db.DB.Select(a, "articles").
+		Where("private = ?", false).
+		Where("sorted_id >= ?", sortedID)
 
 	op.apply(ctx)
 

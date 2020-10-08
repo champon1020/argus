@@ -12,34 +12,6 @@ servers:
     description: domain
 
 paths:
-  /api/find/article/sortedId:
-    summary: Return an article whose sortedId is selected.
-    parameters:
-      - name: sortedId
-        in: query
-        required: true
-        description: Article sorted id.
-        schema:
-          type: number
-    responses:
-      '200':
-        description: Success.
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                article:
-                  $ref: '#/components/schemas/Article'
-                nextTitle:
-                  type: string
-                prevTitle:
-                  type: string
-              required:
-                - article
-                - next
-                - prev
-          
   /api/find/article/list:
     get:
       summary: Return articles list.
@@ -68,11 +40,40 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articleCount:
+                  count:
                     type: number
                 required:
                   - articles
-                  - articleCount
+                  - count
+
+  /api/find/article/sortedId:
+    get:
+      summary: Return an article whose sortedId is selected.
+      parameters:
+        - name: sortedID
+          in: query
+          required: true
+          description: Article sorted id.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    $ref: '#/components/schemas/Article'
+                  nextTitle:
+                    type: string
+                  prevTitle:
+                    type: string
+                required:
+                  - article
+                  - nextTitle
+                  - prevTitle
 
   /api/find/article/list/title:
     get:
@@ -108,11 +109,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articleCount:
+                  count:
                     type: number
                 required:
                   - articles
-                  - articleCount
+                  - count
 
   /api/find/article/list/category:
     get:
@@ -150,11 +151,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articleCount:
+                  count:
                     type: number
                 required:
                   - articles
-                  - articleCount
+                  - count
 
   /api/find/category/list:
     get:
@@ -228,11 +229,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  articleCount:
+                  count:
                     type: number
                 required:
                   - articles
-                  - articleCount
+                  - count
 
   /api/private/find/draft/id:
     get:
@@ -289,11 +290,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Draft'
-                  draftCount:
+                  count:
                     type: number
                 required:
                   - drafts
-                  - draftCount
+                  - count
 
   /api/private/find/image/list:
     get:
@@ -325,11 +326,11 @@ paths:
                     type: array
                     items:
                       type: string
-                  imageCount:
+                  count:
                     type: number
                 required:
                   - images
-                  - imageCount
+                  - count
 
   /api/private/register/article:
     post:
@@ -491,3 +492,79 @@ paths:
                 properties:
                   verify:
                     type: boolean
+
+components:
+  schemas:
+    Article:
+      type: object
+      properties:
+        id:
+          type: string
+        sortedId:
+          type: number
+        title:
+          type: string
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        createDate:
+          type: string
+        updateDate:
+          type: string
+        content:
+          type: string
+        imageHash:
+          type: string
+        isPrivate:
+          type: boolean
+      required:
+        - id
+        - sortedId
+        - title
+        - categories
+        - createDate
+        - updateDate
+        - content
+        - imageHash
+        - isPrivate
+
+    Cateogry:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        articleNum:
+          type: number
+      required:
+        - id
+        - name
+        - articleNum
+
+    Draft:
+      type: object
+      properties:
+        id:
+          type: string
+        sortedId:
+          type: number
+        title:
+          type: string
+        categories:
+          type: string
+        updateDate:
+          type: string
+        content:
+          type: string
+        imageHash:
+          type: string
+      required:
+        - id
+        - sortedId
+        - title
+        - categories
+        - updateDate
+        - content
+        - imageHash

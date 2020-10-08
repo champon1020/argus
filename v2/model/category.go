@@ -14,10 +14,10 @@ var (
 // Category is the struct including category information.
 type Category struct {
 	// unique id (primary key)
-	ID string `json:"id"`
+	ID string `mgorm:"id" json:"id"`
 
 	// category name
-	Name string `json:"name"`
+	Name string `mgorm:"name" json:"name"`
 }
 
 // FindCategories searches for article categories.

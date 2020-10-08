@@ -28,10 +28,30 @@ type DatabaseIface interface {
 	// Connect to database.
 	Connect(config *argus.DbConf)
 
+	// Article
+	FindArticleByID(a *Article, id string) error
+	FindAllArticles(a *[]Article, op *QueryOptions) error
 	FindPublicArticles(a *[]Article, op *QueryOptions) error
+	FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op *QueryOptions) error
 	FindPublicArticlesByTitle(a *[]Article, title string, op *QueryOptions) error
+	FindPublicArticlesByCategory(a *[]Article, categoryID int, op *QueryOptions) error
+	InsertArticle(a *Article) error
+	UpdateArticle(a *Article) error
+
+	// Category
+	FindCategories(c *[]Category, op *QueryOptions) error
+
+	// Draft
+	FindDrafts(d *[]Draft, op *QueryOptions) error
+	FindDraftByID(d *Draft, id string) error
+	InsertDraft(d *Draft) error
+	UpdateDraft(d *Draft) error
+	DeleteDraft(id int) error
+
+	// Count
 	CountPublicArticles(cnt *int, op *QueryOptions) error
 	CountPublicArticlesByTitle(cnt *int, title string, op *QueryOptions) error
+	CountDrafts(cnt *int, op *QueryOptions) error
 }
 
 // Database contains mgorm.DB.

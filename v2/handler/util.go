@@ -12,9 +12,10 @@ import (
 )
 
 var (
-	errPageIsNotNumber = errors.New("handler.util: Failed to atoi because page is not number")
-	errNumIsNotNumber  = errors.New("handler.util: Failed to atoi because num is not number")
-	errParamNotFound   = errors.New("handler.util: Query parameter is not found")
+	errPageIsNotNumber     = errors.New("handler.util: Failed to atoi because page is not number")
+	errNumIsNotNumber      = errors.New("handler.util: Failed to atoi because num is not number")
+	errSortedIDIsNotNumber = errors.New("handler.util: Failed to atoi because sortedID is not number")
+	errParamNotFound       = errors.New("handler.util: Query parameter is not found")
 )
 
 // ParsePage parses query parameter to get page number.
@@ -60,6 +61,29 @@ func ParseNum(ctx *gin.Context, outc chan<- int, errc chan<- error) {
 	}
 
 	outc <- num
+}
+
+// ParseSortedID parses query parameter to get sorted id.
+func ParseSortedID(ctx *gin.Context, outc chan<- int, errc chan<- error) {
+	defer close(outc)
+	sidStr, ok := ctx.GetQuery("sortedID")
+	if !ok {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		err := argus.NewError(errParamNotFound, nil)
+		errc <- err
+		return
+	}
+
+	sortedID, err := strconv.Atoi(sidStr)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		err := argus.NewError(errSortedIDIsNotNumber, err).
+			AppendValue("sortedID", sidStr)
+		errc <- err
+		return
+	}
+
+	outc <- sortedID
 }
 
 // ParseTitle parses query parameter to get title string.

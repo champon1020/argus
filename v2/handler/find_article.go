@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/champon1020/argus/v2/model"
 	"github.com/gin-gonic/gin"
@@ -13,8 +14,8 @@ type APIFindArticlesRes struct {
 	Count    int             `json:"count"`
 }
 
-// FindArticles gets all public articles.
-func FindArticles(ctx *gin.Context, db model.DatabaseIface) error {
+// APIFindArticles gets all public articles.
+func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for query parameter p.
 	pc := make(chan int, 1)
 
@@ -45,6 +46,7 @@ func FindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 
 	// Search for articles.
 	go func() {
+		defer close(doneFind)
 		if err := db.FindPublicArticles(
 			&res.Articles,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
@@ -58,6 +60,7 @@ func FindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 
 	// Count the nubmer of articles.
 	go func() {
+		defer close(doneCount)
 		if err := db.CountPublicArticles(
 			&res.Count,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
@@ -84,9 +87,94 @@ func FindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	return nil
 }
 
-// FindArticlesByTitle gets public articles
+// APIFindArticlesBySortedIDRes is the response type.
+type APIFindArticlesBySortedIDRes struct {
+	Article   model.Article `json:"article"`
+	PrevTitle string        `json:"prevTitle"`
+	NextTitle string        `json:"nextTitle"`
+}
+
+// APIFindArticlesBySortedID gets public articles
+// whose sorted id is greater than and equal to
+// thet of query parameter
+func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
+	// Channel for query parameter sortedID.
+	sidc := make(chan int, 1)
+
+	// Channel for error variable.
+	errc := make(chan error, 3)
+
+	// Response of this call.
+	res := new(APIFindArticlesBySortedIDRes)
+
+	// Parse article sorted id from gin context.
+	go ParseSortedID(ctx, sidc, errc)
+
+	sortedID, ok := <-sidc
+	if !ok {
+		err := <-errc
+		return err
+	}
+
+	ac := make(chan []model.Article)
+
+	// Search for the articles by sorted id.
+	go func() {
+		defer close(ac)
+		var a []model.Article
+		if err := db.FindPublicArticlesGeSortedID(
+			&a,
+			sortedID-1,
+			model.NewOp(3, 0, "", false),
+		); err != nil {
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+			errc <- err
+			return
+		}
+		ac <- a
+	}()
+
+	articles, ok := <-ac
+	if !ok {
+		err := <-errc
+		return err
+	}
+
+	// Assing fetched articles to response type.
+	// If the sorted id is equal to that of query parameter,
+	// it's assigned to Article Field.
+	//
+	// If the sorted id is less than that of query parameter,
+	// its title assigned to prevTitle Field.
+	//
+	// If the sorted id is greater than that of query parameter,
+	// its title assigned to nextTitle Field.
+	wg := new(sync.WaitGroup)
+	for _, a := range articles {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if a.SortedID == sortedID {
+				res.Article = a
+			}
+			if a.SortedID < sortedID {
+				res.PrevTitle = a.Title
+			}
+			if a.SortedID > sortedID {
+				res.NextTitle = a.Title
+			}
+		}()
+	}
+	wg.Wait()
+
+	ctx.JSON(http.StatusOK, res)
+
+	return nil
+}
+
+// APIFindArticlesByTitle gets public articles
 // whose title is specified at query parameter.
-func FindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
+func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for query parameter p.
 	pc := make(chan int, 1)
 
@@ -124,10 +212,11 @@ func FindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 
 	// Search for articles by title.
 	go func() {
+		defer close(doneFind)
 		if err := db.FindPublicArticlesByTitle(
 			&res.Articles,
 			title,
-			model.NewOp(p, (p-1)*num, "sorted_id", true),
+			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
@@ -138,10 +227,11 @@ func FindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 
 	// Count the number of articles with title.
 	go func() {
+		defer close(doneCount)
 		if err := db.CountPublicArticlesByTitle(
 			&res.Count,
 			title,
-			model.NewOp(p, (p-1)*num, "sorted_id", true),
+			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err

@@ -17,42 +17,25 @@ var (
 // Draft is the struct including draft information.
 type Draft struct {
 	// unique id (primary key)
-	ID string `json:"id"`
+	ID string `mgorm:"id" json:"id"`
 
 	// id for sorting drafts
-	SortedID int `json:"sortedId"`
+	SortedID int `mgorm:"sorted_id" json:"sortedId"`
 
 	// draft title
-	Title string `json:"title"`
+	Title string `mgorm:"title" json:"title"`
 
 	// categories of draft
-	Categories string `json:"categories"`
+	Categories string `mgorm:"categories" json:"categories"`
 
 	// date draft is updated
-	UpdateDate time.Time `json:"updateDate"`
+	UpdateDate time.Time `mgorm:"update_date" json:"updateDate"`
 
 	// content of draft
-	Content string `json:"content"`
+	Content string `mgorm:"content" json:"content"`
 
 	// image file name
-	ImageHash string `json:"imageHash"`
-}
-
-// FindDrafts searches for drafts.
-func (db *Database) FindDrafts(d *[]Draft, op *QueryOptions) error {
-	if db.DB == nil {
-		return argus.NewError(errDraftDbNil, nil)
-	}
-
-	ctx := db.DB.Select(d, "drafts")
-	op.apply(ctx)
-
-	if err := ctx.Do(); err != nil {
-		return argus.NewError(errDraftQueryFailed, err).
-			AppendValue("query", ctx.ToSQLString())
-	}
-
-	return nil
+	ImageHash string `mgorm:"image_hash" json:"imageHash"`
 }
 
 // FindDraftByID searches for draft
@@ -75,6 +58,23 @@ func (db *Database) FindDraftByID(d *Draft, id string) error {
 		return argus.NewError(errDraftNoResult, nil)
 	}
 	*d = _d[0]
+
+	return nil
+}
+
+// FindDrafts searches for drafts.
+func (db *Database) FindDrafts(d *[]Draft, op *QueryOptions) error {
+	if db.DB == nil {
+		return argus.NewError(errDraftDbNil, nil)
+	}
+
+	ctx := db.DB.Select(d, "drafts")
+	op.apply(ctx)
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errDraftQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
 
 	return nil
 }
