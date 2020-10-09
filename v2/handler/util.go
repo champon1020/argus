@@ -12,93 +12,71 @@ import (
 )
 
 var (
-	errPageIsNotNumber     = errors.New("handler.util: Failed to atoi because page is not number")
-	errNumIsNotNumber      = errors.New("handler.util: Failed to atoi because num is not number")
-	errSortedIDIsNotNumber = errors.New("handler.util: Failed to atoi because sortedID is not number")
-	errParamNotFound       = errors.New("handler.util: Query parameter is not found")
+	errParamIsNotNumber = errors.New("handler.util: Failed to atoi because parameter is not number")
+	errParamNotFound    = errors.New("handler.util: Query parameter is not found")
 )
 
-// ParsePage parses query parameter to get page number.
+// ParsePage parses query parameter to get title string.
 func ParsePage(ctx *gin.Context, outc chan<- int, errc chan<- error) {
-	defer close(outc)
-	pStr, ok := ctx.GetQuery("p")
-	if !ok {
-		// If query parameter 'p' is not found, default page number is 1.
-		outc <- 1
-		return
-	}
-
-	p, err := strconv.Atoi(pStr)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		err := argus.NewError(errPageIsNotNumber, err).
-			AppendValue("page", pStr)
-		errc <- err
-		return
-	}
-
-	outc <- p
+	parseIntParam(ctx, "p", outc, errc)
 }
 
-// ParseNum parses query parameter to get num.
+// ParseNum parses query parameter to get title string.
 func ParseNum(ctx *gin.Context, outc chan<- int, errc chan<- error) {
-	defer close(outc)
-	numStr, ok := ctx.GetQuery("num")
-	if !ok {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		err := argus.NewError(errParamNotFound, nil)
-		errc <- err
-		return
-	}
-
-	num, err := strconv.Atoi(numStr)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		err := argus.NewError(errNumIsNotNumber, err).
-			AppendValue("num", numStr)
-		errc <- err
-		return
-	}
-
-	outc <- num
+	parseIntParam(ctx, "num", outc, errc)
 }
 
-// ParseSortedID parses query parameter to get sorted id.
+// ParseSortedID parses query parameter to get title string.
 func ParseSortedID(ctx *gin.Context, outc chan<- int, errc chan<- error) {
-	defer close(outc)
-	sidStr, ok := ctx.GetQuery("sortedID")
-	if !ok {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		err := argus.NewError(errParamNotFound, nil)
-		errc <- err
-		return
-	}
-
-	sortedID, err := strconv.Atoi(sidStr)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		err := argus.NewError(errSortedIDIsNotNumber, err).
-			AppendValue("sortedID", sidStr)
-		errc <- err
-		return
-	}
-
-	outc <- sortedID
+	parseIntParam(ctx, "sortedID", outc, errc)
 }
 
 // ParseTitle parses query parameter to get title string.
 func ParseTitle(ctx *gin.Context, outc chan<- string, errc chan<- error) {
+	parseStringParam(ctx, "title", outc, errc)
+}
+
+// ParseCategoryID parses query parameter to get category id.
+func ParseCategoryID(ctx *gin.Context, outc chan<- int, errc chan<- error) {
+	parseIntParam(ctx, "categoryID", outc, errc)
+}
+
+// Parse query parameter to get integer variable.
+func parseIntParam(ctx *gin.Context, name string, outc chan<- int, errc chan<- error) {
 	defer close(outc)
-	title, ok := ctx.GetQuery("title")
+	str, ok := ctx.GetQuery(name)
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		err := argus.NewError(errParamNotFound, nil).
-			AppendValue("param", "title")
+		err := argus.NewError(errParamNotFound, nil)
 		errc <- err
 		return
 	}
 
-	outc <- title
+	value, err := strconv.Atoi(str)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		err := argus.NewError(errParamIsNotNumber, err).
+			AppendValue(name, str)
+		errc <- err
+		return
+	}
+
+	outc <- value
+}
+
+// Parse query parameter to get string variable.
+func parseStringParam(ctx *gin.Context, name string, outc chan<- string, errc chan<- error) {
+	defer close(outc)
+	value, ok := ctx.GetQuery(name)
+	if !ok {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		err := argus.NewError(errParamNotFound, nil).
+			AppendValue("param", name)
+		errc <- err
+		return
+	}
+
+	outc <- value
 }
 
 func printMemory(mem runtime.MemStats) {

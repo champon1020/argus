@@ -36,3 +36,23 @@ func (db *Database) FindCategories(c *[]Category, op *QueryOptions) error {
 
 	return nil
 }
+
+// FindCategoriesByArticleID searches for article categories by article id.
+func (db *Database) FindCategoriesByArticleID(c *[]Category, articleID string) error {
+	if db.DB == nil {
+		return argus.NewError(errCategoryDbNil, nil)
+	}
+
+	aCtx := db.DB.Select(nil, "article_category", "category_id").
+		Where("article_id", articleID)
+
+	ctx := db.DB.Select(c, "categories").
+		WhereCtx("id", aCtx)
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errCategoryQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
+}

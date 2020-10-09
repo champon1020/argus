@@ -51,6 +51,7 @@ type DatabaseIface interface {
 	// Count
 	CountPublicArticles(cnt *int, op *QueryOptions) error
 	CountPublicArticlesByTitle(cnt *int, title string, op *QueryOptions) error
+	CountPublicArticlesByCategory(cnt *int, categoryID int, op *QueryOptions) error
 	CountDrafts(cnt *int, op *QueryOptions) error
 }
 

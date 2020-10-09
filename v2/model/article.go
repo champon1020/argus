@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/champon1020/argus/v2"
@@ -44,6 +45,28 @@ type Article struct {
 	Private bool `mgorm:"is_private" json:"isPrivate"`
 }
 
+func (db *Database) setCategoriesToArticle(a *[]Article) error {
+	var err error
+
+	wg := new(sync.WaitGroup)
+	for _, v := range *a {
+		wg.Add(1)
+		go func(v Article) {
+			defer wg.Done()
+			if e := db.FindCategoriesByArticleID(&v.Categories, v.ID); e != nil {
+				err = e
+			}
+		}(v)
+	}
+
+	wg.Wait()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // FindArticleByID searched for the article
 // whose id is the specified id string.
 func (db *Database) FindArticleByID(a *Article, id string) error {
@@ -63,6 +86,12 @@ func (db *Database) FindArticleByID(a *Article, id string) error {
 	if len(_a) == 0 {
 		return argus.NewError(errArticleNoResult, nil)
 	}
+
+	// Get categories by article id.
+	if err := db.setCategoriesToArticle(&_a); err != nil {
+		return err
+	}
+
 	*a = _a[0]
 
 	return nil
@@ -82,6 +111,11 @@ func (db *Database) FindAllArticles(a *[]Article, op *QueryOptions) error {
 			AppendValue("query", ctx.ToSQLString())
 	}
 
+	// Get categories by article id.
+	if err := db.setCategoriesToArticle(a); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -99,6 +133,11 @@ func (db *Database) FindPublicArticles(a *[]Article, op *QueryOptions) error {
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errArticleQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
+	}
+
+	// Get categories by article id.
+	if err := db.setCategoriesToArticle(a); err != nil {
+		return err
 	}
 
 	return nil
@@ -123,6 +162,11 @@ func (db *Database) FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op 
 			AppendValue("query", ctx.ToSQLString())
 	}
 
+	// Get categories by article id.
+	if err := db.setCategoriesToArticle(a); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -140,6 +184,11 @@ func (db *Database) FindPublicArticlesByTitle(a *[]Article, title string, op *Qu
 			AppendValue("query", ctx.ToSQLString())
 	}
 
+	// Get categories by article id.
+	if err := db.setCategoriesToArticle(a); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -150,7 +199,7 @@ func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID int, o
 		return argus.NewError(errArticleDbNil, nil)
 	}
 
-	idCtx := db.DB.Select(nil, "categoreis", "article_id").
+	idCtx := db.DB.Select(nil, "article_category", "article_id").
 		Where("category_id = ?", categoryID)
 
 	ctx := db.DB.Select(a, "articles").
@@ -162,6 +211,11 @@ func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID int, o
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errArticleQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
+	}
+
+	// Get categories by article id.
+	if err := db.setCategoriesToArticle(a); err != nil {
+		return err
 	}
 
 	return nil
@@ -180,6 +234,8 @@ func (db *Database) InsertArticle(a *Article) error {
 			AppendValue("query", ctx.ToSQLString())
 	}
 
+	// TODO: implement process to insert categories.
+
 	return nil
 }
 
@@ -195,6 +251,8 @@ func (db *Database) UpdateArticle(a *Article) error {
 		return argus.NewError(errArticleQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
 	}
+
+	// TODO: implement process to update category.
 
 	return nil
 }
