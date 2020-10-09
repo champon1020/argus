@@ -194,7 +194,7 @@ func (db *Database) FindPublicArticlesByTitle(a *[]Article, title string, op *Qu
 
 // FindPublicArticlesByCategory searches for public articles
 // which belongs to the specified category id.
-func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID int, op *QueryOptions) error {
+func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID string, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errArticleDbNil, nil)
 	}

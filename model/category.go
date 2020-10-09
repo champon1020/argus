@@ -20,8 +20,8 @@ type Category struct {
 	Name string `mgorm:"name" json:"name"`
 }
 
-// FindCategories searches for categories which is included by public articles.
-func (db *Database) FindCategories(c *[]Category, op *QueryOptions) error {
+// FindPublicCategories searches for categories which is included by public articles.
+func (db *Database) FindPublicCategories(c *[]Category, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errCategoryDbNil, nil)
 	}

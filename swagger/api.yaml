@@ -199,7 +199,7 @@ paths:
                 required:
                   - article
 
-  /api/private/find/article/list/all:
+  /api/private/find/article/list:
     get:
       summary: Return all articles list.
       security:
@@ -529,19 +529,16 @@ components:
         - imageHash
         - isPrivate
 
-    Cateogry:
+    Category:
       type: object
       properties:
         id:
           type: string
         name:
           type: string
-        articleNum:
-          type: number
       required:
         - id
         - name
-        - articleNum
 
     Draft:
       type: object

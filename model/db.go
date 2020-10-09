@@ -34,12 +34,12 @@ type DatabaseIface interface {
 	FindPublicArticles(a *[]Article, op *QueryOptions) error
 	FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op *QueryOptions) error
 	FindPublicArticlesByTitle(a *[]Article, title string, op *QueryOptions) error
-	FindPublicArticlesByCategory(a *[]Article, categoryID int, op *QueryOptions) error
+	FindPublicArticlesByCategory(a *[]Article, categoryID string, op *QueryOptions) error
 	InsertArticle(a *Article) error
 	UpdateArticle(a *Article) error
 
 	// Category
-	FindCategories(c *[]Category, op *QueryOptions) error
+	FindPublicCategories(c *[]Category, op *QueryOptions) error
 
 	// Draft
 	FindDrafts(d *[]Draft, op *QueryOptions) error
@@ -49,9 +49,10 @@ type DatabaseIface interface {
 	DeleteDraft(id int) error
 
 	// Count
+	CountAllArticles(cnt *int, op *QueryOptions) error
 	CountPublicArticles(cnt *int, op *QueryOptions) error
 	CountPublicArticlesByTitle(cnt *int, title string, op *QueryOptions) error
-	CountPublicArticlesByCategory(cnt *int, categoryID int, op *QueryOptions) error
+	CountPublicArticlesByCategory(cnt *int, categoryID string, op *QueryOptions) error
 	CountDrafts(cnt *int, op *QueryOptions) error
 }
 

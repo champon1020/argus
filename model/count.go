@@ -17,8 +17,8 @@ type Count struct {
 	Value int `mgorm:"count"`
 }
 
-// CountPublicArticles counts the number of articles.
-func (db *Database) CountPublicArticles(cnt *int, op *QueryOptions) error {
+// CountAllArticles counts the number of all articles.
+func (db *Database) CountAllArticles(cnt *int, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
@@ -32,11 +32,32 @@ func (db *Database) CountPublicArticles(cnt *int, op *QueryOptions) error {
 			AppendValue("query", ctx.ToSQLString())
 	}
 
-	if len(c) == 0 {
-		return argus.NewError(errCountNoResult, nil)
+	if err := assignCount(cnt, &c); err != nil {
+		return err
 	}
 
-	*cnt = c[0].Value
+	return nil
+}
+
+// CountPublicArticles counts the number of public articles.
+func (db *Database) CountPublicArticles(cnt *int, op *QueryOptions) error {
+	if db.DB == nil {
+		return argus.NewError(errCountDbNil, nil)
+	}
+
+	var c []Count
+	ctx := db.DB.Select(&c, "articles", "COUNT(*) AS count").
+		Where("private = ?", false)
+	op.apply(ctx)
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errCountQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	if err := assignCount(cnt, &c); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -59,17 +80,15 @@ func (db *Database) CountPublicArticlesByTitle(cnt *int, title string, op *Query
 			AppendValue("query", ctx.ToSQLString())
 	}
 
-	if len(c) == 0 {
-		return argus.NewError(errCountNoResult, nil)
+	if err := assignCount(cnt, &c); err != nil {
+		return err
 	}
-
-	*cnt = c[0].Value
 
 	return nil
 }
 
 // CountPublicArticlesByCategory counts the number of articles with category.
-func (db *Database) CountPublicArticlesByCategory(cnt *int, categoryID int, op *QueryOptions) error {
+func (db *Database) CountPublicArticlesByCategory(cnt *int, categoryID string, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
@@ -89,11 +108,9 @@ func (db *Database) CountPublicArticlesByCategory(cnt *int, categoryID int, op *
 			AppendValue("query", ctx.ToSQLString())
 	}
 
-	if len(c) == 0 {
-		return argus.NewError(errCountNoResult, nil)
+	if err := assignCount(cnt, &c); err != nil {
+		return err
 	}
-
-	*cnt = c[0].Value
 
 	return nil
 }
@@ -113,11 +130,18 @@ func (db *Database) CountDrafts(cnt *int, op *QueryOptions) error {
 			AppendValue("query", ctx.ToSQLString())
 	}
 
-	if len(c) == 0 {
+	if err := assignCount(cnt, &c); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func assignCount(cnt *int, c *[]Count) error {
+	if len(*c) == 0 {
 		return argus.NewError(errCountNoResult, nil)
 	}
 
-	*cnt = c[0].Value
-
+	*cnt = (*c)[0].Value
 	return nil
 }

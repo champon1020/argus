@@ -16,7 +16,7 @@ type APIFindCategoriesRes struct {
 func APIFindCategories(ctx *gin.Context, db model.DatabaseIface) error {
 	res := new(APIFindCategoriesRes)
 
-	if err := db.FindCategories(&res.Categories, nil); err != nil {
+	if err := db.FindPublicCategories(&res.Categories, nil); err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return err
 	}

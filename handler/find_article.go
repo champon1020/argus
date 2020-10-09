@@ -37,12 +37,11 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	p, ok1 := <-pc
 	num, ok2 := <-numc
 	if !ok1 || !ok2 {
-		err := <-errc
-		return err
+		return <-errc
 	}
 
-	doneCount := make(chan bool)
 	doneFind := make(chan bool)
+	doneCount := make(chan bool)
 
 	// Search for articles.
 	go func() {
@@ -78,8 +77,7 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	_, ok1 = <-doneFind
 	_, ok2 = <-doneCount
 	if !ok1 || !ok2 {
-		err := <-errc
-		return err
+		return <-errc
 	}
 
 	ctx.JSON(http.StatusOK, res)
@@ -112,8 +110,7 @@ func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
 
 	sortedID, ok := <-sidc
 	if !ok {
-		err := <-errc
-		return err
+		return <-errc
 	}
 
 	ac := make(chan []model.Article)
@@ -136,8 +133,7 @@ func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
 
 	articles, ok := <-ac
 	if !ok {
-		err := <-errc
-		return err
+		return <-errc
 	}
 
 	// Assing fetched articles to response type.
@@ -202,12 +198,11 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 	num, ok2 := <-numc
 	title, ok3 := <-titlec
 	if !ok1 || !ok2 || !ok3 {
-		err := <-errc
-		return err
+		return <-errc
 	}
 
-	doneCount := make(chan bool)
 	doneFind := make(chan bool)
+	doneCount := make(chan bool)
 
 	// Search for articles by title.
 	go func() {
@@ -245,8 +240,7 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 	_, ok1 = <-doneFind
 	_, ok2 = <-doneCount
 	if !ok1 || !ok2 {
-		err := <-errc
-		return err
+		return <-errc
 	}
 
 	ctx.JSON(http.StatusOK, res)
@@ -263,7 +257,7 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 	numc := make(chan int, 1)
 
 	// Channel for query parameter categoryID.
-	catec := make(chan int, 1)
+	catec := make(chan string, 1)
 
 	// Channel for error variable.
 	errc := make(chan error, 2)
@@ -281,8 +275,7 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 	num, ok2 := <-numc
 	categoryID, ok3 := <-catec
 	if !ok1 || !ok2 || !ok3 {
-		err := <-errc
-		return err
+		return <-errc
 	}
 
 	doneFind := make(chan bool)
@@ -320,8 +313,7 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 	_, ok2 = <-doneCount
 
 	if !ok1 || !ok2 {
-		err := <-errc
-		return err
+		return <-errc
 	}
 
 	ctx.JSON(http.StatusOK, res)
