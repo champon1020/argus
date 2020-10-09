@@ -37,6 +37,7 @@ func newRouter() *gin.Engine {
 		find.GET("/article/sortedId", wrapHandler(handler.APIFindArticlesBySortedID))
 		find.GET("/article/list/title", wrapHandler(handler.APIFindArticlesByTitle))
 		find.GET("/article/list/category", wrapHandler(handler.APIFindArticlesByCategory))
+		find.GET("/category/list", wrapHandler(handler.APIFindCategories))
 	}
 	return r
 }

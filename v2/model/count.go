@@ -99,7 +99,7 @@ func (db *Database) CountPublicArticlesByCategory(cnt *int, categoryID int, op *
 }
 
 // CountDrafts counts the number of drafts.
-func (db *Database) CountDrafts(cnt *Count, op *QueryOptions) error {
+func (db *Database) CountDrafts(cnt *int, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
@@ -117,7 +117,7 @@ func (db *Database) CountDrafts(cnt *Count, op *QueryOptions) error {
 		return argus.NewError(errCountNoResult, nil)
 	}
 
-	*cnt = c[0]
+	*cnt = c[0].Value
 
 	return nil
 }
