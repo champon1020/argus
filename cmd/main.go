@@ -2,38 +2,61 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
-	"github.com/champon1020/argus/argus-private/auth"
-
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/handler"
-	"github.com/champon1020/argus/repo"
+	"github.com/champon1020/argus/model"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	Logger = argus.Logger
-	Errors = &argus.Errors
-	r      *gin.Engine
-)
-
-func init() {
-	repo.GlobalMysql = repo.NewMysql()
-	r = NewRouter()
-}
-
 func main() {
+	argus.Init()
+	model.InitDatabase()
+
+	r := newRouter()
 	_ = r.Run(":8000")
 }
 
-func NewRouter() *gin.Engine {
-	router := gin.New()
+func newRouter() *gin.Engine {
+	r := gin.New()
 
-	router.Use(gin.LoggerWithConfig(gin.LoggerConfig{
+	// Set the loggin configuration
+	r.Use(gin.LoggerWithConfig(*loggerConfig()))
+
+	r.Use(gin.Recovery())
+
+	// Set the cors configuration
+	r.Use(cors.New(*corsConfig()))
+
+	find := r.Group("/api/find")
+	{
+		find.GET("/article/list", wrapHandler(handler.APIFindArticles))
+		find.GET("/article/sortedId", wrapHandler(handler.APIFindArticlesBySortedID))
+		find.GET("/article/list/title", wrapHandler(handler.APIFindArticlesByTitle))
+		find.GET("/article/list/category", wrapHandler(handler.APIFindArticlesByCategory))
+		find.GET("/category/list", wrapHandler(handler.APIFindCategories))
+	}
+	return r
+}
+
+func wrapHandler(h func(c *gin.Context, db model.DatabaseIface) error) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := h(c, model.Db)
+
+		// If error was occurred in handler, output error log as standard output.
+		if err != nil {
+			if e, ok := err.(*argus.Error); ok {
+				e.Log()
+			}
+		}
+	}
+}
+
+func loggerConfig() *gin.LoggerConfig {
+	return &gin.LoggerConfig{
 		Formatter: func(param gin.LogFormatterParams) string {
 			return fmt.Sprintf("[GIN] %s | %s |%s %d %s| %15s | %15s |%s %s %s %s \n",
 				param.Request.Proto,
@@ -51,11 +74,11 @@ func NewRouter() *gin.Engine {
 		},
 		Output:    os.Stdout,
 		SkipPaths: []string{"/healthcheck"},
-	}))
+	}
+}
 
-	router.Use(gin.Recovery())
-
-	corsConfig := cors.Config{
+func corsConfig() *cors.Config {
+	return &cors.Config{
 		AllowAllOrigins: false,
 		AllowOrigins: []string{
 			"https://blog.champonian.com",
@@ -64,80 +87,5 @@ func NewRouter() *gin.Engine {
 		AllowHeaders:  []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders: []string{"Content-Length"},
 		MaxAge:        12 * time.Hour,
-	}
-
-	if argus.EnvVars.Get("mode") == "dev" {
-		corsConfig.AllowOrigins = append(corsConfig.AllowOrigins, "http://localhost:3000")
-	}
-
-	router.Use(cors.New(corsConfig))
-	router.Use(HandleError())
-
-	router.GET("/healthcheck", HealthCheck)
-
-	find := router.Group("/api/find")
-	{
-		find.GET("/article/pickup", handler.FindPickUpArticleController)
-		find.GET("/article/sortedId", handler.FindArticleBySortedIdController)
-		find.GET("/article/list", handler.FindArticleController)
-		find.GET("/article/list/title", handler.FindArticleByTitleController)
-		find.GET("/article/list/create-date", handler.FindArticleByCreateDateController)
-		find.GET("/article/list/category", handler.FindArticleByCategoryController)
-		find.GET("/category/list", handler.FindCategoryController)
-	}
-
-	router.POST("/api/verify/token", auth.VerifyHandler)
-
-	private := router.Group("/api/private")
-	private.Use(auth.Middleware)
-	{
-		find := private.Group("/find")
-		{
-			find.GET("/article/id", handler.FindArticleByIdController)
-			find.GET("/draft/id", handler.FindDraftByIdController)
-			find.GET("/article/list/all", handler.FindAllArticleController)
-			find.GET("/draft/list", handler.FindDraftController)
-			find.GET("/image/list", handler.FindImageController)
-		}
-
-		register := private.Group("/register")
-		{
-			register.POST("/article", handler.RegisterArticleController)
-			register.POST("/image", handler.RegisterImageController)
-		}
-
-		update := private.Group("/update")
-		{
-			update.PUT("/article", handler.UpdateArticleController)
-		}
-
-		delete := private.Group("/delete")
-		{
-			delete.DELETE("/draft", handler.DeleteDraftController)
-			delete.DELETE("/image", handler.DeleteImageController)
-		}
-
-		draft := private.Group("/draft")
-		{
-			draft.POST("/article", handler.DraftController)
-		}
-	}
-
-	return router
-}
-
-func HealthCheck(c *gin.Context) {
-	c.AbortWithStatus(200)
-	return
-}
-
-func HandleError() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-		if len(*Errors) > 0 {
-			Logger.ErrorLog(*Errors)
-			*Errors = []argus.Error{}
-			(c.Writer).WriteHeader(http.StatusInternalServerError)
-		}
 	}
 }

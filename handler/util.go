@@ -1,78 +1,85 @@
 package handler
 
 import (
-	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
+	"runtime"
 	"strconv"
 
 	"github.com/champon1020/argus"
-	"github.com/champon1020/argus/repo"
-	"github.com/champon1020/argus/service"
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	Errors           = &argus.Errors
-	BasicError       = argus.NewError(argus.BasicError)
-	IOMarshalError   = argus.NewError(argus.IOFailedMarshalError)
-	IOUnmarshalError = argus.NewError(argus.IOFailedUnmarshalError)
+	errParamIsNotNumber = errors.New("handler.util: Failed to atoi because parameter is not number")
+	errParamNotFound    = errors.New("handler.util: Query parameter is not found")
 )
 
-// Parse page from context of gin framework.
-func ParsePage(c *gin.Context) (p int, err error) {
-	p = 1
-	if pp, ok := c.GetQuery("p"); ok {
-		if p, err = strconv.Atoi(pp); err != nil {
-			BasicError.SetErr(err).AppendTo(Errors)
-			c.Writer.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
-	return
+// ParsePage parses query parameter to get title string.
+func ParsePage(ctx *gin.Context, outc chan<- int, errc chan<- error) {
+	parseIntParam(ctx, "p", outc, errc)
 }
 
-// Get LimitOffset object from p (page num).
-func ParseOffsetLimit(p int, maxView int) (ol repo.OffsetLimit) {
-	ol[1] = maxView
-	ol[0] = (p - 1) * ol[1]
-	return
+// ParseNum parses query parameter to get title string.
+func ParseNum(ctx *gin.Context, outc chan<- int, errc chan<- error) {
+	parseIntParam(ctx, "num", outc, errc)
 }
 
-// Get max of a and b;
-func Max(a int, b int) (r int) {
-	if a >= b {
-		r = a
-	} else {
-		r = b
-	}
-	return
+// ParseSortedID parses query parameter to get title string.
+func ParseSortedID(ctx *gin.Context, outc chan<- int, errc chan<- error) {
+	parseIntParam(ctx, "sortedID", outc, errc)
 }
 
-// Get total page of view
-func GetMaxPage(articlesNum int, maxView int) int {
-	return (maxView + articlesNum - 1) / maxView
+// ParseTitle parses query parameter to get title string.
+func ParseTitle(ctx *gin.Context, outc chan<- string, errc chan<- error) {
+	parseStringParam(ctx, "title", outc, errc)
 }
 
-// Parse request object from http.Request.
-func ParseRequestBody(r *http.Request, reqBody *RequestBody) (err error) {
-	var body []byte
-	if body, err = service.ReadBody(r.Body); err != nil {
+// ParseCategoryID parses query parameter to get category id.
+func ParseCategoryID(ctx *gin.Context, outc chan<- int, errc chan<- error) {
+	parseIntParam(ctx, "categoryID", outc, errc)
+}
+
+// Parse query parameter to get integer variable.
+func parseIntParam(ctx *gin.Context, name string, outc chan<- int, errc chan<- error) {
+	defer close(outc)
+	str, ok := ctx.GetQuery(name)
+	if !ok {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		err := argus.NewError(errParamNotFound, nil)
+		errc <- err
 		return
 	}
-	if err = json.Unmarshal(body, &reqBody); err != nil {
-		IOUnmarshalError.SetErr(err).AppendTo(Errors)
-	}
-	return
-}
 
-// Parse draft request object from http.Request.
-func ParseDraftRequestBody(r *http.Request, reqBody *DraftRequestBody) (err error) {
-	var body []byte
-	if body, err = service.ReadBody(r.Body); err != nil {
+	value, err := strconv.Atoi(str)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		err := argus.NewError(errParamIsNotNumber, err).
+			AppendValue(name, str)
+		errc <- err
 		return
 	}
-	if err = json.Unmarshal(body, &reqBody); err != nil {
-		IOUnmarshalError.SetErr(err).AppendTo(Errors)
+
+	outc <- value
+}
+
+// Parse query parameter to get string variable.
+func parseStringParam(ctx *gin.Context, name string, outc chan<- string, errc chan<- error) {
+	defer close(outc)
+	value, ok := ctx.GetQuery(name)
+	if !ok {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		err := argus.NewError(errParamNotFound, nil).
+			AppendValue("param", name)
+		errc <- err
+		return
 	}
-	return
+
+	outc <- value
+}
+
+func printMemory(mem runtime.MemStats) {
+	runtime.ReadMemStats(&mem)
+	fmt.Println(mem.Alloc, mem.TotalAlloc, mem.HeapAlloc, mem.HeapSys)
 }

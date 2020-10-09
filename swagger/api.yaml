@@ -12,12 +12,25 @@ servers:
     description: domain
 
 paths:
-  /api/find/article/pickup:
+  /api/find/article/list:
     get:
-      summary: Return pick up articles.
+      summary: Return articles list.
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: Number of articles.
+          schema:
+            type: number
       responses:
         '200':
-          description: A JSON of articles array.
+          description: Success.
           content:
             application/json:
               schema:
@@ -27,13 +40,17 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
+                  count:
+                    type: number
                 required:
                   - articles
+                  - count
+
   /api/find/article/sortedId:
     get:
-      summary: Return an aritlce by selected sortedId and next, previous article.
+      summary: Return an article whose sortedId is selected.
       parameters:
-        - name: sortedId
+        - name: sortedID
           in: query
           required: true
           description: Article sorted id.
@@ -41,7 +58,7 @@ paths:
             type: number
       responses:
         '200':
-          description: A JSON of article.
+          description: Success.
           content:
             application/json:
               schema:
@@ -49,93 +66,40 @@ paths:
                 properties:
                   article:
                     $ref: '#/components/schemas/Article'
-                  next:
-                    $ref: '#/components/schemas/Article'
-                  prev:
-                    $ref: '#/components/schemas/Article'
+                  nextTitle:
+                    type: string
+                  prevTitle:
+                    type: string
                 required:
                   - article
-                  - next
-                  - prev
-  /api/find/article/list:
-    get:
-      summary: Return a list of articles.
-      parameters:
-        - name: p
-          in: query
-          required: false
-          description: Page of view.
-          schema:
-            type: number
-      responses:
-        '200':
-          description: A JSON array of articles.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  articles:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Article'
-                  maxPage:
-                    type: number
-                required:
-                  - articles
-                  - maxPage
+                  - nextTitle
+                  - prevTitle
+
   /api/find/article/list/title:
     get:
-      summary: Return a list of articles by title.
+      summary: Return articles list by title.
       parameters:
         - name: title
           in: query
           required: true
-          description: A title of articles.
+          description: Article title.
           schema:
             type: string
         - name: p
           in: query
           required: false
-          description: Page of view.
+          description: Page number.
           schema:
             type: number
-      responses:
-        '200':
-          description: A JSON array of articles.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  articles:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Article'
-                  maxPage:
-                    type: number
-                required:
-                  - articles
-                  - maxPage
-  /api/find/article/list/create-date:
-    get:
-      summary: Return a list of articles by title.
-      parameters:
-        - name: createDate
+        - name: num
           in: query
           required: true
-          description: A created date of articles.
-          schema:
-            type: string
-        - name: p
-          in: query
-          required: false
-          description: Page of view.
+          description: Number of articles.
           schema:
             type: number
       responses:
         '200':
-          description: A JSON array of articles.
+          description: Success.
           content:
             application/json:
               schema:
@@ -145,26 +109,39 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  maxPage:
+                  count:
                     type: number
                 required:
                   - articles
-                  - maxPage
+                  - count
+
   /api/find/article/list/category:
     get:
-      summary: Return a list of articles by title.
+      summary: Return articles list by category.
       parameters:
         - name: category
           in: query
           required: true
-          description: A category name which an articles has.
+          description: Category name.
           schema:
             type: array
             items:
               type: string
+        - name: p
+          in: query
+          required: false
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: number of articles.
+          schema:
+            type: number
       responses:
         '200':
-          description: A JSON array of articles.
+          description: Success.
           content:
             application/json:
               schema:
@@ -174,17 +151,19 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  maxPage:
+                  count:
                     type: number
                 required:
                   - articles
-                  - maxPage
+                  - count
+
   /api/find/category/list:
     get:
-      summary: Return a list of categories.
+      summary: Return categories list.
+      parameters:
       responses:
         '200':
-          description: A JSON array of cateogries.
+          description: Success.
           content:
             application/json:
               schema:
@@ -197,43 +176,9 @@ paths:
                 required:
                   - categories
 
-  /api/verify/token:
-    post:
-      summary: Verify token.
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
-        '400':
-          description: no authorization header.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
-
   /api/private/find/article/id:
     get:
-      summary: Return an aritlce by selected id.
+      summary: Return an article whose id is selected
       parameters:
         - name: id
           in: query
@@ -243,7 +188,7 @@ paths:
             type: string
       responses:
         '200':
-          description: A JSON of article.
+          description: Success.
           content:
             application/json:
               schema:
@@ -256,19 +201,25 @@ paths:
 
   /api/private/find/article/list/all:
     get:
-      summary: Return a list of articles (including private)
+      summary: Return all articles list.
       security:
         - BearerAuth: []
       parameters:
         - name: p
           in: query
           required: false
-          description: Page of view.
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: Number of articles.
           schema:
             type: number
       responses:
         '200':
-          description: A JSON array of articles.
+          description: Success.
           content:
             application/json:
               schema:
@@ -278,67 +229,15 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  maxPage:
+                  count:
                     type: number
                 required:
                   - articles
-                  - maxPage
-        '400':
-          description: no authorization header
-        '403':
-          description: expired or firbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
-
-  /api/private/find/draft/list:
-    get:
-      summary: Return a list of drafts.
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: p
-          in: query
-          required: false
-          description: Page of view.
-          schema:
-            type: number
-      responses:
-        '200':
-          description: A JSON array of drafts.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  drafts:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Draft'
-                  maxPage:
-                    type: number
-                required:
-                  - drafts
-                  - maxPage
-        '400':
-          description: no authorization header
-        '403':
-          description: expired or firbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
+                  - count
 
   /api/private/find/draft/id:
     get:
-      summary: Return a list of drafts.
+      summary: Return a draft whose id is selected.
       security:
         - BearerAuth: []
       parameters:
@@ -350,7 +249,7 @@ paths:
             type: string
       responses:
         '200':
-          description: A JSON of draft.
+          description: Success.
           content:
             application/json:
               schema:
@@ -360,33 +259,64 @@ paths:
                     $ref: '#/components/schemas/Draft'
                 required:
                   - draft
-        '400':
-          description: no authorization header
-        '403':
-          description: expired or firbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
 
-  /api/private/find/image/list:
+  /api/private/find/draft/list/all:
     get:
-      summary: Return a list of image names.
+      summary: Return all drafts list.
       security:
         - BearerAuth: []
       parameters:
         - name: p
           in: query
           required: false
-          description: Page of view.
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: Number of drafts.
           schema:
             type: number
       responses:
         '200':
-          description: A string array of image names and whether there is next page.
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  drafts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Draft'
+                  count:
+                    type: number
+                required:
+                  - drafts
+                  - count
+
+  /api/private/find/image/list:
+    get:
+      summary: Return images list.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page number.
+          schema:
+            type: number
+        - name: num
+          in: query
+          required: true
+          description: Number of images.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success.
           content:
             application/json:
               schema:
@@ -396,22 +326,11 @@ paths:
                     type: array
                     items:
                       type: string
-                  next:
-                    type: boolean
+                  count:
+                    type: number
                 required:
                   - images
-                  - next
-        '400':
-          description: no authorization header
-        '403':
-          description: expired or firbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
+                  - count
 
   /api/private/register/article:
     post:
@@ -431,52 +350,7 @@ paths:
                 - article
       responses:
         '200':
-          description: Success
-        '400':
-          description: no authorization header
-        '500':
-          description: Failed
-        '403':
-          description: expired or firbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
-
-  /api/private/register/image:
-    post:
-      summary: Register new image.
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                images:
-                  type: string
-                  format: binary
-      responses:
-        '200':
-          description: Success
-        '400':
-          description: no authorization header
-        '500':
-          description: Failed
-        '403':
-          description: expired or firbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
+          description: Success.
 
   /api/private/update/article:
     put:
@@ -496,24 +370,11 @@ paths:
                 - article
       responses:
         '200':
-          description: Success
-        '400':
-          description: no authorization header
-        '500':
-          description: Failed
-        '403':
-          description: expired or firbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
+          description: Success.
 
-  /api/private/draft/article:
+  /api/private/register/draft:
     post:
-      summary: Draft article.
+      summary: Register new draft.
       security:
         - BearerAuth: []
       requestBody:
@@ -528,7 +389,7 @@ paths:
                 - article
       responses:
         '200':
-          description: Success
+          description: Success.
           content:
             application/json:
               schema:
@@ -544,19 +405,41 @@ paths:
                   - id
                   - content
                   - imageHash
-        '400':
-          description: no authorization header
-        '500':
-          description: Failed
-        '403':
-          description: expired or firbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
+
+  /api/private/delete/draft:
+    delete:
+      summary: Delete draft.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Draft id.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success.
+
+  /api/private/register/image:
+    post:
+      summary: Register new image.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Success.
 
   /api/private/delete/image:
     delete:
@@ -574,13 +457,16 @@ paths:
               type: string
       responses:
         '200':
-          description: Success
-        '400':
-          description: no authorization header
-        '500':
-          description: Failed
-        '403':
-          description: expired or firbidden
+          description: Success.
+
+  /api/verify/token:
+    post:
+      summary: Verify token.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success.
           content:
             application/json:
               schema:
@@ -588,28 +474,17 @@ paths:
                 properties:
                   verify:
                     type: boolean
-
-  /api/private/delete/draft:
-    delete:
-      summary: Delete draft.
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: query
-          required: true
-          description: Draft id.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Success
         '400':
-          description: no authorization header
-        '500':
-          description: Failed
+          description: No authorization header.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
         '403':
-          description: expired or firbidden
+          description: Forbidden.
           content:
             application/json:
               schema:
@@ -653,7 +528,8 @@ components:
         - content
         - imageHash
         - isPrivate
-    Category:
+
+    Cateogry:
       type: object
       properties:
         id:
@@ -666,6 +542,7 @@ components:
         - id
         - name
         - articleNum
+
     Draft:
       type: object
       properties:
@@ -691,59 +568,3 @@ components:
         - updateDate
         - content
         - imageHash
-    RequestArticle:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        categories:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              name:
-                type: string
-            required:
-              - id
-              - name
-        content:
-          type: string
-        imageHash:
-          type: string
-        isPrivate:
-          type: boolean
-      required:
-        - id
-        - title
-        - categories
-        - content
-        - imageHash
-        - isPrivate
-    RequestDraft:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        categories:
-          type: string
-        content:
-          type: string
-        imageHash:
-          type: string
-      required:
-        - id
-        - title
-        - categories
-        - content
-        - imageHash
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
