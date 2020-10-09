@@ -20,13 +20,18 @@ type Category struct {
 	Name string `mgorm:"name" json:"name"`
 }
 
-// FindCategories searches for article categories.
+// FindCategories searches for categories which is included by public articles.
 func (db *Database) FindCategories(c *[]Category, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errCategoryDbNil, nil)
 	}
 
-	ctx := db.DB.Select(c, "categories")
+	idCtx := db.DB.Select(nil, "articles", "id").
+		Where("private = ?", false)
+
+	ctx := db.DB.Select(c, "categories", "DISTINCT *").
+		WhereCtx("id IN", idCtx)
+
 	op.apply(ctx)
 
 	if err := ctx.Do(); err != nil {
