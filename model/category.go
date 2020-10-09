@@ -26,8 +26,11 @@ func (db *Database) FindCategories(c *[]Category, op *QueryOptions) error {
 		return argus.NewError(errCategoryDbNil, nil)
 	}
 
-	idCtx := db.DB.Select(nil, "articles", "id").
+	aCtx := db.DB.Select(nil, "articles", "id").
 		Where("private = ?", false)
+
+	idCtx := db.DB.Select(nil, "article_category", "category_id").
+		WhereCtx("article_id IN", aCtx)
 
 	ctx := db.DB.Select(c, "categories", "DISTINCT *").
 		WhereCtx("id IN", idCtx)
@@ -49,10 +52,10 @@ func (db *Database) FindCategoriesByArticleID(c *[]Category, articleID string) e
 	}
 
 	aCtx := db.DB.Select(nil, "article_category", "category_id").
-		Where("article_id", articleID)
+		Where("article_id = ?", articleID)
 
 	ctx := db.DB.Select(c, "categories").
-		WhereCtx("id", aCtx)
+		WhereCtx("id IN", aCtx)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errCategoryQueryFailed, err).

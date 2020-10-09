@@ -49,14 +49,14 @@ func (db *Database) setCategoriesToArticle(a *[]Article) error {
 	var err error
 
 	wg := new(sync.WaitGroup)
-	for _, v := range *a {
+	for i := 0; i < len(*a); i++ {
 		wg.Add(1)
-		go func(v Article) {
+		go func(v *Article) {
 			defer wg.Done()
 			if e := db.FindCategoriesByArticleID(&v.Categories, v.ID); e != nil {
 				err = e
 			}
-		}(v)
+		}(&(*a)[i])
 	}
 
 	wg.Wait()

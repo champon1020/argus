@@ -18,7 +18,7 @@ paths:
       parameters:
         - name: p
           in: query
-          required: false
+          required: true
           description: Page number.
           schema:
             type: number
@@ -87,7 +87,7 @@ paths:
             type: string
         - name: p
           in: query
-          required: false
+          required: true
           description: Page number.
           schema:
             type: number
@@ -129,7 +129,7 @@ paths:
               type: string
         - name: p
           in: query
-          required: false
+          required: true
           description: Page number.
           schema:
             type: number
@@ -207,7 +207,7 @@ paths:
       parameters:
         - name: p
           in: query
-          required: false
+          required: true
           description: Page number.
           schema:
             type: number
@@ -268,7 +268,7 @@ paths:
       parameters:
         - name: p
           in: query
-          required: false
+          required: true
           description: Page number.
           schema:
             type: number
@@ -304,7 +304,7 @@ paths:
       parameters:
         - name: p
           in: query
-          required: false
+          required: true
           description: Page number.
           schema:
             type: number
