@@ -260,7 +260,7 @@ paths:
                 required:
                   - draft
 
-  /api/private/find/draft/list/all:
+  /api/private/find/draft/list:
     get:
       summary: Return all drafts list.
       security:

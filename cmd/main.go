@@ -8,6 +8,7 @@ import (
 	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/argus-private/auth"
 	"github.com/champon1020/argus/handler"
+	"github.com/champon1020/argus/handler/private"
 	"github.com/champon1020/argus/model"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -43,13 +44,15 @@ func newRouter() *gin.Engine {
 
 	r.POST("/api/verify/token", auth.VerifyHandler)
 
-	private := r.Group("/api/private")
-	private.Use(auth.Middleware)
+	priv := r.Group("/api/private")
+	priv.Use(auth.Middleware)
 	{
-		find := private.Group("/find")
+		find := priv.Group("/find")
 		{
-			find.GET("/article/id", wrapHandler(private.FindArticleByID))
-			find.GET("/article/list", wrapHandler(private.FindArticles))
+			find.GET("/article/id", wrapHandler(private.APIFindArticleByID))
+			find.GET("/article/list", wrapHandler(private.APIFindArticles))
+			find.GET("/draft/id", wrapHandler(private.APIFindDraftByID))
+			find.GET("/draft/list", wrapHandler(private.APIFindDrafts))
 		}
 	}
 
