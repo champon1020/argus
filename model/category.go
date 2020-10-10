@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/champon1020/argus"
+	mgorm "github.com/champon1020/minigorm"
 )
 
 var (
@@ -60,6 +61,46 @@ func (db *Database) FindCategoriesByArticleID(c *[]Category, articleID string) e
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errCategoryQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
+}
+
+// insertCategory inserts new category.
+func insertCategories(tx *mgorm.TX, c *Category) error {
+	if err := getCategoryID(tx, c); err != nil {
+		return err
+	}
+
+	ctx := tx.InsertWithModel(c, "categories")
+	if err := ctx.DoTx(); err != nil {
+		return argus.NewError(errCategoryQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
+}
+
+// getCategoryID assigns id to category object.
+// If the category is exist in database table, get id from database.
+// If not exist, create new random id.
+func getCategoryID(tx *mgorm.TX, c *Category) error {
+	res := []struct {
+		ID string `mgorm:"id"`
+	}{}
+
+	ctx := tx.Select(&res, "categories", "id").
+		Where("name = ?", c.Name)
+
+	if err := ctx.DoTx(); err != nil {
+		return argus.NewError(errCategoryQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	if len(res) > 0 {
+		c.ID = res[0].ID
+	} else {
+		c.ID = getNewID()
 	}
 
 	return nil

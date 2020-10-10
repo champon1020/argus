@@ -45,7 +45,7 @@ func newRouter() *gin.Engine {
 	r.POST("/api/verify/token", auth.VerifyHandler)
 
 	priv := r.Group("/api/private")
-	priv.Use(auth.Middleware)
+	//priv.Use(auth.Middleware)
 	{
 		find := priv.Group("/find")
 		{
@@ -53,6 +53,11 @@ func newRouter() *gin.Engine {
 			find.GET("/article/list", wrapHandler(private.APIFindArticles))
 			find.GET("/draft/id", wrapHandler(private.APIFindDraftByID))
 			find.GET("/draft/list", wrapHandler(private.APIFindDrafts))
+		}
+
+		register := priv.Group("/register")
+		{
+			register.POST("/article", wrapHandler(private.APIRegisterArticle))
 		}
 	}
 

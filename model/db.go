@@ -35,7 +35,7 @@ type DatabaseIface interface {
 	FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op *QueryOptions) error
 	FindPublicArticlesByTitle(a *[]Article, title string, op *QueryOptions) error
 	FindPublicArticlesByCategory(a *[]Article, categoryID string, op *QueryOptions) error
-	InsertArticle(a *Article) error
+	RegisterArticle(a *Article) error
 	UpdateArticle(a *Article) error
 
 	// Category

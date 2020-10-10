@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"runtime"
 	"strconv"
 
@@ -51,18 +50,14 @@ func parseIntParam(ctx *gin.Context, name string, outc chan<- int, errc chan<- e
 	defer close(outc)
 	str, ok := ctx.GetQuery(name)
 	if !ok {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		err := argus.NewError(errParamNotFound, nil)
-		errc <- err
+		errc <- argus.NewError(errParamNotFound, nil)
 		return
 	}
 
 	value, err := strconv.Atoi(str)
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		err := argus.NewError(errParamIsNotNumber, err).
+		errc <- argus.NewError(errParamIsNotNumber, err).
 			AppendValue(name, str)
-		errc <- err
 		return
 	}
 
@@ -74,10 +69,8 @@ func parseStringParam(ctx *gin.Context, name string, outc chan<- string, errc ch
 	defer close(outc)
 	value, ok := ctx.GetQuery(name)
 	if !ok {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		err := argus.NewError(errParamNotFound, nil).
+		errc <- argus.NewError(errParamNotFound, nil).
 			AppendValue("param", name)
-		errc <- err
 		return
 	}
 

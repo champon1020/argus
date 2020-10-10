@@ -68,6 +68,7 @@ func APIFindDrafts(ctx *gin.Context, db model.DatabaseIface) error {
 	p, ok1 := <-pc
 	num, ok2 := <-numc
 	if !ok1 || !ok2 {
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return <-errc
 	}
 
@@ -80,7 +81,6 @@ func APIFindDrafts(ctx *gin.Context, db model.DatabaseIface) error {
 			&res.Drafts,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
 			return
 		}
@@ -93,7 +93,6 @@ func APIFindDrafts(ctx *gin.Context, db model.DatabaseIface) error {
 			&res.Count,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
 			return
 		}
@@ -103,6 +102,7 @@ func APIFindDrafts(ctx *gin.Context, db model.DatabaseIface) error {
 	_, ok1 = <-doneFind
 	_, ok2 = <-doneCount
 	if !ok1 || !ok2 {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return <-errc
 	}
 

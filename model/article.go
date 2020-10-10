@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/champon1020/argus"
+	mgorm "github.com/champon1020/minigorm"
 )
 
 var (
@@ -221,20 +222,72 @@ func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID string
 	return nil
 }
 
-// InsertArticle inserts new article.
-func (db *Database) InsertArticle(a *Article) error {
-	if db.TX == nil {
-		return argus.NewError(errArticleTxNil, nil)
-	}
+// RegisterArticle registers new article.
+// This function inserts new article and new categories to
+// each tables on transaction process.
+func (db *Database) RegisterArticle(a *Article) error {
+	err := db.DB.Transact(func(tx mgorm.TX) error {
+		doneArt := make(chan bool)
+		flgCate := true
+		errc := make(chan error)
 
-	ctx := db.TX.InsertWithModel(a, "articles")
+		// Insert article to database.
+		go func(v *Article) {
+			if err := insertArticle(&tx, v); err != nil {
+				doneArt <- false
+				errc <- err
+				return
+			}
+			doneArt <- true
+		}(a)
 
-	if err := ctx.Do(); err != nil {
+		// Insert category and pair of article and category id to database.
+		wg := new(sync.WaitGroup)
+		for i := 0; i < len(a.Categories); i++ {
+			wg.Add(1)
+			go func(c *Category) {
+				defer wg.Done()
+				if err := insertCategories(&tx, c); err != nil {
+					flgCate = false
+					errc <- err
+					return
+				}
+
+				if err := insertArticleCategory(&tx, a.ID, c.ID); err != nil {
+					flgCate = false
+					errc <- err
+					return
+				}
+			}(&a.Categories[i])
+		}
+
+		wg.Wait()
+
+		if !<-doneArt || !flgCate {
+			return <-errc
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+// insertArticle inserts new article.
+func insertArticle(tx *mgorm.TX, a *Article) error {
+	ctx := tx.Insert("articles").
+		AddColumn("id", getNewID()).
+		AddColumn("title", a.Title).
+		AddColumn("create_date", time.Now()).
+		AddColumn("update_date", time.Now()).
+		AddColumn("content", a.Content).
+		AddColumn("image_hash", a.ImageHash).
+		AddColumn("private", a.Private)
+
+	if err := ctx.DoTx(); err != nil {
 		return argus.NewError(errArticleQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
 	}
-
-	// TODO: implement process to insert categories.
 
 	return nil
 }

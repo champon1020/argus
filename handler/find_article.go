@@ -37,6 +37,7 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	p, ok1 := <-pc
 	num, ok2 := <-numc
 	if !ok1 || !ok2 {
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return <-errc
 	}
 
@@ -50,7 +51,6 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 			&res.Articles,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
 			return
 		}
@@ -64,7 +64,6 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 			&res.Count,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
 			return
 		}
@@ -77,6 +76,7 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	_, ok1 = <-doneFind
 	_, ok2 = <-doneCount
 	if !ok1 || !ok2 {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return <-errc
 	}
 
@@ -110,6 +110,7 @@ func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
 
 	sortedID, ok := <-sidc
 	if !ok {
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return <-errc
 	}
 
@@ -124,7 +125,6 @@ func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
 			sortedID-1,
 			model.NewOp(3, 0, "", false),
 		); err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
 			return
 		}
@@ -133,6 +133,7 @@ func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
 
 	articles, ok := <-ac
 	if !ok {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return <-errc
 	}
 
@@ -198,6 +199,7 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 	num, ok2 := <-numc
 	title, ok3 := <-titlec
 	if !ok1 || !ok2 || !ok3 {
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return <-errc
 	}
 
@@ -212,7 +214,6 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 			title,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
 			return
 		}
@@ -227,7 +228,6 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 			title,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
 			return
 		}
@@ -240,6 +240,7 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 	_, ok1 = <-doneFind
 	_, ok2 = <-doneCount
 	if !ok1 || !ok2 {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return <-errc
 	}
 
@@ -275,6 +276,7 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 	num, ok2 := <-numc
 	categoryID, ok3 := <-catec
 	if !ok1 || !ok2 || !ok3 {
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return <-errc
 	}
 
@@ -288,7 +290,6 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 			categoryID,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
 			return
 		}
@@ -302,7 +303,6 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 			categoryID,
 			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			errc <- err
 			return
 		}
@@ -311,8 +311,8 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 
 	_, ok1 = <-doneFind
 	_, ok2 = <-doneCount
-
 	if !ok1 || !ok2 {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return <-errc
 	}
 

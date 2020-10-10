@@ -45,6 +45,10 @@ paths:
                 required:
                   - articles
                   - count
+        '400':
+          description: Query parameters are not satisfied.
+        '500':
+          description: Internal Server Error.
 
   /api/find/article/sortedId:
     get:
@@ -74,6 +78,11 @@ paths:
                   - article
                   - nextTitle
                   - prevTitle
+        '400':
+          description: Query parameters are not satisfied.
+        '500':
+          description: Internal Server Error.
+
 
   /api/find/article/list/title:
     get:
@@ -114,6 +123,11 @@ paths:
                 required:
                   - articles
                   - count
+        '400':
+          description: Query parameters are not satisfied.
+        '500':
+          description: Internal Server Error.
+
 
   /api/find/article/list/category:
     get:
@@ -156,6 +170,11 @@ paths:
                 required:
                   - articles
                   - count
+        '400':
+          description: Query parameters are not satisfied.
+        '500':
+          description: Internal Server Error.
+
 
   /api/find/category/list:
     get:
@@ -175,6 +194,11 @@ paths:
                       $ref: '#/components/schemas/Category'
                 required:
                   - categories
+        '400':
+          description: Query parameters are not satisfied.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/find/article/id:
     get:
@@ -198,6 +222,13 @@ paths:
                     $ref: '#/components/schemas/Article'
                 required:
                   - article
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/find/article/list:
     get:
@@ -234,6 +265,13 @@ paths:
                 required:
                   - articles
                   - count
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/find/draft/id:
     get:
@@ -259,6 +297,13 @@ paths:
                     $ref: '#/components/schemas/Draft'
                 required:
                   - draft
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/find/draft/list:
     get:
@@ -295,6 +340,13 @@ paths:
                 required:
                   - drafts
                   - count
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/find/image/list:
     get:
@@ -331,6 +383,13 @@ paths:
                 required:
                   - images
                   - count
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Err
+          
 
   /api/private/register/article:
     post:
@@ -351,6 +410,12 @@ paths:
       responses:
         '200':
           description: Success.
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
 
   /api/private/update/article:
     put:
@@ -371,6 +436,13 @@ paths:
       responses:
         '200':
           description: Success.
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/register/draft:
     post:
@@ -405,6 +477,13 @@ paths:
                   - id
                   - content
                   - imageHash
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/delete/draft:
     delete:
@@ -421,6 +500,13 @@ paths:
       responses:
         '200':
           description: Success.
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/register/image:
     post:
@@ -440,6 +526,13 @@ paths:
       responses:
         '200':
           description: Success.
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/delete/image:
     delete:
@@ -458,6 +551,13 @@ paths:
       responses:
         '200':
           description: Success.
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/verify/token:
     post:
@@ -467,31 +567,12 @@ paths:
       responses:
         '200':
           description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
         '400':
-          description: No authorization header.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
+          description: Query parameters are not satisfied. No authorization header.
         '403':
           description: Forbidden.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  verify:
-                    type: boolean
+        '500':
+          description: Internal Server Error.
 
 components:
   schemas:
