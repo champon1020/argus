@@ -13,13 +13,27 @@ var (
 
 // insertArticleCategory inserts new pair of article and category id.
 func insertArticleCategory(tx *minigorm.TX, articleID string, categoryID string) error {
-	cmd := "INSERT INTO article_category (article_id, category_id) " +
-		"SELECT ?,? WHERE NOT EXISTS " +
-		"(SELECT * FROM article_category WHERE article_id=? AND category_id=?)"
+	ctx := tx.Insert("article_category").
+		AddColumn("article_id", articleID).
+		AddColumn("category_id", categoryID)
 
-	if err := tx.RawExec(cmd, articleID, categoryID, articleID, categoryID); err != nil {
+	if err := ctx.DoTx(); err != nil {
 		return argus.NewError(errArticleCategoryQueryFailed, err).
-			AppendValue("query", cmd)
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
+}
+
+// deleteArticleCategoryByArticleID deletes the pair of article and category id
+// by article id.
+func deleteArticleCategoryByArticleID(tx *minigorm.TX, articleID string) error {
+	ctx := tx.Delete("article_category").
+		Where("article_id = ?", articleID)
+
+	if err := ctx.DoTx(); err != nil {
+		return argus.NewError(errArticleCategoryQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
 	}
 
 	return nil

@@ -67,6 +67,7 @@ func (db *Database) FindCategoriesByArticleID(c *[]Category, articleID string) e
 }
 
 // insertCategory inserts new category.
+// If category has already existed, it assigns the id to struct field.
 func insertCategories(tx *minigorm.TX, c *Category) error {
 	if err := assignCategoryIDIfExist(tx, c); err != nil {
 		return err
@@ -104,6 +105,19 @@ func assignCategoryIDIfExist(tx *minigorm.TX, c *Category) error {
 
 	if len(res) > 0 {
 		c.ID = res[0].ID
+	}
+
+	return nil
+}
+
+func deleteCategoriesNotUsed(tx *minigorm.TX) error {
+	cmd := "DELETE c FROM categories AS c " +
+		"WHERE NOT EXISTS " +
+		"(SELECT * FROM article_category AS ac WHERE c.id = ac.category_id)"
+
+	if err := tx.RawExec(cmd); err != nil {
+		return argus.NewError(errCategoryQueryFailed, err).
+			AppendValue("query", cmd)
 	}
 
 	return nil

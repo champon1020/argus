@@ -245,7 +245,7 @@ func (db *Database) RegisterArticle(a *Article) error {
 			return err
 		}
 
-		// Insert category and pair of article and category id to database.
+		// Insert categories and pairs of article and category id to database.
 		wg := new(sync.WaitGroup)
 		for i := 0; i < len(a.Categories); i++ {
 			wg.Add(1)
@@ -296,20 +296,96 @@ func insertArticle(tx *minigorm.TX, a *Article) error {
 	return nil
 }
 
-// UpdateArticle updates the article contents.
+// UpdateArticle updates existed article.
 func (db *Database) UpdateArticle(a *Article) error {
-	if db.TX == nil {
-		return argus.NewError(errArticleTxNil, nil)
+	// Create transaction instance.
+	tx, err := db.DB.NewTX()
+	if err != nil {
+		return argus.NewError(errFailedBeginTx, err)
 	}
 
-	ctx := db.TX.UpdateWithModel(a, "articles")
+	err = tx.Transact(func(tx *minigorm.TX) error {
+		doneUpdate := make(chan bool, 1)
+		doneDelete := make(chan bool, 1)
+		errc := make(chan error, 3)
 
-	if err := ctx.Do(); err != nil {
+		// Update article on database.
+		go func() {
+			defer close(doneUpdate)
+			if err := updateArticle(tx, a); err != nil {
+				errc <- err
+				doneUpdate <- false
+				return
+			}
+			doneUpdate <- true
+		}()
+
+		// Delete pairs of article and category id.
+		go func() {
+			defer close(doneDelete)
+			if err := deleteArticleCategoryByArticleID(tx, a.ID); err != nil {
+				errc <- err
+				doneDelete <- false
+				return
+			}
+			doneDelete <- true
+		}()
+
+		if !<-doneUpdate || !<-doneDelete {
+			return <-errc
+		}
+
+		flgCate := true
+
+		// Insert categories and pairs of article and category id to database.
+		wg := new(sync.WaitGroup)
+		for i := 0; i < len(a.Categories); i++ {
+			wg.Add(1)
+			go func(c *Category) {
+				defer wg.Done()
+				if err := insertCategories(tx, c); err != nil {
+					flgCate = false
+					errc <- err
+				}
+
+				if err := insertArticleCategory(tx, a.ID, c.ID); err != nil {
+					flgCate = false
+					errc <- err
+				}
+			}(&a.Categories[i])
+		}
+
+		wg.Wait()
+
+		if !flgCate {
+			return <-errc
+		}
+
+		// Delete categories which is not used.
+		if err := deleteCategoriesNotUsed(tx); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+// updateArticle updates the article contents.
+func updateArticle(tx *minigorm.TX, a *Article) error {
+	ctx := tx.Update("articles").
+		AddColumn("title", a.Title).
+		AddColumn("update_date", time.Now()).
+		AddColumn("content", a.Content).
+		AddColumn("image_hash", a.ImageHash).
+		AddColumn("private", a.Private).
+		Where("id = ?", a.ID)
+
+	if err := ctx.DoTx(); err != nil {
 		return argus.NewError(errArticleQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
 	}
-
-	// TODO: implement process to update category.
 
 	return nil
 }
