@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/champon1020/argus"
+	"github.com/champon1020/minigorm"
 )
 
 var (
@@ -80,15 +81,36 @@ func (db *Database) FindDrafts(d *[]Draft, op *QueryOptions) error {
 	return nil
 }
 
-// InsertDraft inserts new draft.
-func (db *Database) InsertDraft(d *Draft) error {
-	if db.TX == nil {
-		return argus.NewError(errDraftTxNil, nil)
+// RegisterDraft registers new draft.
+func (db *Database) RegisterDraft(d *Draft) error {
+	// Create transaction instance.
+	tx, err := db.DB.NewTX()
+	if err != nil {
+		return argus.NewError(errFailedBeginTx, err)
 	}
 
-	ctx := db.TX.InsertWithModel(d, "drafts")
+	err = tx.Transact(func(tx *minigorm.TX) error {
+		if err := insertDraft(tx, d); err != nil {
+			return err
+		}
 
-	if err := ctx.Do(); err != nil {
+		return nil
+	})
+
+	return err
+}
+
+// InsertDraft inserts new draft.
+func insertDraft(tx *minigorm.TX, d *Draft) error {
+	ctx := tx.Insert("drafts").
+		AddColumn("id", d.ID).
+		AddColumn("title", d.Title).
+		AddColumn("categories", d.Categories).
+		AddColumn("update_date", time.Now()).
+		AddColumn("content", d.Content).
+		AddColumn("image_hash", d.ImageHash)
+
+	if err := ctx.DoTx(); err != nil {
 		return argus.NewError(errDraftQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
 	}

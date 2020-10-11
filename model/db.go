@@ -44,7 +44,7 @@ type DatabaseIface interface {
 	// Draft
 	FindDrafts(d *[]Draft, op *QueryOptions) error
 	FindDraftByID(d *Draft, id string) error
-	InsertDraft(d *Draft) error
+	RegisterDraft(d *Draft) error
 	UpdateDraft(d *Draft) error
 	DeleteDraft(id int) error
 

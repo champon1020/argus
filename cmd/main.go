@@ -58,6 +58,7 @@ func newRouter() *gin.Engine {
 		register := priv.Group("/register")
 		{
 			register.POST("/article", wrapHandler(private.APIRegisterArticle))
+			register.POST("/draft", wrapHandler(private.APIRegisterDraft))
 		}
 	}
 

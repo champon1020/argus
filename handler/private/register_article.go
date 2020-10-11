@@ -14,21 +14,21 @@ type APIRegisterArticleReq struct {
 
 // APIRegisterArticle registers new article to database.
 func APIRegisterArticle(ctx *gin.Context, db model.DatabaseIface) error {
-	// Channel for article object.
-	resc := make(chan APIRegisterArticleReq)
+	// Channel for request.
+	reqc := make(chan APIRegisterArticleReq)
 
 	// Channel for error variable.
 	errc := make(chan error)
 
-	go ParseRegisterArticle(ctx, resc, errc)
+	go ParseRegisterArticle(ctx, reqc, errc)
 
-	res, ok := <-resc
+	req, ok := <-reqc
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return <-errc
 	}
 
-	if err := db.RegisterArticle(&res.Article); err != nil {
+	if err := db.RegisterArticle(&req.Article); err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return err
 	}
