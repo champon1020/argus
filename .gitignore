@@ -1,6 +1,4 @@
-.idea/
 tmp/**
-logs/**
 resource_debug/**
 
 **/.env

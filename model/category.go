@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/champon1020/argus"
-	mgorm "github.com/champon1020/minigorm"
+	"github.com/champon1020/minigorm"
 )
 
 var (
@@ -67,10 +67,16 @@ func (db *Database) FindCategoriesByArticleID(c *[]Category, articleID string) e
 }
 
 // insertCategory inserts new category.
-func insertCategories(tx *mgorm.TX, c *Category) error {
-	if err := getCategoryID(tx, c); err != nil {
+func insertCategories(tx *minigorm.TX, c *Category) error {
+	if err := assignCategoryIDIfExist(tx, c); err != nil {
 		return err
+	} else if c.ID != "" {
+		// Category has already existed.
+		return nil
 	}
+
+	// Generate new category id.
+	c.ID = getNewID()
 
 	ctx := tx.InsertWithModel(c, "categories")
 	if err := ctx.DoTx(); err != nil {
@@ -81,10 +87,9 @@ func insertCategories(tx *mgorm.TX, c *Category) error {
 	return nil
 }
 
-// getCategoryID assigns id to category object.
+// assignCategoryIDIfExist assigns id to category object.
 // If the category is exist in database table, get id from database.
-// If not exist, create new random id.
-func getCategoryID(tx *mgorm.TX, c *Category) error {
+func assignCategoryIDIfExist(tx *minigorm.TX, c *Category) error {
 	res := []struct {
 		ID string `mgorm:"id"`
 	}{}
@@ -99,8 +104,6 @@ func getCategoryID(tx *mgorm.TX, c *Category) error {
 
 	if len(res) > 0 {
 		c.ID = res[0].ID
-	} else {
-		c.ID = getNewID()
 	}
 
 	return nil

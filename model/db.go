@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/champon1020/argus"
-	mgorm "github.com/champon1020/minigorm"
+	"github.com/champon1020/minigorm"
 
 	// Import mysql driver.
 	_ "github.com/go-sql-driver/mysql"
@@ -56,10 +56,10 @@ type DatabaseIface interface {
 	CountDrafts(cnt *int, op *QueryOptions) error
 }
 
-// Database contains mgorm.DB.
+// Database contains minigorm.DB.
 type Database struct {
-	DB *mgorm.DB
-	TX *mgorm.TX
+	DB *minigorm.DB
+	TX *minigorm.TX
 }
 
 // Connect initializes database settings.
@@ -72,7 +72,12 @@ func (db *Database) Connect(config *argus.DbConf) {
 			config.Port + ")/" +
 			config.DbName + "?parseTime=true"
 
-	if db.DB, err = mgorm.New("mysql", dataSource); err != nil {
+	if db.DB, err = minigorm.NewWithConf(minigorm.SourceConf{
+		Driver:       "mysql",
+		DataSource:   dataSource,
+		MaxIdleConns: 50,
+		MaxOpenConns: 100,
+	}); err != nil {
 		err = argus.NewError(errDbFailedConnect, err)
 		argus.Logger.Fatalf("%v\n", err)
 	}
@@ -103,7 +108,7 @@ type QueryOptions struct {
 }
 
 // Apply the query options to context.
-func (op *QueryOptions) apply(ctx *mgorm.Context) {
+func (op *QueryOptions) apply(ctx *minigorm.Context) {
 	if op == nil {
 		return
 	}

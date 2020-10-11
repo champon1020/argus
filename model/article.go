@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/champon1020/argus"
-	mgorm "github.com/champon1020/minigorm"
+	"github.com/champon1020/minigorm"
 )
 
 var (
@@ -14,6 +14,7 @@ var (
 	errArticleTxNil       = errors.New("model.article: model.Database.TX is nil")
 	errArticleQueryFailed = errors.New("model.article: Failed to execute query")
 	errArticleNoResult    = errors.New("model.article: Query result is nothing")
+	errFailedBeginTx      = errors.New("model.article: Failed to begin transaction")
 )
 
 // Article is the struct including article information.
@@ -226,20 +227,23 @@ func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID string
 // This function inserts new article and new categories to
 // each tables on transaction process.
 func (db *Database) RegisterArticle(a *Article) error {
-	err := db.DB.Transact(func(tx mgorm.TX) error {
-		doneArt := make(chan bool)
+	// Create transaction instance.
+	tx, err := db.DB.NewTX()
+	if err != nil {
+		return argus.NewError(errFailedBeginTx, err)
+	}
+
+	// Generate new article id.
+	a.ID = getNewID()
+
+	err = tx.Transact(func(tx *minigorm.TX) error {
 		flgCate := true
-		errc := make(chan error)
+		errc := make(chan error, 3)
 
 		// Insert article to database.
-		go func(v *Article) {
-			if err := insertArticle(&tx, v); err != nil {
-				doneArt <- false
-				errc <- err
-				return
-			}
-			doneArt <- true
-		}(a)
+		if err := insertArticle(tx, a); err != nil {
+			return err
+		}
 
 		// Insert category and pair of article and category id to database.
 		wg := new(sync.WaitGroup)
@@ -247,13 +251,13 @@ func (db *Database) RegisterArticle(a *Article) error {
 			wg.Add(1)
 			go func(c *Category) {
 				defer wg.Done()
-				if err := insertCategories(&tx, c); err != nil {
+				if err := insertCategories(tx, c); err != nil {
 					flgCate = false
 					errc <- err
 					return
 				}
 
-				if err := insertArticleCategory(&tx, a.ID, c.ID); err != nil {
+				if err := insertArticleCategory(tx, a.ID, c.ID); err != nil {
 					flgCate = false
 					errc <- err
 					return
@@ -263,7 +267,7 @@ func (db *Database) RegisterArticle(a *Article) error {
 
 		wg.Wait()
 
-		if !<-doneArt || !flgCate {
+		if !flgCate {
 			return <-errc
 		}
 
@@ -274,9 +278,9 @@ func (db *Database) RegisterArticle(a *Article) error {
 }
 
 // insertArticle inserts new article.
-func insertArticle(tx *mgorm.TX, a *Article) error {
+func insertArticle(tx *minigorm.TX, a *Article) error {
 	ctx := tx.Insert("articles").
-		AddColumn("id", getNewID()).
+		AddColumn("id", a.ID).
 		AddColumn("title", a.Title).
 		AddColumn("create_date", time.Now()).
 		AddColumn("update_date", time.Now()).

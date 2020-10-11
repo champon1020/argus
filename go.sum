@@ -16,6 +16,12 @@ github.com/champon1020/minigorm v0.0.0-20201010043306-615b3424257f h1:G7wZBPq+Pj
 github.com/champon1020/minigorm v0.0.0-20201010043306-615b3424257f/go.mod h1:hCnm5sXCMjRdQTlLcM/tLNBpbIg4vrRhEM2jo51XN/U=
 github.com/champon1020/minigorm v1.2.1 h1:gK4SvjJgAJe29Ai1SXsqqTvo9Nqucw9kisbG1dA3B00=
 github.com/champon1020/minigorm v1.2.1/go.mod h1:hCnm5sXCMjRdQTlLcM/tLNBpbIg4vrRhEM2jo51XN/U=
+github.com/champon1020/minigorm v1.2.2-0.20201010193110-f9cdda5f68e9 h1:au/vzrHpgetYnVQLgoDUMYtKZaY3Y4r7jFs/WStaLbM=
+github.com/champon1020/minigorm v1.2.2-0.20201010193110-f9cdda5f68e9/go.mod h1:hCnm5sXCMjRdQTlLcM/tLNBpbIg4vrRhEM2jo51XN/U=
+github.com/champon1020/minigorm v1.2.2-0.20201011161450-714350bfbdc1 h1:wzdZ9YHNUxVhdy2UKz6yuuNoUhpDwuPAjo3gpteTfVM=
+github.com/champon1020/minigorm v1.2.2-0.20201011161450-714350bfbdc1/go.mod h1:hCnm5sXCMjRdQTlLcM/tLNBpbIg4vrRhEM2jo51XN/U=
+github.com/champon1020/minigorm v1.2.2-0.20201011163712-a4000bede5bb h1:pmq7Ax4KREd8gRrzfbVVnWWRY6p5y1DMheKSf+31IAg=
+github.com/champon1020/minigorm v1.2.2-0.20201011163712-a4000bede5bb/go.mod h1:hCnm5sXCMjRdQTlLcM/tLNBpbIg4vrRhEM2jo51XN/U=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
