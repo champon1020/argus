@@ -156,18 +156,24 @@ func updateDraft(tx *minigorm.TX, d *Draft) error {
 }
 
 // DeleteDraft deletes the draft.
-func (db *Database) DeleteDraft(id int) error {
-	if db.TX == nil {
-		return argus.NewError(errDraftTxNil, nil)
+func (db *Database) DeleteDraft(draftID string) error {
+	// Create transaction instance.
+	tx, err := db.DB.NewTX()
+	if err != nil {
+		return argus.NewError(errFailedBeginTx, err)
 	}
 
-	ctx := db.TX.Delete("drafts").
-		Where("id = ?", id)
+	err = tx.Transact(func(tx *minigorm.TX) error {
+		ctx := tx.Delete("drafts").
+			Where("id = ?", draftID)
 
-	if err := ctx.Do(); err != nil {
-		return argus.NewError(errDraftQueryFailed, err).
-			AppendValue("query", ctx.ToSQLString())
-	}
+		if err := ctx.DoTx(); err != nil {
+			return argus.NewError(errDraftQueryFailed, err).
+				AppendValue("query", ctx.ToSQLString())
+		}
 
-	return nil
+		return nil
+	})
+
+	return err
 }

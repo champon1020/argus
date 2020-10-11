@@ -46,7 +46,7 @@ type DatabaseIface interface {
 	FindDraftByID(d *Draft, id string) error
 	RegisterDraft(d *Draft) error
 	UpdateDraft(d *Draft) error
-	DeleteDraft(id int) error
+	DeleteDraft(draftID string) error
 
 	// Count
 	CountAllArticles(cnt *int, op *QueryOptions) error

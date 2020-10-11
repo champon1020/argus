@@ -419,33 +419,6 @@ paths:
         '500':
           description: Internal Server Error.
 
-  /api/private/update/article:
-    put:
-      summary: Update article.
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                article:
-                  $ref: '#/components/schemas/RequestArticle'
-              required:
-                - article
-      responses:
-        '200':
-          description: Success.
-        '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
-
-
   /api/private/register/draft:
     post:
       summary: Register new draft.
@@ -486,56 +459,6 @@ paths:
         '500':
           description: Internal Server Error.
 
-  /api/private/update/draft:
-    put:
-      summary: Update draft.
-      security:
-        - BearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                draft:
-                  $ref: '#/components/schemas/RequestDraft'
-              required:
-                - draft
-      responses:
-        '200':
-          description: Success.
-        '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
-
-
-
-  /api/private/delete/draft:
-    delete:
-      summary: Delete draft.
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: query
-          required: true
-          description: Draft id.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Success.
-        '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
-
-
   /api/private/register/image:
     post:
       summary: Register new image.
@@ -561,6 +484,81 @@ paths:
         '500':
           description: Internal Server Error.
 
+  /api/private/update/article:
+    put:
+      summary: Update article.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                article:
+                  $ref: '#/components/schemas/RequestArticle'
+              required:
+                - article
+      responses:
+        '200':
+          description: Success.
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
+  /api/private/update/draft:
+    put:
+      summary: Update draft.
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                draft:
+                  $ref: '#/components/schemas/RequestDraft'
+              required:
+                - draft
+      responses:
+        '200':
+          description: Success.
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
+  /api/private/delete/draft:
+    delete:
+      summary: Delete draft.
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: int
+              required:
+                - id
+      responses:
+        '200':
+          description: Success.
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
 
   /api/private/delete/image:
     delete:
@@ -585,7 +583,6 @@ paths:
           description: Forbidden.
         '500':
           description: Internal Server Error.
-
 
   /api/verify/token:
     post:

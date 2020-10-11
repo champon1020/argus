@@ -66,6 +66,11 @@ func newRouter() *gin.Engine {
 			update.PUT("/article", wrapHandler(private.APIUpdateArticle))
 			update.PUT("/draft", wrapHandler(private.APIUpdateDraft))
 		}
+
+		delete := priv.Group("/delete")
+		{
+			delete.DELETE("/draft", wrapHandler(private.APIDeleteDraft))
+		}
 	}
 
 	return r

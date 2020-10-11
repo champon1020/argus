@@ -90,3 +90,24 @@ func ParseUpdateDraft(ctx *gin.Context, reqc chan<- APIUpdateDraftReq, errc chan
 
 	reqc <- req
 }
+
+// ParseDeleteDraft parses request body to get draft contents.
+func ParseDeleteDraft(ctx *gin.Context, reqc chan<- APIDeleteDraftReq, errc chan<- error) {
+	defer close(reqc)
+
+	// Parse request body.
+	body, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		errc <- err
+		return
+	}
+
+	// Unmarshal body to json.
+	var req APIDeleteDraftReq
+	if err := json.Unmarshal(body, &req); err != nil {
+		errc <- err
+		return
+	}
+
+	reqc <- req
+}
