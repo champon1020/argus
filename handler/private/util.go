@@ -69,3 +69,24 @@ func ParseRegisterDraft(ctx *gin.Context, reqc chan<- APIRegisterDraftReq, errc 
 
 	reqc <- req
 }
+
+// ParseUpdateDraft parses request body to get draft contents.
+func ParseUpdateDraft(ctx *gin.Context, reqc chan<- APIUpdateDraftReq, errc chan<- error) {
+	defer close(reqc)
+
+	// Parse request body.
+	body, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		errc <- err
+		return
+	}
+
+	// Unmarshal body to json.
+	var req APIUpdateDraftReq
+	if err := json.Unmarshal(body, &req); err != nil {
+		errc <- err
+		return
+	}
+
+	reqc <- req
+}

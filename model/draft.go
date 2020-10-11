@@ -118,16 +118,36 @@ func insertDraft(tx *minigorm.TX, d *Draft) error {
 	return nil
 }
 
-// UpdateDraft updates the draft contents.
+// UpdateDraft updates existed draft.
 func (db *Database) UpdateDraft(d *Draft) error {
-	if db.TX == nil {
-		return argus.NewError(errDraftTxNil, nil)
+	// Create transaction instance.
+	tx, err := db.DB.NewTX()
+	if err != nil {
+		return argus.NewError(errFailedBeginTx, err)
 	}
 
-	ctx := db.TX.UpdateWithModel(d, "drafts").
+	err = tx.Transact(func(tx *minigorm.TX) error {
+		if err := updateDraft(tx, d); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+// updateDraft updates the draft contents.
+func updateDraft(tx *minigorm.TX, d *Draft) error {
+	ctx := tx.Update("drafts").
+		AddColumn("title", d.Title).
+		AddColumn("categories", d.Categories).
+		AddColumn("update_date", time.Now()).
+		AddColumn("content", d.Content).
+		AddColumn("image_hash", d.ImageHash).
 		Where("id = ?", d.ID)
 
-	if err := ctx.Do(); err != nil {
+	if err := ctx.DoTx(); err != nil {
 		return argus.NewError(errDraftQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())
 	}

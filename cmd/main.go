@@ -64,6 +64,7 @@ func newRouter() *gin.Engine {
 		update := priv.Group("/update")
 		{
 			update.PUT("/article", wrapHandler(private.APIUpdateArticle))
+			update.PUT("/draft", wrapHandler(private.APIUpdateDraft))
 		}
 	}
 
