@@ -35,60 +35,73 @@ func newRouter() *gin.Engine {
 
 	find := r.Group("/api/find")
 	{
-		find.GET("/article/list", wrapHandler(handler.APIFindArticles))
-		find.GET("/article/sortedId", wrapHandler(handler.APIFindArticlesBySortedID))
-		find.GET("/article/list/title", wrapHandler(handler.APIFindArticlesByTitle))
-		find.GET("/article/list/category", wrapHandler(handler.APIFindArticlesByCategory))
-		find.GET("/category/list", wrapHandler(handler.APIFindCategories))
+		find.GET("/article/list", wrapHandlerWithDatabase(handler.APIFindArticles))
+		find.GET("/article/sortedId", wrapHandlerWithDatabase(handler.APIFindArticlesBySortedID))
+		find.GET("/article/list/title", wrapHandlerWithDatabase(handler.APIFindArticlesByTitle))
+		find.GET("/article/list/category", wrapHandlerWithDatabase(handler.APIFindArticlesByCategory))
+		find.GET("/category/list", wrapHandlerWithDatabase(handler.APIFindCategories))
 	}
 
-	r.POST("/api/verify/token", auth.VerifyHandler)
+	r.POST("/api/verify/token", wrapHandler(auth.APIVerify))
 
 	priv := r.Group("/api/private")
-	//priv.Use(auth.Middleware)
+	//priv.Use(wrapHandler(auth.Middleware))
 	{
 		find := priv.Group("/find")
 		{
-			find.GET("/article/id", wrapHandler(private.APIFindArticleByID))
-			find.GET("/article/list", wrapHandler(private.APIFindArticles))
-			find.GET("/draft/id", wrapHandler(private.APIFindDraftByID))
-			find.GET("/draft/list", wrapHandler(private.APIFindDrafts))
-			find.GET("/image/list", wrapHandler(private.APIFindImages))
+			find.GET("/article/id", wrapHandlerWithDatabase(private.APIFindArticleByID))
+			find.GET("/article/list", wrapHandlerWithDatabase(private.APIFindArticles))
+			find.GET("/draft/id", wrapHandlerWithDatabase(private.APIFindDraftByID))
+			find.GET("/draft/list", wrapHandlerWithDatabase(private.APIFindDrafts))
+			find.GET("/image/list", wrapHandlerWithDatabase(private.APIFindImages))
 		}
 
 		register := priv.Group("/register")
 		{
-			register.POST("/article", wrapHandler(private.APIRegisterArticle))
-			register.POST("/draft", wrapHandler(private.APIRegisterDraft))
-			register.POST("/image", wrapHandler(private.APIRegisterImage))
+			register.POST("/article", wrapHandlerWithDatabase(private.APIRegisterArticle))
+			register.POST("/draft", wrapHandlerWithDatabase(private.APIRegisterDraft))
+			register.POST("/image", wrapHandlerWithDatabase(private.APIRegisterImage))
 		}
 
 		update := priv.Group("/update")
 		{
-			update.PUT("/article", wrapHandler(private.APIUpdateArticle))
-			update.PUT("/draft", wrapHandler(private.APIUpdateDraft))
+			update.PUT("/article", wrapHandlerWithDatabase(private.APIUpdateArticle))
+			update.PUT("/draft", wrapHandlerWithDatabase(private.APIUpdateDraft))
 		}
 
 		delete := priv.Group("/delete")
 		{
-			delete.DELETE("/draft", wrapHandler(private.APIDeleteDraft))
-			delete.DELETE("/image", wrapHandler(private.APIDeleteImage))
+			delete.DELETE("/draft", wrapHandlerWithDatabase(private.APIDeleteDraft))
+			delete.DELETE("/image", wrapHandlerWithDatabase(private.APIDeleteImage))
 		}
 	}
 
 	return r
 }
 
-func wrapHandler(h func(c *gin.Context, db model.DatabaseIface) error) gin.HandlerFunc {
+func wrapHandler(h func(c *gin.Context) error) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := h(c)
+
+		if err != nil {
+			printErr(err)
+		}
+	}
+}
+
+func wrapHandlerWithDatabase(h func(c *gin.Context, db model.DatabaseIface) error) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		err := h(c, model.Db)
-
-		// If error was occurred in handler, output error log as standard output.
 		if err != nil {
-			if e, ok := err.(*argus.Error); ok {
-				e.Log()
-			}
+			printErr(err)
 		}
+	}
+}
+
+// printErr outputs the error log as standard output.
+func printErr(err error) {
+	if e, ok := err.(*argus.Error); ok {
+		e.Log()
 	}
 }
 
