@@ -22,6 +22,15 @@ LOAD DATA LOCAL INFILE
     FIELDS TERMINATED BY ','
     ENCLOSED BY '"';
 
+LOAD DATA LOCAL INFILE
+    "/docker/db/csv/drafts.csv"
+    INTO TABLE drafts
+    CHARACTER SET utf8
+    FIELDS TERMINATED BY ','
+    ENCLOSED BY '"'
+    (id, title, categories, update_date, content, image_hash);
+
+
 USE argus;
 
 LOAD DATA LOCAL INFILE
@@ -45,3 +54,11 @@ LOAD DATA LOCAL INFILE
     CHARACTER SET utf8
     FIELDS TERMINATED BY ','
     ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE
+    "/docker/db/csv/drafts.csv"
+    INTO TABLE drafts
+    CHARACTER SET utf8
+    FIELDS TERMINATED BY ','
+    ENCLOSED BY '"'
+    (id, title, categories, update_date, content, image_hash);

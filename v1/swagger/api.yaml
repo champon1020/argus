@@ -12,25 +12,12 @@ servers:
     description: domain
 
 paths:
-  /api/find/article/list:
+  /api/find/article/pickup:
     get:
-      summary: Return articles list.
-      parameters:
-        - name: p
-          in: query
-          required: true
-          description: Page number.
-          schema:
-            type: number
-        - name: num
-          in: query
-          required: true
-          description: Number of articles.
-          schema:
-            type: number
+      summary: Return pick up articles.
       responses:
         '200':
-          description: Success.
+          description: A JSON of articles array.
           content:
             application/json:
               schema:
@@ -40,21 +27,13 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  count:
-                    type: number
                 required:
                   - articles
-                  - count
-        '400':
-          description: Query parameters are not satisfied.
-        '500':
-          description: Internal Server Error.
-
   /api/find/article/sortedId:
     get:
-      summary: Return an article whose sortedId is selected.
+      summary: Return an aritlce by selected sortedId and next, previous article.
       parameters:
-        - name: sortedID
+        - name: sortedId
           in: query
           required: true
           description: Article sorted id.
@@ -62,7 +41,7 @@ paths:
             type: number
       responses:
         '200':
-          description: Success.
+          description: A JSON of article.
           content:
             application/json:
               schema:
@@ -70,45 +49,60 @@ paths:
                 properties:
                   article:
                     $ref: '#/components/schemas/Article'
-                  nextTitle:
-                    type: string
-                  prevTitle:
-                    type: string
+                  next:
+                    $ref: '#/components/schemas/Article'
+                  prev:
+                    $ref: '#/components/schemas/Article'
                 required:
                   - article
-                  - nextTitle
-                  - prevTitle
-        '400':
-          description: Query parameters are not satisfied.
-        '500':
-          description: Internal Server Error.
-
-
+                  - next
+                  - prev
+  /api/find/article/list:
+    get:
+      summary: Return a list of articles.
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page of view.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A JSON array of articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  maxPage:
+                    type: number
+                required:
+                  - articles
+                  - maxPage
   /api/find/article/list/title:
     get:
-      summary: Return articles list by title.
+      summary: Return a list of articles by title.
       parameters:
         - name: title
           in: query
           required: true
-          description: Article title.
+          description: A title of articles.
           schema:
             type: string
         - name: p
           in: query
-          required: true
-          description: Page number.
-          schema:
-            type: number
-        - name: num
-          in: query
-          required: true
-          description: Number of articles.
+          required: false
+          description: Page of view.
           schema:
             type: number
       responses:
         '200':
-          description: Success.
+          description: A JSON array of articles.
           content:
             application/json:
               schema:
@@ -118,44 +112,59 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  count:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - count
-        '400':
-          description: Query parameters are not satisfied.
-        '500':
-          description: Internal Server Error.
-
-
+                  - maxPage
+  /api/find/article/list/create-date:
+    get:
+      summary: Return a list of articles by title.
+      parameters:
+        - name: createDate
+          in: query
+          required: true
+          description: A created date of articles.
+          schema:
+            type: string
+        - name: p
+          in: query
+          required: false
+          description: Page of view.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A JSON array of articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  maxPage:
+                    type: number
+                required:
+                  - articles
+                  - maxPage
   /api/find/article/list/category:
     get:
-      summary: Return articles list by category.
+      summary: Return a list of articles by title.
       parameters:
         - name: category
           in: query
           required: true
-          description: Category name.
+          description: A category name which an articles has.
           schema:
             type: array
             items:
               type: string
-        - name: p
-          in: query
-          required: true
-          description: Page number.
-          schema:
-            type: number
-        - name: num
-          in: query
-          required: true
-          description: number of articles.
-          schema:
-            type: number
       responses:
         '200':
-          description: Success.
+          description: A JSON array of articles.
           content:
             application/json:
               schema:
@@ -165,24 +174,17 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  count:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - count
-        '400':
-          description: Query parameters are not satisfied.
-        '500':
-          description: Internal Server Error.
-
-
+                  - maxPage
   /api/find/category/list:
     get:
-      summary: Return categories list.
-      parameters:
+      summary: Return a list of categories.
       responses:
         '200':
-          description: Success.
+          description: A JSON array of cateogries.
           content:
             application/json:
               schema:
@@ -194,17 +196,44 @@ paths:
                       $ref: '#/components/schemas/Category'
                 required:
                   - categories
-        '400':
-          description: Query parameters are not satisfied.
-        '500':
-          description: Internal Server Error.
 
+  /api/verify/token:
+    post:
+      summary: Verify token.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+        '400':
+          description: no authorization header.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/find/article/id:
     get:
-      summary: Return an article whose id is selected
-      security:
-        - BearerAuth: []
+      summary: Return an aritlce by selected id.
       parameters:
         - name: id
           in: query
@@ -214,7 +243,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Success.
+          description: A JSON of article.
           content:
             application/json:
               schema:
@@ -224,35 +253,22 @@ paths:
                     $ref: '#/components/schemas/Article'
                 required:
                   - article
-        '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
 
-
-  /api/private/find/article/list:
+  /api/private/find/article/list/all:
     get:
-      summary: Return all articles list.
+      summary: Return a list of articles (including private)
       security:
         - BearerAuth: []
       parameters:
         - name: p
           in: query
-          required: true
-          description: Page number.
-          schema:
-            type: number
-        - name: num
-          in: query
-          required: true
-          description: Number of articles.
+          required: false
+          description: Page of view.
           schema:
             type: number
       responses:
         '200':
-          description: Success.
+          description: A JSON array of articles.
           content:
             application/json:
               schema:
@@ -262,22 +278,67 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  count:
+                  maxPage:
                     type: number
                 required:
                   - articles
-                  - count
+                  - maxPage
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: no authorization header
         '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
+  /api/private/find/draft/list:
+    get:
+      summary: Return a list of drafts.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: p
+          in: query
+          required: false
+          description: Page of view.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A JSON array of drafts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  drafts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Draft'
+                  maxPage:
+                    type: number
+                required:
+                  - drafts
+                  - maxPage
+        '400':
+          description: no authorization header
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/find/draft/id:
     get:
-      summary: Return a draft whose id is selected.
+      summary: Return a list of drafts.
       security:
         - BearerAuth: []
       parameters:
@@ -289,7 +350,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Success.
+          description: A JSON of draft.
           content:
             application/json:
               schema:
@@ -300,77 +361,32 @@ paths:
                 required:
                   - draft
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: no authorization header
         '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
-
-
-  /api/private/find/draft/list:
-    get:
-      summary: Return all drafts list.
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: p
-          in: query
-          required: true
-          description: Page number.
-          schema:
-            type: number
-        - name: num
-          in: query
-          required: true
-          description: Number of drafts.
-          schema:
-            type: number
-      responses:
-        '200':
-          description: Success.
+          description: expired or firbidden
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  drafts:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Draft'
-                  count:
-                    type: number
-                required:
-                  - drafts
-                  - count
-        '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
-
+                  verify:
+                    type: boolean
 
   /api/private/find/image/list:
     get:
-      summary: Return images list.
+      summary: Return a list of image names.
       security:
         - BearerAuth: []
       parameters:
         - name: p
           in: query
-          required: true
-          description: Page number.
-          schema:
-            type: number
-        - name: num
-          in: query
-          required: true
-          description: Number of images.
+          required: false
+          description: Page of view.
           schema:
             type: number
       responses:
         '200':
-          description: Success.
+          description: A string array of image names and whether there is next page.
           content:
             application/json:
               schema:
@@ -386,12 +402,16 @@ paths:
                   - images
                   - next
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: no authorization header
         '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Err
-          
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/register/article:
     post:
@@ -406,58 +426,25 @@ paths:
               type: object
               properties:
                 article:
-                  $ref: '#/components/schemas/ArticleReq'
+                  $ref: '#/components/schemas/RequestArticle'
               required:
                 - article
       responses:
         '200':
-          description: Success.
+          description: Success
         '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
+          description: no authorization header
         '500':
-          description: Internal Server Error.
-
-  /api/private/register/draft:
-    post:
-      summary: Register new draft.
-      security:
-        - BearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                article:
-                  $ref: '#/components/schemas/DraftReq'
-              required:
-                - article
-      responses:
-        '200':
-          description: Success.
+          description: Failed
+        '403':
+          description: expired or firbidden
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  id:
-                    type: string
-                  content:
-                    type: string
-                  imageHash:
-                    type: string
-                required:
-                  - id
-                  - content
-                  - imageHash
-        '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
+                  verify:
+                    type: boolean
 
   /api/private/register/image:
     post:
@@ -476,13 +463,20 @@ paths:
                   format: binary
       responses:
         '200':
-          description: Success.
+          description: Success
         '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
+          description: no authorization header
         '500':
-          description: Internal Server Error.
+          description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/update/article:
     put:
@@ -497,22 +491,29 @@ paths:
               type: object
               properties:
                 article:
-                  $ref: '#/components/schemas/ArticleReq'
+                  $ref: '#/components/schemas/RequestArticle'
               required:
                 - article
       responses:
         '200':
-          description: Success.
+          description: Success
         '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
+          description: no authorization header
         '500':
-          description: Internal Server Error.
+          description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
-  /api/private/update/draft:
-    put:
-      summary: Update draft.
+  /api/private/draft/article:
+    post:
+      summary: Draft article.
       security:
         - BearerAuth: []
       requestBody:
@@ -521,84 +522,101 @@ paths:
             schema:
               type: object
               properties:
-                draft:
-                  $ref: '#/components/schemas/DraftReq'
+                article:
+                  $ref: '#/components/schemas/RequestDraft'
               required:
-                - draft
+                - article
       responses:
         '200':
-          description: Success.
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  content:
+                    type: string
+                  imageHash:
+                    type: string
+                required:
+                  - id
+                  - content
+                  - imageHash
         '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
+          description: no authorization header
         '500':
-          description: Internal Server Error.
-
-  /api/private/delete/draft:
-    delete:
-      summary: Delete draft.
-      security:
-        - BearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: string
-              required:
-                - draft
-      responses:
-        '200':
-          description: Success.
-        '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Failed
         '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
   /api/private/delete/image:
     delete:
       summary: Delete images.
       security:
         - BearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                imageNames:
-                  type: array
-                  items:
-                    type: string
-                  
+      parameters:
+        - name: imageNames
+          in: query
+          required: true
+          description: Image names.
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         '200':
-          description: Success.
+          description: Success
         '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
+          description: no authorization header
         '500':
-          description: Internal Server Error.
+          description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
-  /api/verify/token:
-    post:
-      summary: Verify token.
+  /api/private/delete/draft:
+    delete:
+      summary: Delete draft.
       security:
         - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Draft id.
+          schema:
+            type: string
       responses:
         '200':
-          description: Success.
+          description: Success
         '400':
-          description: Query parameters are not satisfied. No authorization header.
-        '403':
-          description: Forbidden.
+          description: no authorization header
         '500':
-          description: Internal Server Error.
+          description: Failed
+        '403':
+          description: expired or firbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verify:
+                    type: boolean
 
 components:
   schemas:
@@ -635,7 +653,6 @@ components:
         - content
         - imageHash
         - isPrivate
-
     Category:
       type: object
       properties:
@@ -643,10 +660,12 @@ components:
           type: string
         name:
           type: string
+        articleNum:
+          type: number
       required:
         - id
         - name
-
+        - articleNum
     Draft:
       type: object
       properties:
@@ -672,8 +691,7 @@ components:
         - updateDate
         - content
         - imageHash
-
-    ArticleReq:
+    RequestArticle:
       type: object
       properties:
         id:
@@ -705,8 +723,7 @@ components:
         - content
         - imageHash
         - isPrivate
-
-    DraftReq:
+    RequestDraft:
       type: object
       properties:
         id:
@@ -725,8 +742,7 @@ components:
         - categories
         - content
         - imageHash
-
-  securitySchemas:
+  securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer

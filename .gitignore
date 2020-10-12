@@ -1,6 +1,5 @@
-.idea/
-cmd/argus
-logs/**
+tmp/**
 resource_debug/**
 
 **/.env
+envvar.sh
