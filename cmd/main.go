@@ -53,6 +53,7 @@ func newRouter() *gin.Engine {
 			find.GET("/article/list", wrapHandler(private.APIFindArticles))
 			find.GET("/draft/id", wrapHandler(private.APIFindDraftByID))
 			find.GET("/draft/list", wrapHandler(private.APIFindDrafts))
+			find.GET("/image/list", wrapHandler(private.APIFindImages))
 		}
 
 		register := priv.Group("/register")
