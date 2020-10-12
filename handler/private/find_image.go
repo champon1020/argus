@@ -1,6 +1,7 @@
 package private
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -10,6 +11,11 @@ import (
 	"github.com/champon1020/argus/handler"
 	"github.com/champon1020/argus/model"
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	errFailedReadDir = errors.New("private.find_image: Failed to read directory")
+	errBadPage       = errors.New("private.find_image: The page number parameter is bad")
 )
 
 // APIFindImagesRes is the response type.
@@ -46,14 +52,16 @@ func APIFindImages(ctx *gin.Context, db model.DatabaseIface) error {
 	dirPath := filepath.Join(argus.Env.Get("resource"), "images")
 	images, err := ioutil.ReadDir(dirPath)
 	if err != nil {
-		// handle error
+		return argus.NewError(errFailedReadDir, err).
+			AppendValue("dirPath", dirPath)
 	}
 
 	offset := (p - 1) * num
-
 	if offset != 0 && offset >= len(images) {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
-		// handle error
+		return argus.NewError(errBadPage, nil).
+			AppendValue("offset", offset).
+			AppendValue("imagelen", len(images))
 	}
 
 	var fileInfo []os.FileInfo
