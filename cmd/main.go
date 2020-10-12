@@ -72,6 +72,7 @@ func newRouter() *gin.Engine {
 		delete := priv.Group("/delete")
 		{
 			delete.DELETE("/draft", wrapHandler(private.APIDeleteDraft))
+			delete.DELETE("/image", wrapHandler(private.APIDeleteImage))
 		}
 	}
 

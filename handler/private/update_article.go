@@ -12,7 +12,7 @@ type APIUpdateArticleReq struct {
 	Article model.Article `json:"article"`
 }
 
-// APIUpdateArticle updates article on database.
+// APIUpdateArticle is the private handler to update article on database.
 func APIUpdateArticle(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
 	reqc := make(chan APIUpdateArticleReq, 1)

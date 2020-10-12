@@ -111,3 +111,24 @@ func ParseDeleteDraft(ctx *gin.Context, reqc chan<- APIDeleteDraftReq, errc chan
 
 	reqc <- req
 }
+
+// ParseDeleteImage parses request body to get image contents.
+func ParseDeleteImage(ctx *gin.Context, reqc chan<- APIDeleteImageReq, errc chan<- error) {
+	defer close(reqc)
+
+	// Parse request body.
+	body, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		errc <- err
+		return
+	}
+
+	// Unmarshal body to json.
+	var req APIDeleteImageReq
+	if err := json.Unmarshal(body, &req); err != nil {
+		errc <- err
+		return
+	}
+
+	reqc <- req
+}

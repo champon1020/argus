@@ -12,7 +12,7 @@ type APIRegisterArticleReq struct {
 	Article model.Article `json:"article"`
 }
 
-// APIRegisterArticle registers new article to database.
+// APIRegisterArticle is the private hanlder to register new article to database.
 func APIRegisterArticle(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
 	reqc := make(chan APIRegisterArticleReq)

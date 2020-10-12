@@ -12,7 +12,7 @@ type APIDeleteDraftReq struct {
 	ID string `json:"id"`
 }
 
-// APIDeleteDraft deletes draft.
+// APIDeleteDraft is the private handler to delete draft.
 func APIDeleteDraft(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
 	reqc := make(chan APIDeleteDraftReq, 1)

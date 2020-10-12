@@ -12,7 +12,7 @@ type APIRegisterDraftReq struct {
 	Draft model.Draft `json:"draft"`
 }
 
-// APIRegisterDraft registers new draft to database.
+// APIRegisterDraft is the private handler to register new draft to database.
 func APIRegisterDraft(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
 	reqc := make(chan APIRegisterDraftReq)

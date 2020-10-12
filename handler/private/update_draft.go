@@ -12,7 +12,7 @@ type APIUpdateDraftReq struct {
 	Draft model.Draft `json:"draft"`
 }
 
-// APIUpdateDraft updates draft on database.
+// APIUpdateDraft is the private handler to update draft on database.
 func APIUpdateDraft(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
 	reqc := make(chan APIUpdateDraftReq, 1)
