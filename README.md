@@ -51,9 +51,7 @@ kubectl apply -f myblog-ingress.yml
 The types of mode are "deploy" | "dev" | "test". 
 If not selected, it would be built as "dev".
 
-- ```ARGUS_CONFIG_PATH```: Configuration file path.
-
-- ```ARGUS_RESOURCE_PATH```: Article files(html, images, etc...) directory path.
+- ```ARGUS_RESOURCE_PATH```: The directory path which includes some static files.
 
 - ```ARGUS_KEY_PATH```: something.
 

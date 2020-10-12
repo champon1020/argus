@@ -25,7 +25,7 @@ type APIFindImagesRes struct {
 }
 
 // APIFindImages is the private handler to get all images.
-func APIFindImages(ctx *gin.Context, db model.DatabaseIface) error {
+func APIFindImages(ctx *gin.Context, _ model.DatabaseIface) error {
 	// Channel for query parameter p.
 	pc := make(chan int, 1)
 

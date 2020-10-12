@@ -16,7 +16,13 @@ var Db *Database
 // InitDatabase initializes model.Database instance.
 func InitDatabase() {
 	Db = new(Database)
-	Db.Connect(&argus.Config.Db)
+	Db.Connect(
+		argus.Env.Get("dbUser"),
+		argus.Env.Get("dbPass"),
+		argus.Env.Get("dbHost"),
+		argus.Env.Get("dbPort"),
+		argus.Env.Get("dbName"),
+	)
 }
 
 var (
@@ -26,7 +32,7 @@ var (
 // DatabaseIface is the interface of the Database struct.
 type DatabaseIface interface {
 	// Connect to database.
-	Connect(config *argus.DbConf)
+	Connect(user string, pass string, host string, port string, dbName string)
 
 	// Article
 	FindArticleByID(a *Article, id string) error
@@ -63,15 +69,15 @@ type Database struct {
 }
 
 // Connect initializes database settings.
-func (db *Database) Connect(config *argus.DbConf) {
-	var err error
+func (db *Database) Connect(user string, pass string, host string, port string, dbName string) {
 	dataSource :=
-		config.User + ":" +
-			config.Pass + "@tcp(" +
-			config.Host + ":" +
-			config.Port + ")/" +
-			config.DbName + "?parseTime=true"
+		user + ":" +
+			pass + "@tcp(" +
+			host + ":" +
+			port + ")/" +
+			dbName + "?parseTime=true"
 
+	var err error
 	if db.DB, err = minigorm.NewWithConf(minigorm.SourceConf{
 		Driver:       "mysql",
 		DataSource:   dataSource,
@@ -88,7 +94,7 @@ type MockDatabase struct{}
 
 // Connect is dummy function.
 // This function is declared for implementing DatabaseIface.
-func (db *MockDatabase) Connect(config *argus.DbConf) {
+func (db *MockDatabase) Connect(user string, pass string, host string, port string, dbName string) {
 	// dummy function
 }
 

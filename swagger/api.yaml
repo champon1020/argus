@@ -380,11 +380,11 @@ paths:
                     type: array
                     items:
                       type: string
-                  count:
-                    type: number
+                  next:
+                    type: boolean
                 required:
                   - images
-                  - count
+                  - next
         '400':
           description: Query parameters are not satisfied. No authorization header.
         '403':
@@ -406,7 +406,7 @@ paths:
               type: object
               properties:
                 article:
-                  $ref: '#/components/schemas/RequestArticle'
+                  $ref: '#/components/schemas/ArticleReq'
               required:
                 - article
       responses:
@@ -431,7 +431,7 @@ paths:
               type: object
               properties:
                 article:
-                  $ref: '#/components/schemas/RequestDraft'
+                  $ref: '#/components/schemas/DraftReq'
               required:
                 - article
       responses:
@@ -497,7 +497,7 @@ paths:
               type: object
               properties:
                 article:
-                  $ref: '#/components/schemas/RequestArticle'
+                  $ref: '#/components/schemas/ArticleReq'
               required:
                 - article
       responses:
@@ -522,7 +522,7 @@ paths:
               type: object
               properties:
                 draft:
-                  $ref: '#/components/schemas/RequestDraft'
+                  $ref: '#/components/schemas/DraftReq'
               required:
                 - draft
       responses:
@@ -547,9 +547,9 @@ paths:
               type: object
               properties:
                 id:
-                  type: int
+                  type: string
               required:
-                - id
+                - draft
       responses:
         '200':
           description: Success.
@@ -565,15 +565,16 @@ paths:
       summary: Delete images.
       security:
         - BearerAuth: []
-      parameters:
-        - name: imageNames
-          in: query
-          required: true
-          description: Image names.
-          schema:
-            type: array
-            items:
-              type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                imageNames:
+                  type: array
+                  items:
+                    type: string
+                  
       responses:
         '200':
           description: Success.
@@ -671,3 +672,62 @@ components:
         - updateDate
         - content
         - imageHash
+
+    ArticleReq:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+            required:
+              - id
+              - name
+        content:
+          type: string
+        imageHash:
+          type: string
+        isPrivate:
+          type: boolean
+      required:
+        - id
+        - title
+        - categories
+        - content
+        - imageHash
+        - isPrivate
+
+    DraftReq:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        categories:
+          type: string
+        content:
+          type: string
+        imageHash:
+          type: string
+      required:
+        - id
+        - title
+        - categories
+        - content
+        - imageHash
+
+  securitySchemas:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

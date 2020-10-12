@@ -5,12 +5,10 @@ services:
     container_name: argus_dev
     environment:
       ARGUS_MODE: "dev"
-      ARGUS_LOG_PATH: "/logs"
-      ARGUS_CONFIG_PATH: "/config.json"
       ARGUS_RESOURCE_PATH: "/usr/share/nginx/html"
       ARGUS_SECRET_PATH: "/secret.json"
-      ARGUS_KEY_PATH: "/public_key.pem"
       ARGUS_USER_PATH: "/user.json"
+      ARGUS_KEY_PATH: "/public_key.pem"
       ARGUS_DB_USER: "root"
       ARGUS_DB_PASS: "toor"
       ARGUS_DB_PORT: "3306"
@@ -21,7 +19,6 @@ services:
     volumes:
       - "../../:/go/src/github.com/champon1020/argus"
       - "../../resource_debug:/usr/share/nginx/html"
-      - "../../argus-private/config.json:/config.json"
       - "${ARGUS_SECRET_PATH}:/secret.json"
       - "${ARGUS_USER_PATH}:/user.json"
     working_dir: /go/src/github.com/champon1020/argus

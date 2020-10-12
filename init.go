@@ -4,9 +4,6 @@ var (
 	// Env contains environment variables.
 	Env *EnvMap
 
-	// Config contains application configuration.
-	Config *Configuration
-
 	// Logger handles application log processes.
 	Logger *LogHandler
 )
@@ -18,7 +15,4 @@ func Init() {
 
 	// Initialize Env.
 	Env = NewEnv()
-
-	// Initialize Config.
-	Config = NewConfig()
 }

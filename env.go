@@ -17,7 +17,6 @@ func (e *EnvMap) set(key string, value string) {
 // NewEnv inithialize the struct of Env.
 func NewEnv() *EnvMap {
 	e := make(EnvMap)
-	e.set("config", os.Getenv("ARGUS_CONFIG_PATH"))
 	e.set("resource", os.Getenv("ARGUS_RESOURCE_PATH"))
 	e.set("mode", os.Getenv("ARGUS_MODE"))
 	e.set("secret", os.Getenv("ARGUS_SECRET_PATH"))
