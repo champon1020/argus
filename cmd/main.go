@@ -60,6 +60,7 @@ func newRouter() *gin.Engine {
 		{
 			register.POST("/article", wrapHandler(private.APIRegisterArticle))
 			register.POST("/draft", wrapHandler(private.APIRegisterDraft))
+			register.POST("/image", wrapHandler(private.APIRegisterImage))
 		}
 
 		update := priv.Group("/update")
