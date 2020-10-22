@@ -45,7 +45,7 @@ func newRouter() *gin.Engine {
 	r.POST("/api/verify/token", wrapHandler(auth.APIVerify))
 
 	priv := r.Group("/api/private")
-	//priv.Use(wrapHandler(auth.Middleware))
+	priv.Use(wrapHandler(auth.Middleware))
 	{
 		find := priv.Group("/find")
 		{
@@ -132,6 +132,7 @@ func corsConfig() *cors.Config {
 		AllowAllOrigins: false,
 		AllowOrigins: []string{
 			"https://blog.champonian.com",
+			"http://localhost:3000",
 		},
 		AllowMethods:  []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:  []string{"Origin", "Content-Type", "Authorization"},

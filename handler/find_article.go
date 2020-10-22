@@ -60,10 +60,7 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	// Count the nubmer of articles.
 	go func() {
 		defer close(doneCount)
-		if err := db.CountPublicArticles(
-			&res.Count,
-			model.NewOp(num, (p-1)*num, "sorted_id", true),
-		); err != nil {
+		if err := db.CountPublicArticles(&res.Count); err != nil {
 			errc <- err
 			return
 		}
@@ -87,9 +84,9 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 
 // APIFindArticlesBySortedIDRes is the response type.
 type APIFindArticlesBySortedIDRes struct {
-	Article   model.Article `json:"article"`
-	PrevTitle string        `json:"prevTitle"`
-	NextTitle string        `json:"nextTitle"`
+	Article     model.Article `json:"article"`
+	PrevArticle model.Article `json:"prevArticle"`
+	NextArticle model.Article `json:"nextArticle"`
 }
 
 // APIFindArticlesBySortedID is the handler
@@ -123,7 +120,7 @@ func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
 		if err := db.FindPublicArticlesGeSortedID(
 			&a,
 			sortedID-1,
-			model.NewOp(3, 0, "", false),
+			model.NewOp(3, 0, "sorted_id", true),
 		); err != nil {
 			errc <- err
 			return
@@ -149,18 +146,18 @@ func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
 	wg := new(sync.WaitGroup)
 	for _, a := range articles {
 		wg.Add(1)
-		go func() {
+		go func(a model.Article) {
 			defer wg.Done()
 			if a.SortedID == sortedID {
 				res.Article = a
 			}
 			if a.SortedID < sortedID {
-				res.PrevTitle = a.Title
+				res.PrevArticle = a
 			}
 			if a.SortedID > sortedID {
-				res.NextTitle = a.Title
+				res.NextArticle = a
 			}
-		}()
+		}(a)
 	}
 	wg.Wait()
 
@@ -226,7 +223,6 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 		if err := db.CountPublicArticlesByTitle(
 			&res.Count,
 			title,
-			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
 			errc <- err
 			return
@@ -301,7 +297,6 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 		if err := db.CountPublicArticlesByCategory(
 			&res.Count,
 			categoryID,
-			model.NewOp(num, (p-1)*num, "sorted_id", true),
 		); err != nil {
 			errc <- err
 			return

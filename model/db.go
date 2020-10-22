@@ -55,11 +55,11 @@ type DatabaseIface interface {
 	DeleteDraft(draftID string) error
 
 	// Count
-	CountAllArticles(cnt *int, op *QueryOptions) error
-	CountPublicArticles(cnt *int, op *QueryOptions) error
-	CountPublicArticlesByTitle(cnt *int, title string, op *QueryOptions) error
-	CountPublicArticlesByCategory(cnt *int, categoryID string, op *QueryOptions) error
-	CountDrafts(cnt *int, op *QueryOptions) error
+	CountAllArticles(cnt *int) error
+	CountPublicArticles(cnt *int) error
+	CountPublicArticlesByTitle(cnt *int, title string) error
+	CountPublicArticlesByCategory(cnt *int, categoryID string) error
+	CountDrafts(cnt *int) error
 }
 
 // Database contains minigorm.DB.

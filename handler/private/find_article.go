@@ -50,10 +50,7 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 
 	go func() {
 		defer close(doneCount)
-		if err := db.CountAllArticles(
-			&res.Count,
-			model.NewOp(num, (p-1)*num, "sorted_id", true),
-		); err != nil {
+		if err := db.CountAllArticles(&res.Count); err != nil {
 			errc <- err
 			return
 		}

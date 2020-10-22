@@ -70,14 +70,14 @@ paths:
                 properties:
                   article:
                     $ref: '#/components/schemas/Article'
-                  nextTitle:
-                    type: string
-                  prevTitle:
-                    type: string
+                  nextArticle:
+                    $ref: '#/components/schemas/Article'
+                  prevArticle:
+                    $ref: '#/components/schemas/Article'
                 required:
                   - article
-                  - nextTitle
-                  - prevTitle
+                  - nextArticle
+                  - prevArticle
         '400':
           description: Query parameters are not satisfied.
         '500':
@@ -179,7 +179,6 @@ paths:
   /api/find/category/list:
     get:
       summary: Return categories list.
-      parameters:
       responses:
         '200':
           description: Success.
@@ -425,6 +424,7 @@ paths:
       security:
         - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -509,6 +509,36 @@ paths:
           description: Forbidden.
         '500':
           description: Internal Server Error.
+          
+  /api/private/update/article/isPrivate:
+    put:
+      summary: Update article's isPrivate property.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                isPrivate:
+                  type: boolean
+              required:
+                - id
+                - isPrivate
+      responses:
+        '200':
+          description: Success.
+        '400':
+          description: Query parameters are not satisfied. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
 
   /api/private/update/draft:
     put:
@@ -516,6 +546,7 @@ paths:
       security:
         - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -541,6 +572,7 @@ paths:
       security:
         - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -566,9 +598,11 @@ paths:
       security:
         - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
+              type: object
               properties:
                 imageNames:
                   type: array
@@ -601,6 +635,11 @@ paths:
           description: Internal Server Error.
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Article:
       type: object
@@ -643,9 +682,12 @@ components:
           type: string
         name:
           type: string
+        articleNum:
+          type: number
       required:
         - id
         - name
+        - articleNum
 
     Draft:
       type: object
@@ -725,9 +767,3 @@ components:
         - categories
         - content
         - imageHash
-
-  securitySchemas:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT

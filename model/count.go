@@ -18,14 +18,13 @@ type Count struct {
 }
 
 // CountAllArticles counts the number of all articles.
-func (db *Database) CountAllArticles(cnt *int, op *QueryOptions) error {
+func (db *Database) CountAllArticles(cnt *int) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
 
 	var c []Count
 	ctx := db.DB.Select(&c, "articles", "COUNT(*) AS count")
-	op.apply(ctx)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errCountQueryFailed, err).
@@ -40,7 +39,7 @@ func (db *Database) CountAllArticles(cnt *int, op *QueryOptions) error {
 }
 
 // CountPublicArticles counts the number of public articles.
-func (db *Database) CountPublicArticles(cnt *int, op *QueryOptions) error {
+func (db *Database) CountPublicArticles(cnt *int) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
@@ -48,7 +47,6 @@ func (db *Database) CountPublicArticles(cnt *int, op *QueryOptions) error {
 	var c []Count
 	ctx := db.DB.Select(&c, "articles", "COUNT(*) AS count").
 		Where("private = ?", false)
-	op.apply(ctx)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errCountQueryFailed, err).
@@ -63,7 +61,7 @@ func (db *Database) CountPublicArticles(cnt *int, op *QueryOptions) error {
 }
 
 // CountPublicArticlesByTitle counts the number of articles with title.
-func (db *Database) CountPublicArticlesByTitle(cnt *int, title string, op *QueryOptions) error {
+func (db *Database) CountPublicArticlesByTitle(cnt *int, title string) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
@@ -72,8 +70,6 @@ func (db *Database) CountPublicArticlesByTitle(cnt *int, title string, op *Query
 	ctx := db.DB.Select(&c, "articles", "COUNT(*) AS count").
 		Where("private = ?", false).
 		Where("title LIKE %?%", title)
-
-	op.apply(ctx)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errCountQueryFailed, err).
@@ -88,7 +84,7 @@ func (db *Database) CountPublicArticlesByTitle(cnt *int, title string, op *Query
 }
 
 // CountPublicArticlesByCategory counts the number of articles with category.
-func (db *Database) CountPublicArticlesByCategory(cnt *int, categoryID string, op *QueryOptions) error {
+func (db *Database) CountPublicArticlesByCategory(cnt *int, categoryID string) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
@@ -100,8 +96,6 @@ func (db *Database) CountPublicArticlesByCategory(cnt *int, categoryID string, o
 	ctx := db.DB.Select(&c, "articles", "COUNT(*) AS count").
 		Where("private = ?", false).
 		WhereCtx("id IN", idCtx)
-
-	op.apply(ctx)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errArticleQueryFailed, err).
@@ -116,14 +110,13 @@ func (db *Database) CountPublicArticlesByCategory(cnt *int, categoryID string, o
 }
 
 // CountDrafts counts the number of drafts.
-func (db *Database) CountDrafts(cnt *int, op *QueryOptions) error {
+func (db *Database) CountDrafts(cnt *int) error {
 	if db.DB == nil {
 		return argus.NewError(errCountDbNil, nil)
 	}
 
 	var c []Count
 	ctx := db.DB.Select(&c, "drafts", "COUNT(*) AS count")
-	op.apply(ctx)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errCountQueryFailed, err).

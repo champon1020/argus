@@ -89,10 +89,7 @@ func APIFindDrafts(ctx *gin.Context, db model.DatabaseIface) error {
 
 	go func() {
 		defer close(doneCount)
-		if err := db.CountDrafts(
-			&res.Count,
-			model.NewOp(num, (p-1)*num, "sorted_id", true),
-		); err != nil {
+		if err := db.CountDrafts(&res.Count); err != nil {
 			errc <- err
 			return
 		}
