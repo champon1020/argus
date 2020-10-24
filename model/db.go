@@ -43,6 +43,7 @@ type DatabaseIface interface {
 	FindPublicArticlesByCategory(a *[]Article, categoryID string, op *QueryOptions) error
 	RegisterArticle(a *Article) error
 	UpdateArticle(a *Article) error
+	UpdateIsPrivate(id string, isPrivate bool) error
 
 	// Category
 	FindPublicCategories(c *[]Category, op *QueryOptions) error

@@ -372,6 +372,29 @@ func (db *Database) UpdateArticle(a *Article) error {
 	return err
 }
 
+// UpdateIsPrivate updates private column of article.
+func (db *Database) UpdateIsPrivate(id string, isPrivate bool) error {
+	tx, err := db.DB.NewTX()
+	if err != nil {
+		return argus.NewError(errFailedBeginTx, err)
+	}
+
+	err = tx.Transact(func(tx *minigorm.TX) error {
+		ctx := tx.Update("article").
+			AddColumn("private", isPrivate).
+			Where("id = ?", id)
+
+		if err := ctx.DoTx(); err != nil {
+			return argus.NewError(errArticleQueryFailed, err).
+				AppendValue("query", ctx.ToSQLString())
+		}
+
+		return nil
+	})
+
+	return err
+}
+
 // updateArticle updates the article contents.
 func updateArticle(tx *minigorm.TX, a *Article) error {
 	ctx := tx.Update("articles").
