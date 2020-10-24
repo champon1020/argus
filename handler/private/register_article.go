@@ -10,6 +10,7 @@ import (
 // APIRegisterArticleReq is the request type.
 type APIRegisterArticleReq struct {
 	Article model.Article `json:"article"`
+	DraftID string        `json:"draftId"`
 }
 
 // APIRegisterArticle is the private hanlder to register new article to database.
@@ -28,6 +29,15 @@ func APIRegisterArticle(ctx *gin.Context, db model.DatabaseIface) error {
 		return <-errc
 	}
 
+	// Delete draft from database.
+	if req.DraftID != "" {
+		if err := db.DeleteDraft(req.DraftID); err != nil {
+			ctx.AbortWithStatus(http.StatusOK)
+			return nil
+		}
+	}
+
+	// Register new article to articles table.
 	if err := db.RegisterArticle(&req.Article); err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return err

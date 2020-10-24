@@ -50,6 +50,7 @@ paths:
         '500':
           description: Internal Server Error.
 
+          
   /api/find/article/sortedId:
     get:
       summary: Return an article whose sortedId is selected.
@@ -273,7 +274,7 @@ paths:
         '500':
           description: Internal Server Error.
 
-
+          
   /api/private/find/draft/id:
     get:
       summary: Return a draft whose id is selected.
@@ -305,7 +306,7 @@ paths:
         '500':
           description: Internal Server Error.
 
-
+          
   /api/private/find/draft/list:
     get:
       summary: Return all drafts list.
@@ -348,7 +349,7 @@ paths:
         '500':
           description: Internal Server Error.
 
-
+          
   /api/private/find/image/list:
     get:
       summary: Return images list.
@@ -390,8 +391,8 @@ paths:
           description: Forbidden.
         '500':
           description: Internal Server Err
-          
 
+          
   /api/private/register/article:
     post:
       summary: Register new article.
@@ -406,6 +407,8 @@ paths:
               properties:
                 article:
                   $ref: '#/components/schemas/ArticleReq'
+                draftId:
+                  type: string
               required:
                 - article
       responses:
@@ -418,6 +421,7 @@ paths:
         '500':
           description: Internal Server Error.
 
+          
   /api/private/register/draft:
     post:
       summary: Register new draft.
@@ -430,10 +434,10 @@ paths:
             schema:
               type: object
               properties:
-                article:
+                draft:
                   $ref: '#/components/schemas/DraftReq'
               required:
-                - article
+                - draft
       responses:
         '200':
           description: Success.
@@ -459,6 +463,7 @@ paths:
         '500':
           description: Internal Server Error.
 
+          
   /api/private/register/image:
     post:
       summary: Register new image.
@@ -484,6 +489,7 @@ paths:
         '500':
           description: Internal Server Error.
 
+          
   /api/private/update/article:
     put:
       summary: Update article.
@@ -509,6 +515,7 @@ paths:
           description: Forbidden.
         '500':
           description: Internal Server Error.
+
           
   /api/private/update/article/isPrivate:
     put:
@@ -539,7 +546,7 @@ paths:
         '500':
           description: Internal Server Error.
 
-
+          
   /api/private/update/draft:
     put:
       summary: Update draft.
@@ -566,6 +573,7 @@ paths:
         '500':
           description: Internal Server Error.
 
+          
   /api/private/delete/draft:
     delete:
       summary: Delete draft.
@@ -592,6 +600,7 @@ paths:
         '500':
           description: Internal Server Error.
 
+          
   /api/private/delete/image:
     delete:
       summary: Delete images.
@@ -619,6 +628,7 @@ paths:
         '500':
           description: Internal Server Error.
 
+          
   /api/verify/token:
     post:
       summary: Verify token.
@@ -634,6 +644,7 @@ paths:
         '500':
           description: Internal Server Error.
 
+          
 components:
   securitySchemes:
     BearerAuth:
