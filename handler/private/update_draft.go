@@ -15,17 +15,17 @@ type APIUpdateDraftReq struct {
 // APIUpdateDraft is the private handler to update draft on database.
 func APIUpdateDraft(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
-	reqc := make(chan APIUpdateDraftReq, 1)
+	reqCh := make(chan APIUpdateDraftReq, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 1)
+	errCh := make(chan error, 1)
 
-	go ParseUpdateDraft(ctx, reqc, errc)
+	go ParseUpdateDraft(ctx, reqCh, errCh)
 
-	req, ok := <-reqc
+	req, ok := <-reqCh
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
 	if err := db.UpdateDraft(&req.Draft); err != nil {

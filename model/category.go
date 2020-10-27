@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/champon1020/argus"
 	"github.com/champon1020/minigorm"
@@ -19,6 +20,28 @@ type Category struct {
 
 	// category name
 	Name string `mgorm:"name" json:"name"`
+
+	// number of articles which belongs to this category
+	ArticleNum int `json:"articleNum"`
+}
+
+func (db *Database) setArticleNumToCategory(c *[]Category) error {
+	var err error
+
+	wg := new(sync.WaitGroup)
+	for i := 0; i < len(*c); i++ {
+		wg.Add(1)
+		go func(v *Category) {
+			defer wg.Done()
+			if e := db.CountCategoriesByPublicArticles(&v.ArticleNum, v.ID); e != nil {
+				err = e
+			}
+		}(&(*c)[i])
+	}
+
+	wg.Wait()
+
+	return err
 }
 
 // FindPublicCategories searches for categories which is included by public articles.
@@ -43,6 +66,10 @@ func (db *Database) FindPublicCategories(c *[]Category, op *QueryOptions) error 
 			AppendValue("query", ctx.ToSQLString())
 	}
 
+	if err := db.setArticleNumToCategory(c); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -63,6 +90,10 @@ func (db *Database) FindCategoriesByArticleID(c *[]Category, articleID string) e
 			AppendValue("query", ctx.ToSQLString())
 	}
 
+	if err := db.setArticleNumToCategory(c); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -77,9 +108,12 @@ func insertCategories(tx *minigorm.TX, c *Category) error {
 	}
 
 	// Generate new category id.
-	c.ID = getNewID()
+	c.ID = GetNewID(TypeCategory)
 
-	ctx := tx.InsertWithModel(c, "categories")
+	ctx := tx.Insert("categories").
+		AddColumn("id", c.ID).
+		AddColumn("name", c.Name)
+
 	if err := ctx.DoTx(); err != nil {
 		return argus.NewError(errCategoryQueryFailed, err).
 			AppendValue("query", ctx.ToSQLString())

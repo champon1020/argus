@@ -16,65 +16,60 @@ var (
 )
 
 // ParsePage parses query parameter to get title string.
-func ParsePage(ctx *gin.Context, outc chan<- int, errc chan<- error) {
-	parseIntParam(ctx, "p", outc, errc)
+func ParsePage(ctx *gin.Context, outCh chan<- int, errCh chan<- error) {
+	parseIntParam(ctx, "p", outCh, errCh)
 }
 
 // ParseNum parses query parameter to get title string.
-func ParseNum(ctx *gin.Context, outc chan<- int, errc chan<- error) {
-	parseIntParam(ctx, "num", outc, errc)
-}
-
-// ParseSortedID parses query parameter to get title string.
-func ParseSortedID(ctx *gin.Context, outc chan<- int, errc chan<- error) {
-	parseIntParam(ctx, "sortedID", outc, errc)
+func ParseNum(ctx *gin.Context, outCh chan<- int, errCh chan<- error) {
+	parseIntParam(ctx, "num", outCh, errCh)
 }
 
 // ParseTitle parses query parameter to get title string.
-func ParseTitle(ctx *gin.Context, outc chan<- string, errc chan<- error) {
-	parseStringParam(ctx, "title", outc, errc)
+func ParseTitle(ctx *gin.Context, outCh chan<- string, errCh chan<- error) {
+	parseStringParam(ctx, "title", outCh, errCh)
 }
 
 // ParseID parses query parameter to get string id.
-func ParseID(ctx *gin.Context, outc chan<- string, errc chan<- error) {
-	parseStringParam(ctx, "id", outc, errc)
+func ParseID(ctx *gin.Context, outCh chan<- string, errCh chan<- error) {
+	parseStringParam(ctx, "id", outCh, errCh)
 }
 
 // ParseCategoryID parses query parameter to get category id.
-func ParseCategoryID(ctx *gin.Context, outc chan<- string, errc chan<- error) {
-	parseStringParam(ctx, "categoryID", outc, errc)
+func ParseCategoryID(ctx *gin.Context, outCh chan<- string, errCh chan<- error) {
+	parseStringParam(ctx, "categoryID", outCh, errCh)
 }
 
 // Parse query parameter to get integer variable.
-func parseIntParam(ctx *gin.Context, name string, outc chan<- int, errc chan<- error) {
-	defer close(outc)
+func parseIntParam(ctx *gin.Context, name string, outCh chan<- int, errCh chan<- error) {
+	defer close(outCh)
 	str, ok := ctx.GetQuery(name)
 	if !ok {
-		errc <- argus.NewError(errParamNotFound, nil)
+		errCh <- argus.NewError(errParamNotFound, nil)
 		return
 	}
 
 	value, err := strconv.Atoi(str)
 	if err != nil {
-		errc <- argus.NewError(errParamIsNotNumber, err).
+		errCh <- argus.NewError(errParamIsNotNumber, err).
 			AppendValue(name, str)
 		return
 	}
 
-	outc <- value
+	outCh <- value
 }
 
 // Parse query parameter to get string variable.
-func parseStringParam(ctx *gin.Context, name string, outc chan<- string, errc chan<- error) {
-	defer close(outc)
+func parseStringParam(ctx *gin.Context, name string, outCh chan<- string, errCh chan<- error) {
+	defer close(outCh)
 	value, ok := ctx.GetQuery(name)
 	if !ok {
-		errc <- argus.NewError(errParamNotFound, nil).
+		errCh <- argus.NewError(errParamNotFound, nil).
 			AppendValue("param", name)
 		return
 	}
 
-	outc <- value
+	outCh <- value
 }
 
 func printMemory(mem runtime.MemStats) {

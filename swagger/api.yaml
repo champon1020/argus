@@ -46,20 +46,21 @@ paths:
                   - articles
                   - count
         '400':
-          description: Query parameters are not satisfied.
+          description: Query parameters are not valid.
         '500':
           description: Internal Server Error.
 
-  /api/find/article/sortedId:
+          
+  /api/find/article/id:
     get:
-      summary: Return an article whose sortedId is selected.
+      summary: Return an articles by id.
       parameters:
-        - name: sortedID
+        - name: id
           in: query
           required: true
-          description: Article sorted id.
+          description: Article id.
           schema:
-            type: number
+            type: string
       responses:
         '200':
           description: Success.
@@ -70,16 +71,18 @@ paths:
                 properties:
                   article:
                     $ref: '#/components/schemas/Article'
-                  nextTitle:
-                    type: string
-                  prevTitle:
-                    type: string
+                  nextArticle:
+                    $ref: '#/components/schemas/Article'
+                  prevArticle:
+                    $ref: '#/components/schemas/Article'
                 required:
                   - article
-                  - nextTitle
-                  - prevTitle
+                  - nextArticle
+                  - prevArticle
         '400':
-          description: Query parameters are not satisfied.
+          description: Query parameters are not valid.
+        '404':
+          description: Not Found.
         '500':
           description: Internal Server Error.
 
@@ -124,7 +127,7 @@ paths:
                   - articles
                   - count
         '400':
-          description: Query parameters are not satisfied.
+          description: Query parameters are not valid.
         '500':
           description: Internal Server Error.
 
@@ -171,7 +174,7 @@ paths:
                   - articles
                   - count
         '400':
-          description: Query parameters are not satisfied.
+          description: Query parameters are not valid.
         '500':
           description: Internal Server Error.
 
@@ -179,7 +182,6 @@ paths:
   /api/find/category/list:
     get:
       summary: Return categories list.
-      parameters:
       responses:
         '200':
           description: Success.
@@ -195,7 +197,7 @@ paths:
                 required:
                   - categories
         '400':
-          description: Query parameters are not satisfied.
+          description: Query parameters are not valid.
         '500':
           description: Internal Server Error.
 
@@ -225,9 +227,11 @@ paths:
                 required:
                   - article
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
+        '404':
+          description: Not Found.
         '500':
           description: Internal Server Error.
 
@@ -268,13 +272,13 @@ paths:
                   - articles
                   - count
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
-
+          
   /api/private/find/draft/id:
     get:
       summary: Return a draft whose id is selected.
@@ -300,13 +304,15 @@ paths:
                 required:
                   - draft
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
+        '404':
+          description: Not Found.
         '500':
           description: Internal Server Error.
 
-
+          
   /api/private/find/draft/list:
     get:
       summary: Return all drafts list.
@@ -343,13 +349,13 @@ paths:
                   - drafts
                   - count
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
-
+          
   /api/private/find/image/list:
     get:
       summary: Return images list.
@@ -386,13 +392,13 @@ paths:
                   - images
                   - next
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Err
-          
 
+          
   /api/private/register/article:
     post:
       summary: Register new article.
@@ -407,33 +413,37 @@ paths:
               properties:
                 article:
                   $ref: '#/components/schemas/ArticleReq'
+                draftId:
+                  type: string
               required:
                 - article
       responses:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
+          
   /api/private/register/draft:
     post:
       summary: Register new draft.
       security:
         - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                article:
+                draft:
                   $ref: '#/components/schemas/DraftReq'
               required:
-                - article
+                - draft
       responses:
         '200':
           description: Success.
@@ -453,12 +463,13 @@ paths:
                   - content
                   - imageHash
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
+          
   /api/private/register/image:
     post:
       summary: Register new image.
@@ -478,12 +489,13 @@ paths:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
+          
   /api/private/update/article:
     put:
       summary: Update article.
@@ -504,18 +516,50 @@ paths:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
+          
+  /api/private/update/article/private:
+    put:
+      summary: Update article's private property.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                private:
+                  type: boolean
+              required:
+                - id
+                - private
+      responses:
+        '200':
+          description: Success.
+        '400':
+          description: Query parameters are not valid. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal Server Error.
+
+          
   /api/private/update/draft:
     put:
       summary: Update draft.
       security:
         - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -529,18 +573,20 @@ paths:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
+          
   /api/private/delete/draft:
     delete:
       summary: Delete draft.
       security:
         - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -554,21 +600,24 @@ paths:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
+          
   /api/private/delete/image:
     delete:
       summary: Delete images.
       security:
         - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
+              type: object
               properties:
                 imageNames:
                   type: array
@@ -579,12 +628,13 @@ paths:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
+          
   /api/verify/token:
     post:
       summary: Verify token.
@@ -594,47 +644,50 @@ paths:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not satisfied. No authorization header.
+          description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal Server Error.
 
+          
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Article:
       type: object
       properties:
         id:
           type: string
-        sortedId:
-          type: number
         title:
           type: string
         categories:
           type: array
           items:
             $ref: "#/components/schemas/Category"
-        createDate:
+        createdDate:
           type: string
-        updateDate:
+        updatedDate:
           type: string
         content:
           type: string
-        imageHash:
+        imageName:
           type: string
-        isPrivate:
+        private:
           type: boolean
       required:
         - id
-        - sortedId
         - title
         - categories
-        - createDate
-        - updateDate
+        - createdDate
+        - updatedDate
         - content
-        - imageHash
-        - isPrivate
+        - imageName
+        - private
 
     Category:
       type: object
@@ -643,35 +696,35 @@ components:
           type: string
         name:
           type: string
+        articleNum:
+          type: number
       required:
         - id
         - name
+        - articleNum
 
     Draft:
       type: object
       properties:
         id:
           type: string
-        sortedId:
-          type: number
         title:
           type: string
         categories:
           type: string
-        updateDate:
+        updatedDate:
           type: string
         content:
           type: string
-        imageHash:
+        imageName:
           type: string
       required:
         - id
-        - sortedId
         - title
         - categories
-        - updateDate
+        - updatedDate
         - content
-        - imageHash
+        - imageName
 
     ArticleReq:
       type: object
@@ -694,17 +747,17 @@ components:
               - name
         content:
           type: string
-        imageHash:
+        imageName:
           type: string
-        isPrivate:
+        private:
           type: boolean
       required:
         - id
         - title
         - categories
         - content
-        - imageHash
-        - isPrivate
+        - imageName
+        - private
 
     DraftReq:
       type: object
@@ -717,17 +770,11 @@ components:
           type: string
         content:
           type: string
-        imageHash:
+        imageName:
           type: string
       required:
         - id
         - title
         - categories
         - content
-        - imageHash
-
-  securitySchemas:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+        - imageName

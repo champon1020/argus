@@ -15,17 +15,17 @@ type APIDeleteDraftReq struct {
 // APIDeleteDraft is the private handler to delete draft.
 func APIDeleteDraft(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
-	reqc := make(chan APIDeleteDraftReq, 1)
+	reqCh := make(chan APIDeleteDraftReq, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 1)
+	errCh := make(chan error, 1)
 
-	go ParseDeleteDraft(ctx, reqc, errc)
+	go ParseDeleteDraft(ctx, reqCh, errCh)
 
-	req, ok := <-reqc
+	req, ok := <-reqCh
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
 	if err := db.DeleteDraft(req.ID); err != nil {

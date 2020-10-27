@@ -6,7 +6,7 @@ LOAD DATA LOCAL INFILE
     CHARACTER SET utf8
     FIELDS TERMINATED BY ','
     ENCLOSED BY '"'
-    (id, title, create_date, update_date, content, image_hash, private);
+    (id, title, created_date, updated_date, content, image_name, private);
 
 LOAD DATA LOCAL INFILE
     "/docker/db/csv/categories.csv"
@@ -28,7 +28,7 @@ LOAD DATA LOCAL INFILE
     CHARACTER SET utf8
     FIELDS TERMINATED BY ','
     ENCLOSED BY '"'
-    (id, title, categories, update_date, content, image_hash);
+    (id, title, categories, updated_date, content, image_name);
 
 
 USE argus;
@@ -39,7 +39,7 @@ LOAD DATA LOCAL INFILE
     CHARACTER SET utf8
     FIELDS TERMINATED BY ','
     ENCLOSED BY '"'
-    (id, title, create_date, update_date, content, image_hash, private);
+    (id, title, created_date, updated_date, content, image_name, private);
 
 LOAD DATA LOCAL INFILE
     "/docker/db/csv/categories.csv"
@@ -61,4 +61,4 @@ LOAD DATA LOCAL INFILE
     CHARACTER SET utf8
     FIELDS TERMINATED BY ','
     ENCLOSED BY '"'
-    (id, title, categories, update_date, content, image_hash);
+    (id, title, categories, updated_date, content, image_name);

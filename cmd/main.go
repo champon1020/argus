@@ -36,7 +36,7 @@ func newRouter() *gin.Engine {
 	find := r.Group("/api/find")
 	{
 		find.GET("/article/list", wrapHandlerWithDatabase(handler.APIFindArticles))
-		find.GET("/article/sortedId", wrapHandlerWithDatabase(handler.APIFindArticlesBySortedID))
+		find.GET("/article/id", wrapHandlerWithDatabase(handler.APIFindArticlesByID))
 		find.GET("/article/list/title", wrapHandlerWithDatabase(handler.APIFindArticlesByTitle))
 		find.GET("/article/list/category", wrapHandlerWithDatabase(handler.APIFindArticlesByCategory))
 		find.GET("/category/list", wrapHandlerWithDatabase(handler.APIFindCategories))
@@ -45,7 +45,7 @@ func newRouter() *gin.Engine {
 	r.POST("/api/verify/token", wrapHandler(auth.APIVerify))
 
 	priv := r.Group("/api/private")
-	//priv.Use(wrapHandler(auth.Middleware))
+	priv.Use(wrapHandler(auth.Middleware))
 	{
 		find := priv.Group("/find")
 		{
@@ -66,6 +66,7 @@ func newRouter() *gin.Engine {
 		update := priv.Group("/update")
 		{
 			update.PUT("/article", wrapHandlerWithDatabase(private.APIUpdateArticle))
+			update.PUT("/article/isPrivate", wrapHandlerWithDatabase(private.APIUpdateIsPrivate))
 			update.PUT("/draft", wrapHandlerWithDatabase(private.APIUpdateDraft))
 		}
 
@@ -132,6 +133,7 @@ func corsConfig() *cors.Config {
 		AllowAllOrigins: false,
 		AllowOrigins: []string{
 			"https://blog.champonian.com",
+			"http://localhost:3000",
 		},
 		AllowMethods:  []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:  []string{"Origin", "Content-Type", "Authorization"},

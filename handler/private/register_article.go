@@ -10,25 +10,27 @@ import (
 // APIRegisterArticleReq is the request type.
 type APIRegisterArticleReq struct {
 	Article model.Article `json:"article"`
+	DraftID string        `json:"draftId"`
 }
 
 // APIRegisterArticle is the private hanlder to register new article to database.
 func APIRegisterArticle(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
-	reqc := make(chan APIRegisterArticleReq)
+	reqCh := make(chan APIRegisterArticleReq)
 
 	// Channel for error variable.
-	errc := make(chan error)
+	errCh := make(chan error)
 
-	go ParseRegisterArticle(ctx, reqc, errc)
+	go ParseRegisterArticle(ctx, reqCh, errCh)
 
-	req, ok := <-reqc
+	req, ok := <-reqCh
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
-	if err := db.RegisterArticle(&req.Article); err != nil {
+	// Register new article to articles table.
+	if err := db.RegisterArticle(&req.Article, req.DraftID); err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return err
 	}

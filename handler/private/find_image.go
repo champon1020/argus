@@ -27,26 +27,26 @@ type APIFindImagesRes struct {
 // APIFindImages is the private handler to get all images.
 func APIFindImages(ctx *gin.Context, _ model.DatabaseIface) error {
 	// Channel for query parameter p.
-	pc := make(chan int, 1)
+	pCh := make(chan int, 1)
 
 	// Channel for query parameter num.
-	numc := make(chan int, 1)
+	numCh := make(chan int, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 2)
+	errCh := make(chan error, 2)
 
 	// Response of this call.
 	res := new(APIFindImagesRes)
 
-	go handler.ParsePage(ctx, pc, errc)
+	go handler.ParsePage(ctx, pCh, errCh)
 
-	go handler.ParseNum(ctx, numc, errc)
+	go handler.ParseNum(ctx, numCh, errCh)
 
-	p, ok1 := <-pc
-	num, ok2 := <-numc
+	p, ok1 := <-pCh
+	num, ok2 := <-numCh
 	if !ok1 || !ok2 {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
 	dirPath := filepath.Join(argus.Env.Get("resource"), "images")
