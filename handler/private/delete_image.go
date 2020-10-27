@@ -25,17 +25,17 @@ type APIDeleteImageReq struct {
 // APIDeleteImage is the private handler to delete image.
 func APIDeleteImage(ctx *gin.Context, _ model.DatabaseIface) error {
 	// Channel for request.
-	reqc := make(chan APIDeleteImageReq, 1)
+	reqCh := make(chan APIDeleteImageReq, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 1)
+	errCh := make(chan error, 1)
 
-	go ParseDeleteImage(ctx, reqc, errc)
+	go ParseDeleteImage(ctx, reqCh, errCh)
 
-	req, ok := <-reqc
+	req, ok := <-reqCh
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
 	flgDelete := true
@@ -49,7 +49,7 @@ func APIDeleteImage(ctx *gin.Context, _ model.DatabaseIface) error {
 			if err := deleteImage(path); err != nil {
 				ctx.AbortWithStatus(http.StatusInternalServerError)
 				flgDelete = false
-				errc <- err
+				errCh <- err
 				return
 			}
 		}()
@@ -58,7 +58,7 @@ func APIDeleteImage(ctx *gin.Context, _ model.DatabaseIface) error {
 	wg.Wait()
 
 	if !flgDelete {
-		return <-errc
+		return <-errCh
 	}
 
 	ctx.AbortWithStatus(http.StatusOK)

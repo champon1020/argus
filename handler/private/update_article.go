@@ -15,17 +15,17 @@ type APIUpdateArticleReq struct {
 // APIUpdateArticle is the private handler to update article on database.
 func APIUpdateArticle(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
-	reqc := make(chan APIUpdateArticleReq, 1)
+	reqCh := make(chan APIUpdateArticleReq, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 1)
+	errCh := make(chan error, 1)
 
-	go ParseUpdateArticle(ctx, reqc, errc)
+	go ParseUpdateArticle(ctx, reqCh, errCh)
 
-	req, ok := <-reqc
+	req, ok := <-reqCh
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
 	if err := db.UpdateArticle(&req.Article); err != nil {
@@ -37,29 +37,29 @@ func APIUpdateArticle(ctx *gin.Context, db model.DatabaseIface) error {
 	return nil
 }
 
-// APIToggleIsPrivateReq is the request type.
-type APIToggleIsPrivateReq struct {
-	ID        string `json:"id"`
-	IsPrivate bool   `json:"IsPrivate"`
+// APITogglePrivateReq is the request type.
+type APITogglePrivateReq struct {
+	ID      string `json:"id"`
+	Private bool   `json:"private"`
 }
 
 // APIUpdateIsPrivate is the private handler to update isPrivate property of article on database.
 func APIUpdateIsPrivate(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request
-	reqc := make(chan APIToggleIsPrivateReq, 1)
+	reqCh := make(chan APITogglePrivateReq, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 1)
+	errCh := make(chan error, 1)
 
-	go ParseToggleIsPrivate(ctx, reqc, errc)
+	go ParseTogglePrivate(ctx, reqCh, errCh)
 
-	req, ok := <-reqc
+	req, ok := <-reqCh
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
-	if err := db.UpdateIsPrivate(req.ID, req.IsPrivate); err != nil {
+	if err := db.UpdateArticlePrivate(req.ID, req.Private); err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return err
 	}

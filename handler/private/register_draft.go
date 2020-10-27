@@ -12,27 +12,39 @@ type APIRegisterDraftReq struct {
 	Draft model.Draft `json:"draft"`
 }
 
+// APIRegisterDraftRes is the response type.
+type APIRegisterDraftRes struct {
+	ID        string `json:"id"`
+	content   string `json:"content"`
+	imageHash string `json:"imageHash"`
+}
+
 // APIRegisterDraft is the private handler to register new draft to database.
 func APIRegisterDraft(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for request.
-	reqc := make(chan APIRegisterDraftReq)
+	reqCh := make(chan APIRegisterDraftReq)
 
 	// Channel for error variable.
-	errc := make(chan error)
+	errCh := make(chan error)
 
-	go ParseRegisterDraft(ctx, reqc, errc)
+	go ParseRegisterDraft(ctx, reqCh, errCh)
 
-	req, ok := <-reqc
+	req, ok := <-reqCh
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
+
+	// Generate new draft id.
+	req.Draft.ID = model.GetNewID(model.TypeDraft)
 
 	if err := db.RegisterDraft(&req.Draft); err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return err
 	}
 
-	ctx.AbortWithStatus(http.StatusOK)
+	res := APIRegisterDraftRes{ID: req.Draft.ID}
+
+	ctx.JSON(http.StatusOK, res)
 	return nil
 }

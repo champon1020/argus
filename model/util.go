@@ -1,22 +1,40 @@
 package model
 
 import (
-	"math/rand"
+	"strconv"
 	"time"
 )
 
+// IDType is the type for argument of GenNewID().
+type IDType int
+
+// Enum variables for GenNewID().
 const (
-	charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	idLen   = 50
+	TypeArticle IDType = iota
+	TypeDraft
+	TypeCategory
 )
 
-func getNewID() string {
-	b := make([]byte, idLen)
-	randSeed := rand.New(rand.NewSource(time.Now().UnixNano()))
+// GetNewID generates the random id string.
+func GetNewID(typ IDType) string {
+	unix := time.Now().UnixNano()
+	id := strconv.FormatInt(unix, 10)
 
-	for i := range b {
-		b[i] = charset[randSeed.Intn(len(charset))]
+	switch typ {
+	case TypeArticle:
+		id = "A" + id
+	case TypeDraft:
+		id = "D" + id
+	case TypeCategory:
+		id = "C" + id
 	}
 
-	return string(b)
+	return id
+}
+
+func boolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }

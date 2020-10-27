@@ -16,24 +16,30 @@ type APIFindDraftByIDRes struct {
 // APIFindDraftByID is the private handler to get draft by id.
 func APIFindDraftByID(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for query parameter id.
-	idc := make(chan string, 1)
+	idCh := make(chan string, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 1)
+	errCh := make(chan error, 1)
 
 	// Response of this handler.
 	res := new(APIFindDraftByIDRes)
 
-	go handler.ParseID(ctx, idc, errc)
+	go handler.ParseID(ctx, idCh, errCh)
 
-	id, ok := <-idc
+	id, ok := <-idCh
 	if !ok {
-		return <-errc
+		return <-errCh
 	}
 
 	if err := db.FindDraftByID(&res.Draft, id); err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return err
+	}
+
+	// Article is not exist.
+	if res.Draft.ID == "" {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return nil
 	}
 
 	ctx.JSON(http.StatusOK, res)
@@ -50,26 +56,26 @@ type APIFindDraftsRes struct {
 // APIFindDrafts is the private handler to get all drafts.
 func APIFindDrafts(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for query parameter p.
-	pc := make(chan int, 1)
+	pCh := make(chan int, 1)
 
 	// Channel for query parameter num.
-	numc := make(chan int, 1)
+	numCh := make(chan int, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 2)
+	errCh := make(chan error, 2)
 
 	// Response of this handler.
 	res := new(APIFindDraftsRes)
 
-	go handler.ParsePage(ctx, pc, errc)
+	go handler.ParsePage(ctx, pCh, errCh)
 
-	go handler.ParseNum(ctx, numc, errc)
+	go handler.ParseNum(ctx, numCh, errCh)
 
-	p, ok1 := <-pc
-	num, ok2 := <-numc
+	p, ok1 := <-pCh
+	num, ok2 := <-numCh
 	if !ok1 || !ok2 {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
 	doneFind := make(chan bool)
@@ -79,9 +85,9 @@ func APIFindDrafts(ctx *gin.Context, db model.DatabaseIface) error {
 		defer close(doneFind)
 		if err := db.FindDrafts(
 			&res.Drafts,
-			model.NewOp(num, (p-1)*num, "sorted_id", true),
+			model.NewOp(num, (p-1)*num, "id", true),
 		); err != nil {
-			errc <- err
+			errCh <- err
 			return
 		}
 		doneFind <- true
@@ -90,7 +96,7 @@ func APIFindDrafts(ctx *gin.Context, db model.DatabaseIface) error {
 	go func() {
 		defer close(doneCount)
 		if err := db.CountDrafts(&res.Count); err != nil {
-			errc <- err
+			errCh <- err
 			return
 		}
 		doneCount <- true
@@ -100,7 +106,7 @@ func APIFindDrafts(ctx *gin.Context, db model.DatabaseIface) error {
 	_, ok2 = <-doneCount
 	if !ok1 || !ok2 {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return <-errc
+		return <-errCh
 	}
 
 	ctx.JSON(http.StatusOK, res)

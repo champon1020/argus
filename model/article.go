@@ -22,9 +22,6 @@ type Article struct {
 	// unique id (primary key)
 	ID string `mgorm:"id" json:"id"`
 
-	// id for sorting articles
-	SortedID int `mgorm:"sorted_id" json:"sortedId"`
-
 	// article title
 	Title string `mgorm:"title" json:"title"`
 
@@ -32,19 +29,19 @@ type Article struct {
 	Categories []Category `mgorm:"categories" json:"categories"`
 
 	// date article is posted on
-	CreateDate time.Time `mgorm:"create_date" json:"createDate"`
+	CreatedDate time.Time `mgorm:"created_date" json:"createdDate"`
 
 	// date article is updated
-	UpdateDate time.Time `mgorm:"update_date" json:"updateDate"`
+	UpdatedDate time.Time `mgorm:"updated_date" json:"updatedDate"`
 
 	// content of article
 	Content string `mgorm:"content" json:"content"`
 
 	// image file name
-	ImageHash string `mgorm:"image_hash" json:"imageHash"`
+	ImageHash string `mgorm:"image_name" json:"imageName"`
 
 	// article is private or not
-	Private bool `mgorm:"is_private" json:"isPrivate"`
+	Private bool `mgorm:"private" json:"private"`
 }
 
 func (db *Database) setCategoriesToArticle(a *[]Article) error {
@@ -62,11 +59,8 @@ func (db *Database) setCategoriesToArticle(a *[]Article) error {
 	}
 
 	wg.Wait()
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 // FindArticleByID searched for the article
@@ -145,17 +139,42 @@ func (db *Database) FindPublicArticles(a *[]Article, op *QueryOptions) error {
 	return nil
 }
 
-// FindPublicArticlesGeSortedID searches for public articles
-// whose sorted id is greater than and equal to the specified
-// sortedID integer.
-func (db *Database) FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op *QueryOptions) error {
+// FindPublicArticleLeID searches for public article
+// whose id is less than or equal to argument's id.
+func (db *Database) FindPublicArticleLeID(a *[]Article, id string, op *QueryOptions) error {
 	if db.DB == nil {
 		return argus.NewError(errArticleDbNil, nil)
 	}
 
 	ctx := db.DB.Select(a, "articles").
 		Where("private = ?", false).
-		Where("sorted_id >= ?", sortedID)
+		Where("id <= ?", id)
+
+	op.apply(ctx)
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	// Get categories by article id.
+	if err := db.setCategoriesToArticle(a); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// FindPublicArticleGeID search for public article
+// whose id is greater than and equal to argument's id.
+func (db *Database) FindPublicArticleGeID(a *[]Article, id string, op *QueryOptions) error {
+	if db.DB == nil {
+		return argus.NewError(errArticleDbNil, nil)
+	}
+
+	ctx := db.DB.Select(a, "articles").
+		Where("private = ?", false).
+		Where("id >= ?", id)
 
 	op.apply(ctx)
 
@@ -226,7 +245,7 @@ func (db *Database) FindPublicArticlesByCategory(a *[]Article, categoryID string
 // RegisterArticle registers new article.
 // This function inserts new article and new categories to
 // each tables on transaction process.
-func (db *Database) RegisterArticle(a *Article) error {
+func (db *Database) RegisterArticle(a *Article, draftID string) error {
 	// Create transaction instance.
 	tx, err := db.DB.NewTX()
 	if err != nil {
@@ -234,11 +253,16 @@ func (db *Database) RegisterArticle(a *Article) error {
 	}
 
 	// Generate new article id.
-	a.ID = getNewID()
+	a.ID = GetNewID(TypeArticle)
 
 	err = tx.Transact(func(tx *minigorm.TX) error {
 		flgCate := true
 		errc := make(chan error, 3)
+
+		// If this article's draft has already existed, delete it at first.
+		if draftID != "" {
+			deleteDraft(tx, draftID)
+		}
 
 		// Insert article to database.
 		if err := insertArticle(tx, a); err != nil {
@@ -282,11 +306,11 @@ func insertArticle(tx *minigorm.TX, a *Article) error {
 	ctx := tx.Insert("articles").
 		AddColumn("id", a.ID).
 		AddColumn("title", a.Title).
-		AddColumn("create_date", time.Now()).
-		AddColumn("update_date", time.Now()).
+		AddColumn("created_date", time.Now()).
+		AddColumn("updated_date", time.Now()).
 		AddColumn("content", a.Content).
-		AddColumn("image_hash", a.ImageHash).
-		AddColumn("private", a.Private)
+		AddColumn("image_name", a.ImageHash).
+		AddColumn("private", boolToInt(a.Private))
 
 	if err := ctx.DoTx(); err != nil {
 		return argus.NewError(errArticleQueryFailed, err).
@@ -372,16 +396,34 @@ func (db *Database) UpdateArticle(a *Article) error {
 	return err
 }
 
-// UpdateIsPrivate updates private column of article.
-func (db *Database) UpdateIsPrivate(id string, isPrivate bool) error {
+// updateArticle updates the article contents.
+func updateArticle(tx *minigorm.TX, a *Article) error {
+	ctx := tx.Update("articles").
+		AddColumn("title", a.Title).
+		AddColumn("updated_date", time.Now()).
+		AddColumn("content", a.Content).
+		AddColumn("image_name", a.ImageHash).
+		AddColumn("private", boolToInt(a.Private)).
+		Where("id = ?", a.ID)
+
+	if err := ctx.DoTx(); err != nil {
+		return argus.NewError(errArticleQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
+}
+
+// UpdateArticlePrivate updates private column of article.
+func (db *Database) UpdateArticlePrivate(id string, isPrivate bool) error {
 	tx, err := db.DB.NewTX()
 	if err != nil {
 		return argus.NewError(errFailedBeginTx, err)
 	}
 
 	err = tx.Transact(func(tx *minigorm.TX) error {
-		ctx := tx.Update("article").
-			AddColumn("private", isPrivate).
+		ctx := tx.Update("articles").
+			AddColumn("private", boolToInt(isPrivate)).
 			Where("id = ?", id)
 
 		if err := ctx.DoTx(); err != nil {
@@ -393,22 +435,4 @@ func (db *Database) UpdateIsPrivate(id string, isPrivate bool) error {
 	})
 
 	return err
-}
-
-// updateArticle updates the article contents.
-func updateArticle(tx *minigorm.TX, a *Article) error {
-	ctx := tx.Update("articles").
-		AddColumn("title", a.Title).
-		AddColumn("update_date", time.Now()).
-		AddColumn("content", a.Content).
-		AddColumn("image_hash", a.ImageHash).
-		AddColumn("private", a.Private).
-		Where("id = ?", a.ID)
-
-	if err := ctx.DoTx(); err != nil {
-		return argus.NewError(errArticleQueryFailed, err).
-			AppendValue("query", ctx.ToSQLString())
-	}
-
-	return nil
 }

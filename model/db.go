@@ -38,12 +38,13 @@ type DatabaseIface interface {
 	FindArticleByID(a *Article, id string) error
 	FindAllArticles(a *[]Article, op *QueryOptions) error
 	FindPublicArticles(a *[]Article, op *QueryOptions) error
-	FindPublicArticlesGeSortedID(a *[]Article, sortedID int, op *QueryOptions) error
+	FindPublicArticleLeID(a *[]Article, id string, op *QueryOptions) error
+	FindPublicArticleGeID(a *[]Article, id string, op *QueryOptions) error
 	FindPublicArticlesByTitle(a *[]Article, title string, op *QueryOptions) error
 	FindPublicArticlesByCategory(a *[]Article, categoryID string, op *QueryOptions) error
-	RegisterArticle(a *Article) error
+	RegisterArticle(a *Article, draftID string) error
 	UpdateArticle(a *Article) error
-	UpdateIsPrivate(id string, isPrivate bool) error
+	UpdateArticlePrivate(id string, Private bool) error
 
 	// Category
 	FindPublicCategories(c *[]Category, op *QueryOptions) error
@@ -153,7 +154,7 @@ func NewOp(limit int, offset int, orderby string, desc bool) *QueryOptions {
 		op.OrderBy = orderby
 	}
 
-	if !desc {
+	if desc {
 		op.Desc = desc
 	}
 

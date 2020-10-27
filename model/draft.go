@@ -20,9 +20,6 @@ type Draft struct {
 	// unique id (primary key)
 	ID string `mgorm:"id" json:"id"`
 
-	// id for sorting drafts
-	SortedID int `mgorm:"sorted_id" json:"sortedId"`
-
 	// draft title
 	Title string `mgorm:"title" json:"title"`
 
@@ -30,13 +27,13 @@ type Draft struct {
 	Categories string `mgorm:"categories" json:"categories"`
 
 	// date draft is updated
-	UpdateDate time.Time `mgorm:"update_date" json:"updateDate"`
+	UpdatedDate time.Time `mgorm:"updated_date" json:"updatedDate"`
 
 	// content of draft
 	Content string `mgorm:"content" json:"content"`
 
 	// image file name
-	ImageHash string `mgorm:"image_hash" json:"imageHash"`
+	ImageHash string `mgorm:"image_name" json:"imageName"`
 }
 
 // FindDraftByID searches for draft
@@ -106,9 +103,9 @@ func insertDraft(tx *minigorm.TX, d *Draft) error {
 		AddColumn("id", d.ID).
 		AddColumn("title", d.Title).
 		AddColumn("categories", d.Categories).
-		AddColumn("update_date", time.Now()).
+		AddColumn("updated_date", time.Now()).
 		AddColumn("content", d.Content).
-		AddColumn("image_hash", d.ImageHash)
+		AddColumn("image_name", d.ImageHash)
 
 	if err := ctx.DoTx(); err != nil {
 		return argus.NewError(errDraftQueryFailed, err).
@@ -142,9 +139,9 @@ func updateDraft(tx *minigorm.TX, d *Draft) error {
 	ctx := tx.Update("drafts").
 		AddColumn("title", d.Title).
 		AddColumn("categories", d.Categories).
-		AddColumn("update_date", time.Now()).
+		AddColumn("updated_date", time.Now()).
 		AddColumn("content", d.Content).
-		AddColumn("image_hash", d.ImageHash).
+		AddColumn("image_name", d.ImageHash).
 		Where("id = ?", d.ID)
 
 	if err := ctx.DoTx(); err != nil {
@@ -164,16 +161,20 @@ func (db *Database) DeleteDraft(draftID string) error {
 	}
 
 	err = tx.Transact(func(tx *minigorm.TX) error {
-		ctx := tx.Delete("drafts").
-			Where("id = ?", draftID)
-
-		if err := ctx.DoTx(); err != nil {
-			return argus.NewError(errDraftQueryFailed, err).
-				AppendValue("query", ctx.ToSQLString())
-		}
-
-		return nil
+		return deleteDraft(tx, draftID)
 	})
 
 	return err
+}
+
+func deleteDraft(tx *minigorm.TX, draftID string) error {
+	ctx := tx.Delete("drafts").
+		Where("id = ?", draftID)
+
+	if err := ctx.DoTx(); err != nil {
+		return argus.NewError(errDraftQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	return nil
 }

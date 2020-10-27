@@ -130,6 +130,33 @@ func (db *Database) CountDrafts(cnt *int) error {
 	return nil
 }
 
+// CountCategoriesByPublicArticles counts the number of categories
+// which is belonged to public articles.
+func (db *Database) CountCategoriesByPublicArticles(cnt *int, categoryID string) error {
+	if db.DB == nil {
+		return argus.NewError(errCountDbNil, nil)
+	}
+
+	var c []Count
+	publicArticles := db.DB.Select(nil, "articles", "id").
+		Where("private = ?", false)
+
+	ctx := db.DB.Select(&c, "article_category", "COUNT(*) AS count").
+		Where("category_id = ?", categoryID).
+		WhereCtx("article_id IN", publicArticles)
+
+	if err := ctx.Do(); err != nil {
+		return argus.NewError(errCountQueryFailed, err).
+			AppendValue("query", ctx.ToSQLString())
+	}
+
+	if err := assignCount(cnt, &c); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func assignCount(cnt *int, c *[]Count) error {
 	if len(*c) == 0 {
 		return argus.NewError(errCountNoResult, nil)

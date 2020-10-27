@@ -4,29 +4,27 @@ USE argus_test;
 
 CREATE TABLE IF NOT EXISTS articles(
     id varchar(128) primary key not null,
-    sorted_id int not null auto_increment,
     title varchar(256) not null,
-    create_date datetime not null,
-    update_date datetime not null,
-    content longtext character set utf8mb4,
-    image_hash varchar(512) not null,
+    created_date date not null,
+    updated_date date not null,
+    content longtext character set utf8mb4 not null,
+    image_name varchar(512) not null,
     private int default 0,
-    index sorted_index (sorted_id)
+    index id_index (id)
 );
 
 CREATE TABLE IF NOT EXISTS drafts(
     id varchar(128) primary key not null,
-    sorted_id int not null auto_increment,
     title varchar(256) not null,
     categories varchar(256) not null,
-    update_date datetime not null,
-    content longtext character set utf8mb4,
-    image_hash varchar(512) not null,
-    index sorted_index (sorted_id)
+    updated_date date not null,
+    content longtext character set utf8mb4 not null,
+    image_name varchar(512) not null,
+    index id_index (id)
 );
 
 CREATE TABLE IF NOT EXISTS categories(
-    id varchar(128) not null primary key,
+    id varchar(128) primary key not null,
     name varchar(128) not null
 );
 

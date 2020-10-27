@@ -17,28 +17,28 @@ type APIFindArticlesRes struct {
 // APIFindArticles is the handler to get all public articles.
 func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for query parameter p.
-	pc := make(chan int, 1)
+	pCh := make(chan int, 1)
 
 	// Channel for query parameter num.
-	numc := make(chan int, 1)
+	numCh := make(chan int, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 2)
+	errCh := make(chan error, 2)
 
 	// Response of this call.
 	res := new(APIFindArticlesRes)
 
 	// Parse page number from gin context.
-	go ParsePage(ctx, pc, errc)
+	go ParsePage(ctx, pCh, errCh)
 
 	// Parse the number of articles to response to client from gin context.
-	go ParseNum(ctx, numc, errc)
+	go ParseNum(ctx, numCh, errCh)
 
-	p, ok1 := <-pc
-	num, ok2 := <-numc
+	p, ok1 := <-pCh
+	num, ok2 := <-numCh
 	if !ok1 || !ok2 {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
 	doneFind := make(chan bool)
@@ -49,9 +49,9 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 		defer close(doneFind)
 		if err := db.FindPublicArticles(
 			&res.Articles,
-			model.NewOp(num, (p-1)*num, "sorted_id", true),
+			model.NewOp(num, (p-1)*num, "id", true),
 		); err != nil {
-			errc <- err
+			errCh <- err
 			return
 		}
 		doneFind <- true
@@ -61,20 +61,20 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	go func() {
 		defer close(doneCount)
 		if err := db.CountPublicArticles(&res.Count); err != nil {
-			errc <- err
+			errCh <- err
 			return
 		}
 		doneCount <- true
 	}()
 
-	// If some errors are occurred, channel errc receives errors
+	// If some errors are occurred, channel errCh receives errors
 	// and return error variable.
 	// Or, if all database calls are done, return the response.
 	_, ok1 = <-doneFind
 	_, ok2 = <-doneCount
 	if !ok1 || !ok2 {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return <-errc
+		return <-errCh
 	}
 
 	ctx.JSON(http.StatusOK, res)
@@ -82,84 +82,109 @@ func APIFindArticles(ctx *gin.Context, db model.DatabaseIface) error {
 	return nil
 }
 
-// APIFindArticlesBySortedIDRes is the response type.
-type APIFindArticlesBySortedIDRes struct {
+// APIFindArticlesByIDRes is the response type.
+type APIFindArticlesByIDRes struct {
 	Article     model.Article `json:"article"`
 	PrevArticle model.Article `json:"prevArticle"`
 	NextArticle model.Article `json:"nextArticle"`
 }
 
-// APIFindArticlesBySortedID is the handler
-// to get public articles whose sorted id
-// is greater than and equal to thet of query parameter.
-func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
+// APIFindArticlesByID is the handler to get public articles
+// whose id is greater than and equal to thet of query parameter.
+func APIFindArticlesByID(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for query parameter sortedID.
-	sidc := make(chan int, 1)
+	idCh := make(chan string, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 3)
+	errCh := make(chan error, 3)
 
 	// Response of this call.
-	res := new(APIFindArticlesBySortedIDRes)
+	res := new(APIFindArticlesByIDRes)
 
-	// Parse article sorted id from gin context.
-	go ParseSortedID(ctx, sidc, errc)
+	// Parse article id from gin context.
+	go ParseID(ctx, idCh, errCh)
 
-	sortedID, ok := <-sidc
+	id, ok := <-idCh
 	if !ok {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
-	ac := make(chan []model.Article)
+	aCh1 := make(chan []model.Article, 1)
+	aCh2 := make(chan []model.Article, 1)
 
-	// Search for the articles by sorted id.
+	// Search for an article whose id is equal to query parameter's.
+	// Also searchs for an article whose id is greater than query parameter's.
 	go func() {
-		defer close(ac)
+		defer close(aCh1)
 		var a []model.Article
-		if err := db.FindPublicArticlesGeSortedID(
+		if err := db.FindPublicArticleGeID(
 			&a,
-			sortedID-1,
-			model.NewOp(3, 0, "sorted_id", true),
+			id,
+			model.NewOp(2, 0, "", false),
 		); err != nil {
-			errc <- err
+			errCh <- err
 			return
 		}
-		ac <- a
+		aCh1 <- a
 	}()
 
-	articles, ok := <-ac
-	if !ok {
+	// Searchs for an article whose id is less than query parameter's.
+	go func() {
+		defer close(aCh2)
+		var a []model.Article
+		if err := db.FindPublicArticleLeID(
+			&a,
+			id,
+			model.NewOp(1, 0, "", false),
+		); err != nil {
+			errCh <- err
+			return
+		}
+		aCh2 <- a
+	}()
+
+	articles, ok1 := <-aCh1
+	articles2, ok2 := <-aCh2
+	if !ok1 || !ok2 {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return <-errc
+		return <-errCh
 	}
 
+	articles = append(articles, articles2...)
+
 	// Assing fetched articles to response type.
-	// If the sorted id is equal to that of query parameter,
+	// If the id is equal to that of query parameter,
 	// it's assigned to Article Field.
 	//
-	// If the sorted id is less than that of query parameter,
+	// If the id is less than that of query parameter,
 	// its title assigned to prevTitle Field.
 	//
-	// If the sorted id is greater than that of query parameter,
+	// If the id is greater than that of query parameter,
 	// its title assigned to nextTitle Field.
 	wg := new(sync.WaitGroup)
 	for _, a := range articles {
 		wg.Add(1)
 		go func(a model.Article) {
 			defer wg.Done()
-			if a.SortedID == sortedID {
+			if a.ID == id {
 				res.Article = a
 			}
-			if a.SortedID < sortedID {
+			if a.ID < id {
 				res.PrevArticle = a
 			}
-			if a.SortedID > sortedID {
+			if a.ID > id {
 				res.NextArticle = a
 			}
 		}(a)
 	}
 	wg.Wait()
+
+	// Article is not exist.
+	if res.Article.ID == "" {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return nil
+	}
 
 	ctx.JSON(http.StatusOK, res)
 
@@ -169,35 +194,35 @@ func APIFindArticlesBySortedID(ctx *gin.Context, db model.DatabaseIface) error {
 // APIFindArticlesByTitle is the handler to get public articles by title.
 func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for query parameter p.
-	pc := make(chan int, 1)
+	pCh := make(chan int, 1)
 
 	// Channel for query parameter num.
-	numc := make(chan int, 1)
+	numCh := make(chan int, 1)
 
 	// Channel for query parameter title.
-	titlec := make(chan string, 1)
+	titleCh := make(chan string, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 2)
+	errCh := make(chan error, 2)
 
 	// Response of this call.
 	res := new(APIFindArticlesRes)
 
 	// Parse page number from gin context.
-	go ParsePage(ctx, pc, errc)
+	go ParsePage(ctx, pCh, errCh)
 
 	// Parse the number of articles to response to client from gin context.
-	go ParseNum(ctx, numc, errc)
+	go ParseNum(ctx, numCh, errCh)
 
 	// Parse article title from gin context.
-	go ParseTitle(ctx, titlec, errc)
+	go ParseTitle(ctx, titleCh, errCh)
 
-	p, ok1 := <-pc
-	num, ok2 := <-numc
-	title, ok3 := <-titlec
+	p, ok1 := <-pCh
+	num, ok2 := <-numCh
+	title, ok3 := <-titleCh
 	if !ok1 || !ok2 || !ok3 {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
 	doneFind := make(chan bool)
@@ -209,9 +234,9 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 		if err := db.FindPublicArticlesByTitle(
 			&res.Articles,
 			title,
-			model.NewOp(num, (p-1)*num, "sorted_id", true),
+			model.NewOp(num, (p-1)*num, "id", true),
 		); err != nil {
-			errc <- err
+			errCh <- err
 			return
 		}
 		doneFind <- true
@@ -224,20 +249,20 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 			&res.Count,
 			title,
 		); err != nil {
-			errc <- err
+			errCh <- err
 			return
 		}
 		doneCount <- true
 	}()
 
-	// If some errors are occurred, channel errc receives errors
+	// If some errors are occurred, channel errCh receives errors
 	// and return error variable.
 	// Or, if database calls are done certain times, return the response.
 	_, ok1 = <-doneFind
 	_, ok2 = <-doneCount
 	if !ok1 || !ok2 {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return <-errc
+		return <-errCh
 	}
 
 	ctx.JSON(http.StatusOK, res)
@@ -248,32 +273,32 @@ func APIFindArticlesByTitle(ctx *gin.Context, db model.DatabaseIface) error {
 // APIFindArticlesByCategory is the handler to get puclic articles by category id.
 func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 	// Channel for query parameter p.
-	pc := make(chan int, 1)
+	pCh := make(chan int, 1)
 
 	// Channel for query parameter num.
-	numc := make(chan int, 1)
+	numCh := make(chan int, 1)
 
 	// Channel for query parameter categoryID.
-	catec := make(chan string, 1)
+	cateCh := make(chan string, 1)
 
 	// Channel for error variable.
-	errc := make(chan error, 2)
+	errCh := make(chan error, 2)
 
 	// Response of this call.
 	res := new(APIFindArticlesRes)
 
-	go ParsePage(ctx, pc, errc)
+	go ParsePage(ctx, pCh, errCh)
 
-	go ParseNum(ctx, numc, errc)
+	go ParseNum(ctx, numCh, errCh)
 
-	go ParseCategoryID(ctx, catec, errc)
+	go ParseCategoryID(ctx, cateCh, errCh)
 
-	p, ok1 := <-pc
-	num, ok2 := <-numc
-	categoryID, ok3 := <-catec
+	p, ok1 := <-pCh
+	num, ok2 := <-numCh
+	categoryID, ok3 := <-cateCh
 	if !ok1 || !ok2 || !ok3 {
 		ctx.AbortWithStatus(http.StatusBadRequest)
-		return <-errc
+		return <-errCh
 	}
 
 	doneFind := make(chan bool)
@@ -284,9 +309,9 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 		if err := db.FindPublicArticlesByCategory(
 			&res.Articles,
 			categoryID,
-			model.NewOp(num, (p-1)*num, "sorted_id", true),
+			model.NewOp(num, (p-1)*num, "id", true),
 		); err != nil {
-			errc <- err
+			errCh <- err
 			return
 		}
 		doneFind <- true
@@ -298,7 +323,7 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 			&res.Count,
 			categoryID,
 		); err != nil {
-			errc <- err
+			errCh <- err
 			return
 		}
 		doneCount <- true
@@ -308,7 +333,7 @@ func APIFindArticlesByCategory(ctx *gin.Context, db model.DatabaseIface) error {
 	_, ok2 = <-doneCount
 	if !ok1 || !ok2 {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return <-errc
+		return <-errCh
 	}
 
 	ctx.JSON(http.StatusOK, res)
