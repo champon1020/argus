@@ -6,7 +6,7 @@ spec:
   type: NodePort
   clusterIP: 10.76.14.88
   selector:
-    app: argus-api
+    app: argus-backend
   ports:
     - port: 8000
       targetPort: 8000
@@ -19,72 +19,7 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: argus-api
+    app: argus-backend
   ports:
     - port: 8001
       targetPort: 80
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: argus-dep
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: argus-api
-  template:
-    metadata:
-      name: argus-api
-      labels:
-        app: argus-api
-    spec:
-      containers:
-        - name: argus
-          image: champon1020/argus:0.6.1
-          imagePullPolicy: IfNotPresent
-          readinessProbe:
-            timeoutSeconds: 30
-            failureThreshold: 3
-            httpGet:
-              path: /healthcheck
-              port: 8000
-          ports:
-            - containerPort: 8000
-          env:
-            - name: ARGUS_MODE
-              value: deploy
-          envFrom:
-            - secretRef:
-                name: argus-env
-          volumeMounts:
-            - name: argus-files-volume
-              mountPath: /secret/argus
-              readOnly: true
-            - name: argus-resrc-volume
-              mountPath: /argus/resrc
-              readOnly: false
-        - name: argus-file-server
-          image: champon1020/argus-file-server:0.2
-          imagePullPolicy: IfNotPresent
-          readinessProbe:
-            timeoutSeconds: 30
-            failureThreshold: 3
-            httpGet:
-              path: /healthcheck
-              port: 80
-          ports:
-            - containerPort: 80
-          volumeMounts:
-            - name: argus-resrc-volume
-              mountPath: /usr/share/nginx/html/resrc
-      imagePullSecrets:
-        - name: regcred
-      volumes:
-        - name: argus-resrc-volume
-          persistentVolumeClaim:
-            claimName: argus-pvc
-        - name: argus-files-volume
-          secret:
-            secretName: argus-file
