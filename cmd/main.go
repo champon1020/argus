@@ -33,6 +33,11 @@ func newRouter() *gin.Engine {
 	// Set the cors configuration
 	r.Use(cors.New(*corsConfig()))
 
+	r.GET("/healthcheck", func(c *gin.Context) {
+		c.AbortWithStatus(200)
+		return
+	})
+
 	find := r.Group("/api/find")
 	{
 		find.GET("/article/list", wrapHandlerWithDatabase(handler.APIFindArticles))
@@ -133,7 +138,7 @@ func corsConfig() *cors.Config {
 		AllowAllOrigins: false,
 		AllowOrigins: []string{
 			"https://blog.champonian.com",
-			"http://localhost:3000",
+			//"http://localhost:3000",
 		},
 		AllowMethods:  []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:  []string{"Origin", "Content-Type", "Authorization"},

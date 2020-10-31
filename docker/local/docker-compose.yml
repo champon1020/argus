@@ -7,8 +7,8 @@ services:
       ARGUS_MODE: "dev"
       ARGUS_RESOURCE_PATH: "/usr/share/nginx/html"
       ARGUS_SECRET_PATH: "/secret.json"
-      ARGUS_USER_PATH: "/user.json"
-      ARGUS_KEY_PATH: "/public_key.pem"
+      ARGUS_ADMIN_PATH: "/admin.json"
+      ARGUS_PUBKEY_PATH: "/public_key.pem"
       ARGUS_DB_USER: "root"
       ARGUS_DB_PASS: "toor"
       ARGUS_DB_PORT: "3306"
@@ -20,7 +20,7 @@ services:
       - "../../:/go/src/github.com/champon1020/argus"
       - "../../resource_debug:/usr/share/nginx/html"
       - "${ARGUS_SECRET_PATH}:/secret.json"
-      - "${ARGUS_USER_PATH}:/user.json"
+      - "${ARGUS_ADMIN_PATH}:/admin.json"
     working_dir: /go/src/github.com/champon1020/argus
     command: air
     networks:
