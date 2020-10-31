@@ -6,6 +6,7 @@
 ## Development Tools
 
 [![](https://img.shields.io/badge/golang-1.13.4-blue)](https://golang.org/doc/)
+[![](https://img.shields.io/badge/minigorm-latest-blue)](https://github.com/champon1020/minigorm)
 [![](https://img.shields.io/badge/gin-1.5.0-blue)](https://github.com/gin-gonic/gin)
 [![](https://img.shields.io/badge/gosqldriver-1.5.0-blue)](https://github.com/go-sql-driver/mysql)
 [![](https://img.shields.io/badge/jwtgo-3.2.0-red)](https://github.com/dgrijalva/jwt-go)
@@ -21,6 +22,8 @@ front side => https://github.com/champon1020/alfheim
 
 ### Local
 
+Build as local docker container.
+
 ```
 docker build . -t argus
 
@@ -30,15 +33,15 @@ docker-compose up -d
 
 ### Deploy
 
-※Before this step, deploy some components in argus-private repository.
+Before this step, it needs to deploy some components in argus-private repository.
 
 ```
-cd kube
+cd k8s
 
-kubeclt apply -f mysql-pvc.yml
+kubeclt apply -f argus-dep.yml
 kubectl apply -f argus-pvc.yml
-kubectl apply -f mysql-svc.yml
 kubectl apply -f argus-svc.yml
-kubectl apply -f alfheim-svc.yml (front side)
+kubectl apply -f alfheim-dep.yml (frontend)
+kubectl apply -f alfheim-svc.yml (frontend)
 kubectl apply -f myblog-ingress.yml
 ```
