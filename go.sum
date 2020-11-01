@@ -2,6 +2,8 @@ github.com/DATA-DOG/go-sqlmock v1.4.1 h1:ThlnYciV1iM/V0OSF/dtkqWb6xo5qITT1TJBG1M
 github.com/DATA-DOG/go-sqlmock v1.4.1/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/champon1020/minigorm v0.0.0-20201026085522-172ebf4f9865 h1:4tTIwtFVH0kVEmO2o676P0UqZNTFBKJuS7cCBo7a70A=
 github.com/champon1020/minigorm v0.0.0-20201026085522-172ebf4f9865/go.mod h1:hCnm5sXCMjRdQTlLcM/tLNBpbIg4vrRhEM2jo51XN/U=
+github.com/champon1020/minigorm v0.0.0-20201031222330-151ad2491709 h1:LMnIwhsVfBEpt3AlcCi0cPlgY1iJ6Kg2oDC3IO6T3es=
+github.com/champon1020/minigorm v0.0.0-20201031222330-151ad2491709/go.mod h1:hCnm5sXCMjRdQTlLcM/tLNBpbIg4vrRhEM2jo51XN/U=
 github.com/champon1020/minigorm v1.2.2-0.20201011163712-a4000bede5bb h1:pmq7Ax4KREd8gRrzfbVVnWWRY6p5y1DMheKSf+31IAg=
 github.com/champon1020/minigorm v1.2.2-0.20201011163712-a4000bede5bb/go.mod h1:hCnm5sXCMjRdQTlLcM/tLNBpbIg4vrRhEM2jo51XN/U=
 github.com/champon1020/minigorm v1.2.2 h1:nsJg6ljSYbipkP3//o85Nxd7nsgP/WSVZAIPtlQqbrU=

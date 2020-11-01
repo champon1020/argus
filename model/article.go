@@ -41,7 +41,7 @@ type Article struct {
 	ImageHash string `mgorm:"image_name" json:"imageName"`
 
 	// article is private or not
-	Private bool `mgorm:"private" json:"private"`
+	Private bool `mgorm:"private" json:"_private"`
 }
 
 func (db *Database) setCategoriesToArticle(a *[]Article) error {
@@ -194,9 +194,11 @@ func (db *Database) FindPublicArticleGeID(a *[]Article, id string, op *QueryOpti
 // FindPublicArticlesByTitle searches for public articles
 // whose title is part of the specified title string.
 func (db *Database) FindPublicArticlesByTitle(a *[]Article, title string, op *QueryOptions) error {
+	title = "%" + title + "%"
+
 	ctx := db.DB.Select(a, "articles").
 		Where("private = ?", false).
-		Where("title LIKE %?%", title)
+		Where("title LIKE ?", title)
 
 	op.apply(ctx)
 
@@ -329,34 +331,14 @@ func (db *Database) UpdateArticle(a *Article) error {
 	}
 
 	err = tx.Transact(func(tx *minigorm.TX) error {
-		doneUpdate := make(chan bool, 1)
-		doneDelete := make(chan bool, 1)
 		errc := make(chan error, 3)
 
-		// Update article on database.
-		go func() {
-			defer close(doneUpdate)
-			if err := updateArticle(tx, a); err != nil {
-				errc <- err
-				doneUpdate <- false
-				return
-			}
-			doneUpdate <- true
-		}()
+		if err := updateArticle(tx, a); err != nil {
+			return err
+		}
 
-		// Delete pairs of article and category id.
-		go func() {
-			defer close(doneDelete)
-			if err := deleteArticleCategoryByArticleID(tx, a.ID); err != nil {
-				errc <- err
-				doneDelete <- false
-				return
-			}
-			doneDelete <- true
-		}()
-
-		if !<-doneUpdate || !<-doneDelete {
-			return <-errc
+		if err := deleteArticleCategoryByArticleID(tx, a.ID); err != nil {
+			return err
 		}
 
 		flgCate := true

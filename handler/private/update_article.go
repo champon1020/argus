@@ -40,7 +40,7 @@ func APIUpdateArticle(ctx *gin.Context, db model.DatabaseIface) error {
 // APITogglePrivateReq is the request type.
 type APITogglePrivateReq struct {
 	ID      string `json:"id"`
-	Private bool   `json:"private"`
+	Private bool   `json:"_private"`
 }
 
 // APIUpdateIsPrivate is the private handler to update isPrivate property of article on database.

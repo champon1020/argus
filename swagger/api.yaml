@@ -136,7 +136,7 @@ paths:
     get:
       summary: Return articles list by category.
       parameters:
-        - name: category
+        - name: categoryId
           in: query
           required: true
           description: Category name.
@@ -537,11 +537,11 @@ paths:
               properties:
                 id:
                   type: string
-                private:
+                _private:
                   type: boolean
               required:
                 - id
-                - private
+                - _private
       responses:
         '200':
           description: Success.
@@ -677,7 +677,7 @@ components:
           type: string
         imageName:
           type: string
-        private:
+        _private:
           type: boolean
       required:
         - id
@@ -687,7 +687,7 @@ components:
         - updatedDate
         - content
         - imageName
-        - private
+        - _private
 
     Category:
       type: object

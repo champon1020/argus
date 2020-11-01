@@ -66,10 +66,12 @@ func (db *Database) CountPublicArticlesByTitle(cnt *int, title string) error {
 		return argus.NewError(errCountDbNil, nil)
 	}
 
+	title = "%" + title + "%"
+
 	var c []Count
 	ctx := db.DB.Select(&c, "articles", "COUNT(*) AS count").
 		Where("private = ?", false).
-		Where("title LIKE %?%", title)
+		Where("title LIKE ?", title)
 
 	if err := ctx.Do(); err != nil {
 		return argus.NewError(errCountQueryFailed, err).
