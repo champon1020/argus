@@ -71,7 +71,7 @@ func newRouter() *gin.Engine {
 		update := priv.Group("/update")
 		{
 			update.PUT("/article", wrapHandlerWithDatabase(private.APIUpdateArticle))
-			update.PUT("/article/isPrivate", wrapHandlerWithDatabase(private.APIUpdateIsPrivate))
+			update.PUT("/article/private", wrapHandlerWithDatabase(private.APIUpdateIsPrivate))
 			update.PUT("/draft", wrapHandlerWithDatabase(private.APIUpdateDraft))
 		}
 
@@ -138,7 +138,8 @@ func corsConfig() *cors.Config {
 		AllowAllOrigins: false,
 		AllowOrigins: []string{
 			"https://blog.champonian.com",
-			//"http://localhost:3000",
+			"https://us-central1-alfheim-argus-269319.cloudfunctions.net",
+			"http://localhost:3000",
 		},
 		AllowMethods:  []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:  []string{"Origin", "Content-Type", "Authorization"},

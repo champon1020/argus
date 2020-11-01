@@ -14,9 +14,7 @@ type APIRegisterDraftReq struct {
 
 // APIRegisterDraftRes is the response type.
 type APIRegisterDraftRes struct {
-	ID        string `json:"id"`
-	content   string `json:"content"`
-	imageHash string `json:"imageHash"`
+	ID string `json:"id"`
 }
 
 // APIRegisterDraft is the private handler to register new draft to database.

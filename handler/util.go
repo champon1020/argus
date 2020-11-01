@@ -37,7 +37,7 @@ func ParseID(ctx *gin.Context, outCh chan<- string, errCh chan<- error) {
 
 // ParseCategoryID parses query parameter to get category id.
 func ParseCategoryID(ctx *gin.Context, outCh chan<- string, errCh chan<- error) {
-	parseStringParam(ctx, "categoryID", outCh, errCh)
+	parseStringParam(ctx, "categoryId", outCh, errCh)
 }
 
 // Parse query parameter to get integer variable.
