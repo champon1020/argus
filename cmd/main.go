@@ -139,7 +139,7 @@ func corsConfig() *cors.Config {
 		AllowOrigins: []string{
 			"https://blog.champonian.com",
 			"https://us-central1-alfheim-argus-269319.cloudfunctions.net",
-			"http://localhost:3000",
+			//			"http://localhost:3000",
 		},
 		AllowMethods:  []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:  []string{"Origin", "Content-Type", "Authorization"},

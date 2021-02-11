@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: myblog-ingress
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: "myblog-external"
+    kubernetes.io/ingress.global-static-ip-name: myblog-external
     networking.gke.io/managed-certificates: alfheim-crt
 spec:
   backend:
