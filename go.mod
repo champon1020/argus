@@ -9,5 +9,8 @@ require (
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/echo/v4 v4.1.17 // indirect
 	github.com/stretchr/testify v1.6.1
+	golang.org/x/net v0.0.0-20200822124328-c89045814202
 )

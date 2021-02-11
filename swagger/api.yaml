@@ -231,25 +231,6 @@ paths:
           description: Internal server error.
 
 
-  /api/v3/count/articles:
-    get:
-      summary: Count number of public articles.
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  count:
-                    type: number
-                required:
-                  - count
-        '500':
-          description: Internal server error.
-          
-
   /api/v3/get/categories:
     get:
       summary: Return categories which belong to public articles.
@@ -271,6 +252,25 @@ paths:
           description: Query parameters are not valid.
         '500':
           description: Internal server error.
+
+          
+  /api/v3/count/articles:
+    get:
+      summary: Count number of public articles.
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: number
+                required:
+                  - count
+        '500':
+          description: Internal server error.                  
 
 
   /api/v3/private/get/article/id/{id}:
