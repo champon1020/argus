@@ -1,16 +1,15 @@
 module github.com/champon1020/argus
 
-go 1.13
+go 1.16
+
+replace github.com/champon1020/mgorm => ../argus/mgorm
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.4.1
-	github.com/champon1020/minigorm v0.0.0-20201026085522-172ebf4f9865
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/gin-contrib/cors v1.3.1
-	github.com/gin-gonic/gin v1.5.0
+	github.com/champon1020/mgorm v0.0.0-20210316114102-2461c3545a03
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/labstack/echo v3.3.10+incompatible
-	github.com/labstack/echo/v4 v4.1.17 // indirect
-	github.com/stretchr/testify v1.6.1
-	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	github.com/labstack/echo/v4 v4.2.1
+	github.com/mattn/go-colorable v0.1.8 // indirect
+	github.com/stretchr/testify v1.6.1 // indirect
+	golang.org/x/sys v0.0.0-20210317225723-c4fcb01b228e // indirect
 )

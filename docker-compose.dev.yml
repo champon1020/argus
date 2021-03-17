@@ -1,0 +1,27 @@
+version: "3"
+services:
+  api:
+    image: golang:1.16
+    container_name: argus_api_dev
+    environment:
+      ARGUS_DB_USER: "root"
+      ARGUS_DB_PASSWORD: "toor"
+      ARGUS_DB_PORT: "3306"
+      ARGUS_DB_HOST: "db"
+      ARGUS_DB_NAME: "argus"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ".:/go/src/github.com/champon1020/argus"
+    working_dir: "/go/src/github.com/champon1020/argus"
+    command: >
+      /bin/sh -c "go get -u github.com/cosmtrek/air && go mod download && air -c .air.toml"
+
+  db:
+    image: mysql:8.0
+    container_name: argus_db_dev
+    environment:
+      MYSQL_ROOT_PASSWORD: "toor"
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: "argus"
+      TZ: "Asia/Tokyo"

@@ -1,15 +1,17 @@
 package route
 
-import "github.com/labstack/echo"
+import (
+	"github.com/champon1020/argus/handler"
+	"github.com/labstack/echo/v4"
+)
 
 func dummyHandler(c echo.Context) error {
 	return nil
 }
 
 // AddRoutes registers new routes.
-func AddRoutes(e *echo.Echo) {
+func AddRoutes(e *echo.Echo, h *handler.Handler) {
 	v3 := e.Group("/api/v3")
-
 	{
 		v3.GET("/get/article/id/:id", dummyHandler)
 		v3.GET("/get/articles", dummyHandler)

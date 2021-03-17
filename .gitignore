@@ -1,5 +1,2 @@
-tmp/**
-resource_debug/**
-
-**/.env
-envvar.sh
+tmp/
+sshkey/
