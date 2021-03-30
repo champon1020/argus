@@ -1,7 +1,7 @@
-package route
+package router
 
 import (
-	"github.com/champon1020/argus/handler"
+	"github.com/champon1020/argus/interfaces/handler"
 	"github.com/labstack/echo/v4"
 )
 
@@ -9,8 +9,8 @@ func dummyHandler(c echo.Context) error {
 	return nil
 }
 
-// AddRoutes registers new routes.
-func AddRoutes(e *echo.Echo, h *handler.Handler) {
+// AppRouter declares the api routes.
+func AppRouter(e *echo.Echo, h handler.AppHandler) {
 	v3 := e.Group("/api/v3")
 	{
 		v3.GET("/get/article/id/:id", dummyHandler)
@@ -21,7 +21,7 @@ func AddRoutes(e *echo.Echo, h *handler.Handler) {
 
 	private := v3.Group("/private")
 	{
-		private.GET("/get/article/id/:id", dummyHandler)
+		private.GET("/get/article/id/:id", h.ArticleByID)
 		private.GET("/get/draft/id/:id", dummyHandler)
 		private.GET("/get/articles", dummyHandler)
 		private.GET("/get/drafts", dummyHandler)

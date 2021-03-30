@@ -2,17 +2,13 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
-	"github.com/champon1020/argus/handler"
-	"github.com/champon1020/argus/repository"
-	"github.com/champon1020/argus/route"
-	"github.com/champon1020/mgorm"
+	"github.com/champon1020/argus/interfaces/di"
+	"github.com/champon1020/argus/interfaces/router"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func dns() string {
@@ -27,13 +23,7 @@ func dns() string {
 }
 
 func main() {
-	db, err := mgorm.New("mysql", dns())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	repo := repository.NewRepository(db)
-	h := handler.NewHandler(repo)
+	di := di.NewDI()
 
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -45,6 +35,6 @@ func main() {
 		Output: os.Stdout,
 	}))
 
-	route.AddRoutes(e, h)
+	router.AppRouter(e, di.NewAppHandler())
 	e.Logger.Fatal(e.Start(":8000"))
 }
