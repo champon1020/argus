@@ -17,6 +17,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
   schemas:
     Article:
       type: object
@@ -25,43 +26,40 @@ components:
           type: string
         title:
           type: string
-        categories:
+        tags:
           type: array
           items:
-            $ref: "#/components/schemas/Category"
-        createdDate:
+            $ref: "#/components/schemas/Tag"
+        created_at:
           type: string
-        updatedDate:
+        updated_at:
           type: string
         content:
           type: string
-        imageName:
+        image_url:
           type: string
-        isPublic:
+        is_public:
           type: boolean
       required:
         - id
         - title
-        - categories
-        - createdDate
-        - updatedDate
+        - tags
+        - created_at
+        - updated_at
         - content
-        - imageName
-        - isPublic
+        - image_url
+        - is_public
 
-    Category:
+    Tag:
       type: object
       properties:
-        id:
-          type: string
         name:
           type: string
-        numArticles:
+        n_articles:
           type: number
       required:
-        - id
         - name
-        - numArticles
+        - n_articles
 
     Draft:
       type: object
@@ -70,23 +68,21 @@ components:
           type: string
         title:
           type: string
-        categories:
-          type: array
-          items:
-            $ref: "#/components/schemas/Category"
-        updatedDate:
+        tags:
+          type: string
+        updated_at:
           type: string
         content:
           type: string
-        imageName:
+        image_url:
           type: string
       required:
         - id
         - title
-        - categories
-        - updatedDate
+        - tags
+        - updated_at
         - content
-        - imageName
+        - image_url
 
     ArticleReq:
       type: object
@@ -95,34 +91,31 @@ components:
           type: string
         title:
           type: string
-        categories:
+        tags:
           type: array
           items:
-            $ref: "#/components/schemas/CategoryReq"
+            $ref: "#/components/schemas/TagReq"
         content:
           type: string
-        imageName:
+        image_url:
           type: string
-        isPublic:
+        is_public:
           type: boolean
       required:
         - id
         - title
-        - categories
+        - tags
         - content
-        - imageName
-        - isPublic
+        - image_url
+        - is_public
 
-    CategoryReq:
+    TagReq:
       type: object
       properties:
-        id:
-          type: string
         name:
           type: string
       required:
-        - id
-        - name        
+        - name
 
     DraftReq:
       type: object
@@ -131,20 +124,18 @@ components:
           type: string
         title:
           type: string
-        categories:          
-          type: array
-          items:
-            $ref: "#/components/schemas/CategoryReq"
+        tags:
+          type: string
         content:
           type: string
-        imageName:
+        image_url:
           type: string
       required:
         - id
         - title
-        - categories
+        - tags
         - content
-        - imageName    
+        - image_url
 
 paths:
   /api/v3/get/article/id/{id}:
@@ -180,7 +171,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/get/articles:
     get:
       summary: Return public articles.
@@ -203,10 +194,10 @@ paths:
           description: Article title.
           schema:
             type: string
-        - name: category
+        - name: tag
           in: query
           required: false
-          description: Category name.
+          description: Tag name.
           schema:
             type: array
             items:
@@ -231,9 +222,9 @@ paths:
           description: Internal server error.
 
 
-  /api/v3/get/categories:
+  /api/v3/get/tags:
     get:
-      summary: Return categories which belong to public articles.
+      summary: Return tags which belong to public articles.
       responses:
         '200':
           description: Success.
@@ -242,18 +233,18 @@ paths:
               schema:
                 type: object
                 properties:
-                  categories:
+                  tags:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Category'
+                      $ref: '#/components/schemas/Tag'
                 required:
-                  - categories
+                  - tags
         '400':
           description: Query parameters are not valid.
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/count/articles:
     get:
       summary: Count number of public articles.
@@ -270,7 +261,7 @@ paths:
                 required:
                   - count
         '500':
-          description: Internal server error.                  
+          description: Internal server error.
 
 
   /api/v3/private/get/article/id/{id}:
@@ -338,7 +329,7 @@ paths:
         '404':
           description: Not Found.
         '500':
-          description: Internal server error.          
+          description: Internal server error.
 
 
   /api/v3/private/get/articles:
@@ -379,8 +370,8 @@ paths:
           description: Forbidden.
         '500':
           description: Internal server error.
-          
-          
+
+
   /api/v3/private/get/drafts:
     get:
       summary: Return drafts.
@@ -420,7 +411,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/private/get/images:
     get:
       summary: Return images.
@@ -460,7 +451,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/private/count/articles:
     get:
       summary: Count number of articles.
@@ -528,8 +519,8 @@ paths:
           description: Forbidden.
         '500':
           description: Internal server error.
-          
-          
+
+
   /api/v3/private/post/article:
     post:
       summary: Register an article.
@@ -558,7 +549,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/private/post/draft:
     post:
       summary: Register a draft.
@@ -600,7 +591,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/private/post/image:
     post:
       summary: Register a image.
@@ -626,7 +617,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/private/update/article:
     put:
       summary: Update an article.
@@ -653,7 +644,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/private/update/article/isPublic:
     put:
       summary: Update article's isPublic property.
@@ -683,7 +674,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/private/update/draft:
     put:
       summary: Update a draft.
@@ -737,7 +728,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/private/delete/draft:
     delete:
       summary: Delete a draft with id.
@@ -764,7 +755,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/private/delete/image:
     delete:
       summary: Delete images.
@@ -782,7 +773,7 @@ paths:
                   items:
                     type: string
               required:
-                - imageNames                  
+                - imageNames
       responses:
         '200':
           description: Success.
@@ -793,7 +784,7 @@ paths:
         '500':
           description: Internal server error.
 
-          
+
   /api/v3/verify/token:
     post:
       summary: Verify token.

@@ -25,3 +25,7 @@ services:
       MYSQL_ROOT_HOST: '%'
       MYSQL_DATABASE: "argus"
       TZ: "Asia/Tokyo"
+    ports:
+      - "43306:3306"
+    volumes:
+      - "./migration:/docker-entrypoint-initdb.d"

@@ -1,29 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 
+	"github.com/champon1020/argus/config"
 	"github.com/champon1020/argus/interfaces/di"
 	"github.com/champon1020/argus/interfaces/router"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func dns() string {
-	return fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?parseTime=True",
-		os.Getenv("ARGUS_DB_USER"),
-		os.Getenv("ARGUS_DB_PASSWORD"),
-		os.Getenv("ARGUS_DB_HOST"),
-		os.Getenv("ARGUS_DB_PORT"),
-		os.Getenv("ARGUS_DB_NAME"),
-	)
-}
-
 func main() {
-	di := di.NewDI()
+	config, err := config.NewConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	di := di.NewDI(config)
 
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
