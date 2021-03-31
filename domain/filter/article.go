@@ -1,27 +1,27 @@
 package filter
 
-import "gorm.io/gorm"
+import (
+	"github.com/champon1020/argus/domain"
+	"gorm.io/gorm"
+)
 
 // ArticleFilter contains search filters.
 type ArticleFilter struct {
-	Title    string
-	Tags     []string
-	IsPublic bool
+	Title  *string
+	Tags   []string
+	Status *domain.Status
 }
 
 // Apply applies filter.
-func (af *ArticleFilter) Apply(db *gorm.DB) *gorm.DB {
-	if af.Title != "" {
-		db.Where("title LIKE %s", "%%"+af.Title+"%%")
+func (af *ArticleFilter) Apply(base *gorm.DB) *gorm.DB {
+	if af.Title != nil {
+		base = base.Where("title LIKE ?", "%"+*af.Title+"%")
 	}
 	if len(af.Tags) > 0 {
-		db.Where("tag IN (?)", db.Table("article_tag").
-			Where("tag_name IN (?)", af.Tags).
-			Select("article_id"),
-		)
+		base = base.Where("id IN (SELECT article_id FROM tags WHERE name IN (?))", af.Tags)
 	}
-	if af.IsPublic {
-		db.Where("is_public = ?", 1)
+	if af.Status != nil {
+		base = base.Where("status = ?", *af.Status)
 	}
-	return db
+	return base
 }

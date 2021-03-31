@@ -13,7 +13,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/stretchr/testify v1.6.1 // indirect
-	golang.org/x/sys v0.0.0-20210330210617-4fbd30eecc44 // indirect
+	golang.org/x/sys v0.0.0-20210331175145-43e1dd70ce54 // indirect
 	gorm.io/driver/mysql v1.0.5 // indirect
 	gorm.io/gorm v1.21.6
 )

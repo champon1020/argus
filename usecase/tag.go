@@ -8,7 +8,7 @@ import (
 
 // TagUseCase is usecase interface for tag.
 type TagUseCase interface {
-	FindByName(db *gorm.DB, name string) (*domain.Tag, error)
+	FindByName(db *gorm.DB, name string) (*[]domain.Tag, error)
 }
 
 type tagUseCase struct {
@@ -20,7 +20,7 @@ func NewTagUseCase(tr repository.TagRepository) TagUseCase {
 	return &tagUseCase{tr: tr}
 }
 
-func (tu *tagUseCase) FindByName(db *gorm.DB, name string) (*domain.Tag, error) {
+func (tu *tagUseCase) FindByName(db *gorm.DB, name string) (*[]domain.Tag, error) {
 	return nil, nil
 }
 

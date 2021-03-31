@@ -8,7 +8,7 @@ import (
 
 // ArticleRepository is repository interface for article.
 type ArticleRepository interface {
-	FindByID(db *gorm.DB, id string, isPublic bool) (*domain.Article, error)
+	FindByID(db *gorm.DB, id string, status *domain.Status) (*domain.Article, error)
 	Find(db *gorm.DB, limit int, offset int, filter *filter.ArticleFilter) (*[]domain.Article, error)
 	Count(db *gorm.DB, filter *filter.ArticleFilter) (int, error)
 	Post(db *gorm.DB, article *domain.Article) error

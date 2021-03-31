@@ -4,11 +4,19 @@ import (
 	"github.com/champon1020/argus/domain"
 	"github.com/champon1020/argus/domain/filter"
 	"github.com/champon1020/argus/domain/repository"
+	"github.com/champon1020/argus/usecase/pagenation"
 	"gorm.io/gorm"
 )
 
 // ArticleUseCase is usecase interface for article.
 type ArticleUseCase interface {
+	FindPublicByID(db *gorm.DB, id string) (*domain.Article, error)
+	FindPublic(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error)
+	FindPublicByTitle(db *gorm.DB, p pagenation.Pagenation, title string) (*[]domain.Article, error)
+	FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, tag string) (*[]domain.Article, error)
+	CountPublic(db *gorm.DB) (int, error)
+	CountPublicByTitle(db *gorm.DB, title string) (int, error)
+	CountPublicByTag(db *gorm.DB, tag string) (int, error)
 	FindByID(db *gorm.DB, id string) (*domain.Article, error)
 }
 
@@ -22,39 +30,61 @@ func NewArticleUseCase(ar repository.ArticleRepository) ArticleUseCase {
 }
 
 func (au articleUseCase) FindPublicByID(db *gorm.DB, id string) (*domain.Article, error) {
-	return au.ar.FindByID(db, id, true)
+	return au.ar.FindByID(db, id, &domain.Public)
 }
 
-func (au articleUseCase) FindPublic(db *gorm.DB, num int, page int) (*[]domain.Article, error) {
-	return au.ar.Find(db, num, page, &filter.ArticleFilter{IsPublic: true})
+func (au articleUseCase) FindPublic(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
+	filter := &filter.ArticleFilter{
+		Status: &domain.Public,
+	}
+	return au.ar.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
-func (au articleUseCase) FindPublicByTitle(db *gorm.DB, num int, page int, title string) (*[]domain.Article, error) {
-	return au.ar.Find(db, num, page, &filter.ArticleFilter{IsPublic: true, Title: title})
+func (au articleUseCase) FindPublicByTitle(db *gorm.DB, p pagenation.Pagenation, title string) (*[]domain.Article, error) {
+	filter := &filter.ArticleFilter{
+		Status: &domain.Public,
+		Title:  &title,
+	}
+	return au.ar.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
-func (au articleUseCase) FindPublicByTags(db *gorm.DB, num int, page int, tags []string) (*[]domain.Article, error) {
-	return au.ar.Find(db, num, page, &filter.ArticleFilter{IsPublic: true, Tags: tags})
+func (au articleUseCase) FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, tag string) (*[]domain.Article, error) {
+	filter := &filter.ArticleFilter{
+		Status: &domain.Public,
+		Tags:   []string{tag},
+	}
+	return au.ar.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
 func (au articleUseCase) CountPublic(db *gorm.DB) (int, error) {
-	return au.ar.Count(db, &filter.ArticleFilter{IsPublic: true})
+	filter := &filter.ArticleFilter{
+		Status: &domain.Public,
+	}
+	return au.ar.Count(db, filter)
 }
 
 func (au articleUseCase) CountPublicByTitle(db *gorm.DB, title string) (int, error) {
-	return au.ar.Count(db, &filter.ArticleFilter{IsPublic: true, Title: title})
+	filter := &filter.ArticleFilter{
+		Status: &domain.Public,
+		Title:  &title,
+	}
+	return au.ar.Count(db, filter)
 }
 
-func (au articleUseCase) CountPublicByTags(db *gorm.DB, tags []string) (int, error) {
-	return au.ar.Count(db, &filter.ArticleFilter{IsPublic: true, Tags: tags})
+func (au articleUseCase) CountPublicByTag(db *gorm.DB, tag string) (int, error) {
+	filter := &filter.ArticleFilter{
+		Status: &domain.Public,
+		Tags:   []string{tag},
+	}
+	return au.ar.Count(db, filter)
 }
 
 func (au articleUseCase) FindByID(db *gorm.DB, id string) (*domain.Article, error) {
-	return au.ar.FindByID(db, id, false)
+	return au.ar.FindByID(db, id, nil)
 }
 
-func (au articleUseCase) Find(db *gorm.DB, num int, page int) (*[]domain.Article, error) {
-	return au.ar.Find(db, num, page, nil)
+func (au articleUseCase) Find(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
+	return au.ar.Find(db, p.Limit, (p.Page-1)*p.Limit, nil)
 }
 
 func (au articleUseCase) Count(db *gorm.DB) (int, error) {
@@ -62,13 +92,13 @@ func (au articleUseCase) Count(db *gorm.DB) (int, error) {
 }
 
 func (au articleUseCase) Post(db *gorm.DB, article *domain.Article) error {
-	return nil
+	return au.ar.Post(db, article)
 }
 
 func (au articleUseCase) Update(db *gorm.DB, article *domain.Article) error {
-	return nil
+	return au.ar.Update(db, article)
 }
 
 func (au articleUseCase) Delete(db *gorm.DB, id string) error {
-	return nil
+	return au.ar.Delete(db, id)
 }

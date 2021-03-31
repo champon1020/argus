@@ -4,6 +4,7 @@ import (
 	"github.com/champon1020/argus/domain"
 	"github.com/champon1020/argus/domain/filter"
 	"github.com/champon1020/argus/domain/repository"
+	"github.com/champon1020/argus/infra/dto"
 	"gorm.io/gorm"
 )
 
@@ -14,25 +15,46 @@ func NewArticlePersistence() repository.ArticleRepository {
 	return &articlePersistence{}
 }
 
-func (ap *articlePersistence) FindByID(db *gorm.DB, id string, isPublic bool) (*domain.Article, error) {
-	article := &domain.Article{}
+func (ap *articlePersistence) FindByID(db *gorm.DB, id string, status *domain.Status) (*domain.Article, error) {
+	articleDTO := &dto.ArticleDTO{}
 
-	if err := db.Table("articles").Where("id = ?", id).First(article).Error; err != nil {
+	base := db.Table("articles").Where("id = ?", id)
+	if status != nil {
+		base.Where("status = ?", *status)
+	}
+	if err := base.First(articleDTO).Error; err != nil {
 		return nil, err
 	}
+
+	article := articleDTO.MapToDomain()
+	tags, err := (*tagPersistence).FindByArticleID(&tagPersistence{}, db, article.ID)
+	if err != nil {
+		return nil, err
+	}
+	article.Tags = *tags
 
 	return article, nil
 }
 
 func (ap *articlePersistence) Find(db *gorm.DB, limit int, offset int, filter *filter.ArticleFilter) (*[]domain.Article, error) {
-	articles := []domain.Article{}
+	articleDTOs := []dto.ArticleDTO{}
 
 	base := db.Table("articles").Limit(limit).Offset(offset)
 	if filter != nil {
 		base = filter.Apply(base)
 	}
-	if err := base.Find(&articles).Error; err != nil {
+	if err := base.Find(&articleDTOs).Error; err != nil {
 		return nil, err
+	}
+
+	articles := make([]domain.Article, len(articleDTOs))
+	for i, a := range articleDTOs {
+		articles[i] = *a.MapToDomain()
+		tags, err := (*tagPersistence).FindByArticleID(&tagPersistence{}, db, articles[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		articles[i].Tags = *tags
 	}
 
 	return &articles, nil
@@ -53,21 +75,23 @@ func (ap *articlePersistence) Count(db *gorm.DB, filter *filter.ArticleFilter) (
 }
 
 func (ap *articlePersistence) Post(db *gorm.DB, article *domain.Article) error {
-	if err := db.Create(article).Error; err != nil {
+	articleDTO := dto.NewArticleDTO(article)
+	if err := db.Create(articleDTO).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (ap *articlePersistence) Update(db *gorm.DB, article *domain.Article) error {
-	if err := db.Model(article).Where("id = ?", article.ID).Updates(article).Error; err != nil {
+	articleDTO := dto.NewArticleDTO(article)
+	if err := db.Model(articleDTO).Where("id = ?", article.ID).Updates(article).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (ap *articlePersistence) Delete(db *gorm.DB, id string) error {
-	if err := db.Where("id = ?", id).Delete(&domain.Article{}).Error; err != nil {
+	if err := db.Exec("DELETE FROM articles WHERE id = ?", id).Error; err != nil {
 		return err
 	}
 	return nil

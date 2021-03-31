@@ -31,8 +31,12 @@ func (h *appHandler) PublicArticles(c echo.Context) error {
 	return h.ah.PublicArticles(c)
 }
 
-func (h *appHandler) CountPublicArticles(c echo.Context) error {
-	return h.ah.CountPublicArticles(c)
+func (h *appHandler) PublicArticlesByTitle(c echo.Context) error {
+	return h.ah.PublicArticlesByTitle(c)
+}
+
+func (h *appHandler) PublicArticlesByTag(c echo.Context) error {
+	return h.ah.PublicArticlesByTag(c)
 }
 
 func (h *appHandler) ArticleByID(c echo.Context) error {
@@ -41,10 +45,6 @@ func (h *appHandler) ArticleByID(c echo.Context) error {
 
 func (h *appHandler) Articles(c echo.Context) error {
 	return h.ah.Articles(c)
-}
-
-func (h *appHandler) CountArticles(c echo.Context) error {
-	return h.ah.CountArticles(c)
 }
 
 func (h *appHandler) PostArticle(c echo.Context) error {
