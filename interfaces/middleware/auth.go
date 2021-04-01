@@ -4,20 +4,20 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/champon1020/argus/service"
+	"github.com/champon1020/argus/interfaces/auth"
 	"github.com/labstack/echo/v4"
 )
 
 // AuthMiddleware verifies jwt token.
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		auth := c.Request().Header.Get("Authorization")
-		token, err := extractToken(auth)
+		authHeader := c.Request().Header.Get("Authorization")
+		token, err := extractToken(authHeader)
 		if err != nil {
 			return err
 		}
 
-		if err := service.VerifyJWTToken(token); err != nil {
+		if err := auth.VerifyJWTToken(token); err != nil {
 			return err
 		}
 
