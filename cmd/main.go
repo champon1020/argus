@@ -24,7 +24,7 @@ func main() {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "[ECHO] ${method} | ${uri} | ${status}\n",
+		Format: "[ECHO] ${method} | ${uri} | ${status} : ${error}\n",
 		Output: os.Stdout,
 	}))
 

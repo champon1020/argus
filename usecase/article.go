@@ -1,10 +1,14 @@
 package usecase
 
 import (
+	"encoding/json"
+	"time"
+
 	"github.com/champon1020/argus/domain"
 	"github.com/champon1020/argus/domain/filter"
 	"github.com/champon1020/argus/domain/repository"
 	"github.com/champon1020/argus/usecase/pagenation"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -14,91 +18,164 @@ type ArticleUseCase interface {
 	FindPublic(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error)
 	FindPublicByTitle(db *gorm.DB, p pagenation.Pagenation, title string) (*[]domain.Article, error)
 	FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, tag string) (*[]domain.Article, error)
+	FindByID(db *gorm.DB, id string) (*domain.Article, error)
+	Find(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error)
 	CountPublic(db *gorm.DB) (int, error)
 	CountPublicByTitle(db *gorm.DB, title string) (int, error)
 	CountPublicByTag(db *gorm.DB, tag string) (int, error)
-	FindByID(db *gorm.DB, id string) (*domain.Article, error)
+	Count(db *gorm.DB) (int, error)
+	Post(db *gorm.DB, jsonBody []byte) (string, error)
+	Update(db *gorm.DB, jsonBody []byte) (string, error)
+	Delete(db *gorm.DB, jsonBody []byte) error
 }
 
 type articleUseCase struct {
-	ar repository.ArticleRepository
+	aR repository.ArticleRepository
+	tR repository.TagRepository
 }
 
 // NewArticleUseCase creates articleUseCase.
-func NewArticleUseCase(ar repository.ArticleRepository) ArticleUseCase {
-	return &articleUseCase{ar: ar}
+func NewArticleUseCase(aR repository.ArticleRepository, tR repository.TagRepository) ArticleUseCase {
+	return &articleUseCase{aR: aR, tR: tR}
 }
 
-func (au articleUseCase) FindPublicByID(db *gorm.DB, id string) (*domain.Article, error) {
-	return au.ar.FindByID(db, id, &domain.Public)
+func (aU articleUseCase) FindPublicByID(db *gorm.DB, id string) (*domain.Article, error) {
+	return aU.aR.FindByID(db, id, &domain.Public)
 }
 
-func (au articleUseCase) FindPublic(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
+func (aU articleUseCase) FindPublic(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
 	}
-	return au.ar.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
+	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
-func (au articleUseCase) FindPublicByTitle(db *gorm.DB, p pagenation.Pagenation, title string) (*[]domain.Article, error) {
-	filter := &filter.ArticleFilter{
-		Status: &domain.Public,
-		Title:  &title,
-	}
-	return au.ar.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
-}
-
-func (au articleUseCase) FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, tag string) (*[]domain.Article, error) {
-	filter := &filter.ArticleFilter{
-		Status: &domain.Public,
-		Tags:   []string{tag},
-	}
-	return au.ar.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
-}
-
-func (au articleUseCase) CountPublic(db *gorm.DB) (int, error) {
-	filter := &filter.ArticleFilter{
-		Status: &domain.Public,
-	}
-	return au.ar.Count(db, filter)
-}
-
-func (au articleUseCase) CountPublicByTitle(db *gorm.DB, title string) (int, error) {
+func (aU articleUseCase) FindPublicByTitle(db *gorm.DB, p pagenation.Pagenation, title string) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
 		Title:  &title,
 	}
-	return au.ar.Count(db, filter)
+	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
-func (au articleUseCase) CountPublicByTag(db *gorm.DB, tag string) (int, error) {
+func (aU articleUseCase) FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, tag string) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
 		Tags:   []string{tag},
 	}
-	return au.ar.Count(db, filter)
+	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
-func (au articleUseCase) FindByID(db *gorm.DB, id string) (*domain.Article, error) {
-	return au.ar.FindByID(db, id, nil)
+func (aU articleUseCase) CountPublic(db *gorm.DB) (int, error) {
+	filter := &filter.ArticleFilter{
+		Status: &domain.Public,
+	}
+	return aU.aR.Count(db, filter)
 }
 
-func (au articleUseCase) Find(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
-	return au.ar.Find(db, p.Limit, (p.Page-1)*p.Limit, nil)
+func (aU articleUseCase) CountPublicByTitle(db *gorm.DB, title string) (int, error) {
+	filter := &filter.ArticleFilter{
+		Status: &domain.Public,
+		Title:  &title,
+	}
+	return aU.aR.Count(db, filter)
 }
 
-func (au articleUseCase) Count(db *gorm.DB) (int, error) {
-	return au.ar.Count(db, nil)
+func (aU articleUseCase) CountPublicByTag(db *gorm.DB, tag string) (int, error) {
+	filter := &filter.ArticleFilter{
+		Status: &domain.Public,
+		Tags:   []string{tag},
+	}
+	return aU.aR.Count(db, filter)
 }
 
-func (au articleUseCase) Post(db *gorm.DB, article *domain.Article) error {
-	return au.ar.Post(db, article)
+func (aU articleUseCase) FindByID(db *gorm.DB, id string) (*domain.Article, error) {
+	return aU.aR.FindByID(db, id, nil)
 }
 
-func (au articleUseCase) Update(db *gorm.DB, article *domain.Article) error {
-	return au.ar.Update(db, article)
+func (aU articleUseCase) Find(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
+	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, nil)
 }
 
-func (au articleUseCase) Delete(db *gorm.DB, id string) error {
-	return au.ar.Delete(db, id)
+func (aU articleUseCase) Count(db *gorm.DB) (int, error) {
+	return aU.aR.Count(db, nil)
+}
+
+func (aU articleUseCase) Post(db *gorm.DB, jsonBody []byte) (string, error) {
+	article := &domain.Article{}
+	if err := json.Unmarshal(jsonBody, article); err != nil {
+		return "", err
+	}
+
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		return "", err
+	}
+
+	article.ID = uuid.String()
+	article.CreatedAt = time.Now()
+	article.UpdatedAt = time.Now()
+	article.Status = 1
+
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		if err := aU.aR.Post(tx, article); err != nil {
+			return err
+		}
+
+		if err := aU.tR.Posts(tx, &article.Tags, article.ID); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return "", err
+	}
+
+	return article.ID, nil
+}
+
+func (aU articleUseCase) Update(db *gorm.DB, jsonBody []byte) (string, error) {
+	article := &domain.Article{}
+	if err := json.Unmarshal(jsonBody, article); err != nil {
+		return "", err
+	}
+
+	article.UpdatedAt = time.Now()
+
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		if err := aU.aR.Update(tx, article); err != nil {
+			return err
+		}
+
+		if err := aU.tR.DeleteByArticleID(tx, article.ID); err != nil {
+			return err
+		}
+
+		if err := aU.tR.Posts(tx, &article.Tags, article.ID); err != nil {
+			return err
+		}
+
+		return nil
+	}); err != nil {
+		return "", err
+	}
+
+	return article.ID, nil
+}
+
+func (aU articleUseCase) Delete(db *gorm.DB, jsonBody []byte) error {
+	article := &domain.Article{}
+	if err := json.Unmarshal(jsonBody, article); err != nil {
+		return err
+	}
+
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		if err := aU.aR.Delete(tx, article.ID); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }

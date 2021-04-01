@@ -8,13 +8,13 @@ import (
 
 // ArticleDTO is article data transfer object.
 type ArticleDTO struct {
-	ID        string    `gorm:"id"`
-	Title     string    `gorm:"title"`
-	CreatedAt time.Time `gorm:"created_at"`
-	UpdatedAt time.Time `gorm:"updated_at"`
-	Content   string    `gorm:"content"`
-	ImageURL  string    `gorm:"image_url"`
-	Status    int       `gorm:"status"`
+	ID        string    `gorm:"column:id"`
+	Title     string    `gorm:"column:title"`
+	CreatedAt time.Time `gorm:"column:created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at"`
+	Content   string    `gorm:"column:content"`
+	ImageURL  string    `gorm:"column:image_url"`
+	Status    int       `gorm:"column:status"`
 }
 
 // MapToDomain maps dto to the domain model.

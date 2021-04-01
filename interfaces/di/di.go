@@ -17,26 +17,32 @@ type DI interface {
 
 type di struct {
 	config *config.Config
-	ap     repository.ArticleRepository
-	au     usecase.ArticleUseCase
+	aP     repository.ArticleRepository
+	aU     usecase.ArticleUseCase
+	tP     repository.TagRepository
+	tU     usecase.TagUseCase
 	h      handler.AppHandler
 }
 
 // NewDI creates DI instance.
 func NewDI(config *config.Config) DI {
 	d := &di{config: config}
-	d.ap = persistence.NewArticlePersistence()
-	d.au = usecase.NewArticleUseCase(d.ap)
-	d.h = handler.NewAppHandler(d.au, d.config)
+	d.aP = persistence.NewArticlePersistence()
+	d.tP = persistence.NewTagPersistence()
+
+	d.aU = usecase.NewArticleUseCase(d.aP, d.tP)
+	d.tU = usecase.NewTagUseCase(d.tP)
+
+	d.h = handler.NewAppHandler(d.aU, d.tU, d.config)
 	return d
 }
 
 func (d di) NewArticleRepository() repository.ArticleRepository {
-	return d.ap
+	return d.aP
 }
 
 func (d di) NewArticleUseCase() usecase.ArticleUseCase {
-	return d.au
+	return d.aU
 }
 
 func (d di) NewAppHandler() handler.AppHandler {

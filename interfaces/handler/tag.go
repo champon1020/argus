@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/champon1020/argus/config"
+	"github.com/champon1020/argus/domain"
 	"github.com/champon1020/argus/usecase"
 	"github.com/labstack/echo/v4"
 )
@@ -13,14 +16,22 @@ type TagHandler interface {
 
 type tagHandler struct {
 	config *config.Config
-	tu     usecase.TagUseCase
+	tU     usecase.TagUseCase
 }
 
 // NewTagHandler creates tagHandler.
-func NewTagHandler(tu usecase.TagUseCase, config *config.Config) TagHandler {
-	return &tagHandler{config: config, tu: tu}
+func NewTagHandler(tU usecase.TagUseCase, config *config.Config) TagHandler {
+	return &tagHandler{config: config, tU: tU}
 }
 
-func (th *tagHandler) PublicTags(c echo.Context) error {
-	return nil
+func (tH *tagHandler) PublicTags(c echo.Context) error {
+	tags, err := tH.tU.FindPublic(tH.config.DB)
+	if err != nil {
+		// 503
+		return err
+	}
+
+	return c.JSON(http.StatusOK, struct {
+		Tags []domain.Tag `json:"tags"`
+	}{*tags})
 }

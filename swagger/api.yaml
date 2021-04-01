@@ -75,32 +75,26 @@ components:
         - current
         - prev
 
-    ArticleReq:
+    PostArticle:
       type: object
       properties:
-        id:
-          type: string
         title:
           type: string
         tags:
           type: array
           items:
-            $ref: "#/components/schemas/TagReq"
+            $ref: "#/components/schemas/PostTag"
         content:
           type: string
         image_url:
           type: string
-        status:
-          type: number
       required:
-        - id
         - title
         - tags
         - content
         - image_url
-        - status
 
-    TagReq:
+    PostTag:
       type: object
       properties:
         name:

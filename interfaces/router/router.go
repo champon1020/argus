@@ -19,22 +19,21 @@ func AppRouter(e *echo.Echo, h handler.AppHandler) {
 		v3.GET("/get/articles", h.PublicArticles)
 		v3.GET("/get/articles/title/:title", h.PublicArticlesByTitle)
 		v3.GET("/get/articles/tag/:tag", h.PublicArticlesByTag)
-		v3.GET("/get/tags", dummyHandler)
+		v3.GET("/get/tags", h.PublicTags)
 	}
 
 	private := v3.Group("/private")
 	{
 		private.GET("/get/article/id/:id", h.ArticleByID)
-		private.GET("/get/articles", dummyHandler)
+		private.GET("/get/articles", h.Articles)
 		private.GET("/get/images", dummyHandler)
-		private.GET("/count/articles", dummyHandler)
-		private.GET("/count/images", dummyHandler)
-		private.POST("/post/article", dummyHandler)
+		private.POST("/post/article", h.PostArticle)
 		private.POST("/post/image", dummyHandler)
-		private.POST("/verify/token", dummyHandler)
-		private.PUT("/update/article", dummyHandler)
+		private.PUT("/update/article", h.UpdateArticle)
 		private.PUT("/update/article/isPublic", dummyHandler)
-		private.DELETE("/delete/article", dummyHandler)
+		private.DELETE("/delete/article", h.DeleteArticle)
 		private.DELETE("/delete/image", dummyHandler)
+
+		private.POST("/verify/token", dummyHandler)
 	}
 }

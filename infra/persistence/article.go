@@ -76,7 +76,7 @@ func (ap *articlePersistence) Count(db *gorm.DB, filter *filter.ArticleFilter) (
 
 func (ap *articlePersistence) Post(db *gorm.DB, article *domain.Article) error {
 	articleDTO := dto.NewArticleDTO(article)
-	if err := db.Create(articleDTO).Error; err != nil {
+	if err := db.Table("articles").Create(articleDTO).Error; err != nil {
 		return err
 	}
 	return nil
@@ -84,7 +84,10 @@ func (ap *articlePersistence) Post(db *gorm.DB, article *domain.Article) error {
 
 func (ap *articlePersistence) Update(db *gorm.DB, article *domain.Article) error {
 	articleDTO := dto.NewArticleDTO(article)
-	if err := db.Model(articleDTO).Where("id = ?", article.ID).Updates(article).Error; err != nil {
+	if err := db.Table("articles").
+		Select("title", "updated_at", "content", "image_url", "status").
+		Where("id = ?", article.ID).
+		Updates(articleDTO).Error; err != nil {
 		return err
 	}
 	return nil

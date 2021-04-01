@@ -8,26 +8,28 @@ import (
 
 // TagUseCase is usecase interface for tag.
 type TagUseCase interface {
-	FindByName(db *gorm.DB, name string) (*[]domain.Tag, error)
+	FindPublic(db *gorm.DB) (*[]domain.Tag, error)
+	Posts(db *gorm.DB, tags *[]domain.Tag, articleID string) error
+	DeleteByArticleID(db *gorm.DB, articleID string) error
 }
 
 type tagUseCase struct {
-	tr repository.TagRepository
+	tR repository.TagRepository
 }
 
 // NewTagUseCase creates tagUseCase.
-func NewTagUseCase(tr repository.TagRepository) TagUseCase {
-	return &tagUseCase{tr: tr}
+func NewTagUseCase(tR repository.TagRepository) TagUseCase {
+	return &tagUseCase{tR: tR}
 }
 
-func (tu *tagUseCase) FindByName(db *gorm.DB, name string) (*[]domain.Tag, error) {
-	return nil, nil
+func (tU *tagUseCase) FindPublic(db *gorm.DB) (*[]domain.Tag, error) {
+	return tU.tR.Find(db, &domain.Public)
 }
 
-func (tu tagUseCase) Post(db *gorm.DB, tag *domain.Tag) error {
-	return nil
+func (tU tagUseCase) Posts(db *gorm.DB, tags *[]domain.Tag, articleID string) error {
+	return tU.tR.Posts(db, tags, articleID)
 }
 
-func (tu tagUseCase) Delete(db *gorm.DB, id string) error {
-	return nil
+func (tU tagUseCase) DeleteByArticleID(db *gorm.DB, articleID string) error {
+	return tU.tR.DeleteByArticleID(db, articleID)
 }
