@@ -64,7 +64,7 @@ func (h *articleHandler) PublicArticles(c echo.Context) error {
 		return err
 	}
 
-	p := pagenation.NewPagenation(page, total, h.config.LimitInPage)
+	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumArticles)
 
 	articles, err := h.aU.FindPublic(h.config.DB, *p)
 	if err != nil {
@@ -92,7 +92,7 @@ func (h *articleHandler) PublicArticlesByTitle(c echo.Context) error {
 		return err
 	}
 
-	p := pagenation.NewPagenation(page, total, h.config.LimitInPage)
+	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumArticles)
 
 	articles, err := h.aU.FindPublicByTitle(h.config.DB, *p, title)
 	if err != nil {
@@ -120,7 +120,7 @@ func (h *articleHandler) PublicArticlesByTag(c echo.Context) error {
 		return err
 	}
 
-	p := pagenation.NewPagenation(page, total, h.config.LimitInPage)
+	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumArticles)
 
 	articles, err := h.aU.FindPublicByTag(h.config.DB, *p, tag)
 	if err != nil {
@@ -161,7 +161,7 @@ func (h *articleHandler) Articles(c echo.Context) error {
 		return err
 	}
 
-	p := pagenation.NewPagenation(page, total, h.config.LimitInPage)
+	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumPrivArticles)
 
 	articles, err := h.aU.Find(h.config.DB, *p)
 	if err != nil {

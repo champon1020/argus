@@ -27,13 +27,13 @@ func AppRouter(e *echo.Echo, h handler.AppHandler) {
 	{
 		private.GET("/get/article/id/:id", h.ArticleByID)
 		private.GET("/get/articles", h.Articles)
-		private.GET("/get/images", dummyHandler)
+		private.GET("/get/images", h.Images)
 		private.POST("/post/article", h.PostArticle)
-		private.POST("/post/image", dummyHandler)
+		private.POST("/post/image", h.PostImage)
 		private.PUT("/update/article", h.UpdateArticle)
 		private.PUT("/update/article/status", h.UpdateArticleStatus)
 		private.DELETE("/delete/article", h.DeleteArticle)
-		private.DELETE("/delete/image", dummyHandler)
+		private.DELETE("/delete/image", h.DeleteImage)
 		private.POST("/verify", dummyHandler)
 	}
 }

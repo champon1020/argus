@@ -2,6 +2,7 @@ package di
 
 import (
 	"github.com/champon1020/argus/config"
+	"github.com/champon1020/argus/domain/gcp"
 	"github.com/champon1020/argus/domain/repository"
 	"github.com/champon1020/argus/infra/persistence"
 	"github.com/champon1020/argus/interfaces/handler"
@@ -18,9 +19,11 @@ type DI interface {
 type di struct {
 	config *config.Config
 	aP     repository.ArticleRepository
-	aU     usecase.ArticleUseCase
 	tP     repository.TagRepository
+	iP     gcp.CloudStorage
+	aU     usecase.ArticleUseCase
 	tU     usecase.TagUseCase
+	iU     usecase.ImageUseCase
 	h      handler.AppHandler
 }
 
@@ -29,11 +32,13 @@ func NewDI(config *config.Config) DI {
 	d := &di{config: config}
 	d.aP = persistence.NewArticlePersistence()
 	d.tP = persistence.NewTagPersistence()
+	d.iP = persistence.NewImagePersistence()
 
 	d.aU = usecase.NewArticleUseCase(d.aP, d.tP)
 	d.tU = usecase.NewTagUseCase(d.tP)
+	d.iU = usecase.NewImageUseCase(d.iP)
 
-	d.h = handler.NewAppHandler(d.aU, d.tU, d.config)
+	d.h = handler.NewAppHandler(d.aU, d.tU, d.iU, d.config)
 	return d
 }
 

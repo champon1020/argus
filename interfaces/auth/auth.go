@@ -90,7 +90,7 @@ func decodeJwt(token string) (jwt.MapClaims, error) {
 }
 
 func readPublicKey(token string) (*rsa.PublicKey, error) {
-	file := os.Getenv("ARGUS_PUBKEY_PATH")
+	file := os.Getenv("ARGUS_PUBLIC_KEY_PATH")
 
 	if _, err := os.Stat(file); err != nil {
 		if err := fetchPublicKey(token); err != nil {
@@ -136,7 +136,7 @@ func fetchPublicKey(token string) error {
 }
 
 func readSecret() (*secret, error) {
-	file := os.Getenv("ARGUS_SECRET_PATH")
+	file := os.Getenv("ARGUS_CLIENT_SECRET_PATH")
 	body, err := os.ReadFile(file)
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ func downloadPublicKey(url string, kid string) error {
 
 func saveKeyAsPem(key string) error {
 	block, _ := pem.Decode([]byte(key))
-	file := os.Getenv("ARGUS_PUBKEY_PATH")
+	file := os.Getenv("ARGUS_PUBLIC_KEY_PATH")
 
 	k, err := os.Create(file)
 	if err != nil {

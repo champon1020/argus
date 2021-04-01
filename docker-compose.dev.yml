@@ -9,15 +9,17 @@ services:
       ARGUS_DB_PORT: "3306"
       ARGUS_DB_HOST: "db"
       ARGUS_DB_NAME: "argus"
-      ARGUS_USER_PATH: "/user.json"
-      ARGUS_PUBKEY_PATH: "/public_key.pem"
-      ARGUS_SECRET_PATH: "/secret.json"
+      ARGUS_USER_PATH: "/argus-user.json"
+      ARGUS_PUBLIC_KEY_PATH: "/argus-public-key.pem"
+      ARGUS_CLIENT_SECRET_PATH: "/argus-client-secret.json"
+      ARGUS_CLOUD_STORAGE_KEY_PATH: "/argus-cloud-storage-key.json"
     ports:
       - "8000:8000"
     volumes:
       - ".:/go/src/github.com/champon1020/argus"
-      - "${ARGUS_USER_PATH}:/user.json"
-      - "${ARGUS_SECRET_PATH}:/secret.json"
+      - "${ARGUS_USER_PATH}:/argus-user.json"
+      - "${ARGUS_CLIENT_SECRET_PATH}:/client-secret.json"
+      - "${ARGUS_CLOUD_STORAGE_KEY_PATH}:/argus-cloud-storage-key.json"
     working_dir: "/go/src/github.com/champon1020/argus"
     command: >
       /bin/sh -c "go get -u github.com/cosmtrek/air && go mod download && air -c .air.toml"

@@ -15,7 +15,7 @@ func NewArticlePersistence() repository.ArticleRepository {
 	return &articlePersistence{}
 }
 
-func (ap *articlePersistence) FindByID(db *gorm.DB, id string, status *domain.Status) (*domain.Article, error) {
+func (aP *articlePersistence) FindByID(db *gorm.DB, id string, status *domain.Status) (*domain.Article, error) {
 	articleDTO := &dto.ArticleDTO{}
 
 	base := db.Table("articles").Where("id = ?", id)
@@ -36,7 +36,7 @@ func (ap *articlePersistence) FindByID(db *gorm.DB, id string, status *domain.St
 	return article, nil
 }
 
-func (ap *articlePersistence) Find(db *gorm.DB, limit int, offset int, filter *filter.ArticleFilter) (*[]domain.Article, error) {
+func (aP *articlePersistence) Find(db *gorm.DB, limit int, offset int, filter *filter.ArticleFilter) (*[]domain.Article, error) {
 	articleDTOs := []dto.ArticleDTO{}
 
 	base := db.Table("articles").Limit(limit).Offset(offset)
@@ -60,7 +60,7 @@ func (ap *articlePersistence) Find(db *gorm.DB, limit int, offset int, filter *f
 	return &articles, nil
 }
 
-func (ap *articlePersistence) Count(db *gorm.DB, filter *filter.ArticleFilter) (int, error) {
+func (aP *articlePersistence) Count(db *gorm.DB, filter *filter.ArticleFilter) (int, error) {
 	var cnt int64
 
 	base := db.Table("articles")
@@ -74,7 +74,7 @@ func (ap *articlePersistence) Count(db *gorm.DB, filter *filter.ArticleFilter) (
 	return int(cnt), nil
 }
 
-func (ap *articlePersistence) Post(db *gorm.DB, article *domain.Article) error {
+func (aP *articlePersistence) Post(db *gorm.DB, article *domain.Article) error {
 	articleDTO := dto.NewArticleDTO(article)
 	if err := db.Table("articles").Create(articleDTO).Error; err != nil {
 		return err
@@ -82,7 +82,7 @@ func (ap *articlePersistence) Post(db *gorm.DB, article *domain.Article) error {
 	return nil
 }
 
-func (ap *articlePersistence) Update(db *gorm.DB, article *domain.Article) error {
+func (aP *articlePersistence) Update(db *gorm.DB, article *domain.Article) error {
 	articleDTO := dto.NewArticleDTO(article)
 	if err := db.Table("articles").
 		Select("title", "updated_at", "content", "image_url", "status").
@@ -93,7 +93,7 @@ func (ap *articlePersistence) Update(db *gorm.DB, article *domain.Article) error
 	return nil
 }
 
-func (ap *articlePersistence) UpdateStatus(db *gorm.DB, article *domain.Article) error {
+func (aP *articlePersistence) UpdateStatus(db *gorm.DB, article *domain.Article) error {
 	articleDTO := dto.NewArticleDTO(article)
 	if err := db.Table("articles").
 		Select("title", "updated_at", "status").
@@ -104,7 +104,7 @@ func (ap *articlePersistence) UpdateStatus(db *gorm.DB, article *domain.Article)
 	return nil
 }
 
-func (ap *articlePersistence) Delete(db *gorm.DB, id string) error {
+func (aP *articlePersistence) Delete(db *gorm.DB, id string) error {
 	if err := db.Exec("DELETE FROM articles WHERE id = ?", id).Error; err != nil {
 		return err
 	}

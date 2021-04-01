@@ -10,7 +10,7 @@ type Pagenation struct {
 }
 
 // NewPagenation creates Pagenation instance.
-func NewPagenation(page int, total int, limit int) *Pagenation {
+func NewPagenation(page, total, limit int) *Pagenation {
 	return &Pagenation{Page: page, Total: total, Limit: limit}
 }
 

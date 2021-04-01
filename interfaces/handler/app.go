@@ -10,19 +10,22 @@ import (
 type AppHandler interface {
 	ArticleHandler
 	TagHandler
+	ImageHandler
 }
 
 type appHandler struct {
 	config *config.Config
 	aH     ArticleHandler
 	tH     TagHandler
+	iH     ImageHandler
 }
 
 // NewAppHandler creates appHandler.
-func NewAppHandler(aU usecase.ArticleUseCase, tU usecase.TagUseCase, config *config.Config) AppHandler {
+func NewAppHandler(aU usecase.ArticleUseCase, tU usecase.TagUseCase, iU usecase.ImageUseCase, config *config.Config) AppHandler {
 	return &appHandler{
 		aH: NewArticleHandler(aU, tU, config),
 		tH: NewTagHandler(tU, config),
+		iH: NewImageHandler(iU, config),
 	}
 }
 
@@ -68,4 +71,16 @@ func (h *appHandler) DeleteArticle(c echo.Context) error {
 
 func (h *appHandler) PublicTags(c echo.Context) error {
 	return h.tH.PublicTags(c)
+}
+
+func (h *appHandler) Images(c echo.Context) error {
+	return h.iH.Images(c)
+}
+
+func (h *appHandler) PostImage(c echo.Context) error {
+	return h.iH.PostImage(c)
+}
+
+func (h *appHandler) DeleteImage(c echo.Context) error {
+	return h.iH.DeleteImage(c)
 }
