@@ -93,6 +93,17 @@ func (ap *articlePersistence) Update(db *gorm.DB, article *domain.Article) error
 	return nil
 }
 
+func (ap *articlePersistence) UpdateStatus(db *gorm.DB, article *domain.Article) error {
+	articleDTO := dto.NewArticleDTO(article)
+	if err := db.Table("articles").
+		Select("title", "updated_at", "status").
+		Where("id = ?", article.ID).
+		Updates(articleDTO).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ap *articlePersistence) Delete(db *gorm.DB, id string) error {
 	if err := db.Exec("DELETE FROM articles WHERE id = ?", id).Error; err != nil {
 		return err

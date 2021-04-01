@@ -13,5 +13,6 @@ type ArticleRepository interface {
 	Count(db *gorm.DB, filter *filter.ArticleFilter) (int, error)
 	Post(db *gorm.DB, article *domain.Article) error
 	Update(db *gorm.DB, article *domain.Article) error
+	UpdateStatus(db *gorm.DB, article *domain.Article) error
 	Delete(db *gorm.DB, id string) error
 }

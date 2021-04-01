@@ -58,6 +58,10 @@ func (h *appHandler) UpdateArticle(c echo.Context) error {
 	return h.aH.UpdateArticle(c)
 }
 
+func (h *appHandler) UpdateArticleStatus(c echo.Context) error {
+	return h.aH.UpdateArticleStatus(c)
+}
+
 func (h *appHandler) DeleteArticle(c echo.Context) error {
 	return h.aH.DeleteArticle(c)
 }

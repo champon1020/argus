@@ -22,6 +22,7 @@ type ArticleHandler interface {
 	Articles(c echo.Context) error
 	PostArticle(c echo.Context) error
 	UpdateArticle(c echo.Context) error
+	UpdateArticleStatus(c echo.Context) error
 	DeleteArticle(c echo.Context) error
 }
 
@@ -199,6 +200,23 @@ func (h *articleHandler) UpdateArticle(c echo.Context) error {
 	}
 
 	id, err := h.aU.Update(h.config.DB, body)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, struct {
+		ID string `json:"id"`
+	}{id})
+}
+
+func (h *articleHandler) UpdateArticleStatus(c echo.Context) error {
+	body, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		// 400
+		return err
+	}
+
+	id, err := h.aU.UpdateStatus(h.config.DB, body)
 	if err != nil {
 		return err
 	}

@@ -23,6 +23,7 @@ func AppRouter(e *echo.Echo, h handler.AppHandler) {
 	}
 
 	private := v3.Group("/private")
+	//private.Use(middleware.AuthMiddleware)
 	{
 		private.GET("/get/article/id/:id", h.ArticleByID)
 		private.GET("/get/articles", h.Articles)
@@ -30,10 +31,9 @@ func AppRouter(e *echo.Echo, h handler.AppHandler) {
 		private.POST("/post/article", h.PostArticle)
 		private.POST("/post/image", dummyHandler)
 		private.PUT("/update/article", h.UpdateArticle)
-		private.PUT("/update/article/isPublic", dummyHandler)
+		private.PUT("/update/article/status", h.UpdateArticleStatus)
 		private.DELETE("/delete/article", h.DeleteArticle)
 		private.DELETE("/delete/image", dummyHandler)
-
-		private.POST("/verify/token", dummyHandler)
+		private.POST("/verify", dummyHandler)
 	}
 }

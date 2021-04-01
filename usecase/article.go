@@ -26,6 +26,7 @@ type ArticleUseCase interface {
 	Count(db *gorm.DB) (int, error)
 	Post(db *gorm.DB, jsonBody []byte) (string, error)
 	Update(db *gorm.DB, jsonBody []byte) (string, error)
+	UpdateStatus(db *gorm.DB, jsonBody []byte) (string, error)
 	Delete(db *gorm.DB, jsonBody []byte) error
 }
 
@@ -154,6 +155,26 @@ func (aU articleUseCase) Update(db *gorm.DB, jsonBody []byte) (string, error) {
 			return err
 		}
 
+		return nil
+	}); err != nil {
+		return "", err
+	}
+
+	return article.ID, nil
+}
+
+func (aU articleUseCase) UpdateStatus(db *gorm.DB, jsonBody []byte) (string, error) {
+	article := &domain.Article{}
+	if err := json.Unmarshal(jsonBody, article); err != nil {
+		return "", err
+	}
+
+	article.UpdatedAt = time.Now()
+
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		if err := aU.aR.UpdateStatus(tx, article); err != nil {
+			return err
+		}
 		return nil
 	}); err != nil {
 		return "", err

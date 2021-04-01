@@ -53,10 +53,15 @@ func (tp *tagPersistence) Find(db *gorm.DB, articleStatus *domain.Status) (*[]do
 }
 
 func (tp *tagPersistence) Posts(db *gorm.DB, tags *[]domain.Tag, articleID string) error {
+	if len(*tags) == 0 {
+		return nil
+	}
+
 	tagDTOs := dto.NewTagDTOs(tags, articleID)
 	if err := db.Table("tags").Select("name", "article_id").Create(tagDTOs).Error; err != nil {
 		return err
 	}
+
 	return nil
 }
 
