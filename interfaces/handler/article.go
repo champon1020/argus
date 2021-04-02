@@ -20,6 +20,7 @@ type ArticleHandler interface {
 	PublicArticlesByTag(c echo.Context) error
 	ArticleByID(c echo.Context) error
 	Articles(c echo.Context) error
+	DraftArticles(c echo.Context) error
 	PostArticle(c echo.Context) error
 	UpdateArticle(c echo.Context) error
 	UpdateArticleStatus(c echo.Context) error
@@ -164,6 +165,33 @@ func (h *articleHandler) Articles(c echo.Context) error {
 	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumPrivArticles)
 
 	articles, err := h.aU.Find(h.config.DB, *p)
+	if err != nil {
+		// 500
+		return err
+	}
+
+	return c.JSON(http.StatusOK, struct {
+		Articles   []domain.Article  `json:"articles"`
+		Pagenation domain.Pagenation `json:"pagenation"`
+	}{*articles, *p.MapToDomain()})
+}
+
+func (h *articleHandler) DraftArticles(c echo.Context) error {
+	page, err := httputil.ParsePage(c)
+	if err != nil {
+		// 400
+		return err
+	}
+
+	total, err := h.aU.CountDraftArticles(h.config.DB)
+	if err != nil {
+		// 500
+		return err
+	}
+
+	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumPrivArticles)
+
+	articles, err := h.aU.FindDraftArticles(h.config.DB, *p)
 	if err != nil {
 		// 500
 		return err

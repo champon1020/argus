@@ -53,6 +53,10 @@ func (h *appHandler) Articles(c echo.Context) error {
 	return h.aH.Articles(c)
 }
 
+func (h *appHandler) DraftArticles(c echo.Context) error {
+	return h.aH.DraftArticles(c)
+}
+
 func (h *appHandler) PostArticle(c echo.Context) error {
 	return h.aH.PostArticle(c)
 }

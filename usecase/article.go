@@ -20,10 +20,12 @@ type ArticleUseCase interface {
 	FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, tag string) (*[]domain.Article, error)
 	FindByID(db *gorm.DB, id string) (*domain.Article, error)
 	Find(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error)
+	FindDraftArticles(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error)
 	CountPublic(db *gorm.DB) (int, error)
 	CountPublicByTitle(db *gorm.DB, title string) (int, error)
 	CountPublicByTag(db *gorm.DB, tag string) (int, error)
 	Count(db *gorm.DB) (int, error)
+	CountDraftArticles(db *gorm.DB) (int, error)
 	Post(db *gorm.DB, jsonBody []byte) (string, error)
 	Update(db *gorm.DB, jsonBody []byte) (string, error)
 	UpdateStatus(db *gorm.DB, jsonBody []byte) (string, error)
@@ -98,8 +100,22 @@ func (aU articleUseCase) Find(db *gorm.DB, p pagenation.Pagenation) (*[]domain.A
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, nil)
 }
 
+func (aU articleUseCase) FindDraftArticles(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
+	filter := &filter.ArticleFilter{
+		Status: &domain.Draft,
+	}
+	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
+}
+
 func (aU articleUseCase) Count(db *gorm.DB) (int, error) {
 	return aU.aR.Count(db, nil)
+}
+
+func (aU articleUseCase) CountDraftArticles(db *gorm.DB) (int, error) {
+	filter := &filter.ArticleFilter{
+		Status: &domain.Draft,
+	}
+	return aU.aR.Count(db, filter)
 }
 
 func (aU articleUseCase) Post(db *gorm.DB, jsonBody []byte) (string, error) {

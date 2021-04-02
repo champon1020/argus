@@ -27,6 +27,7 @@ func AppRouter(e *echo.Echo, h handler.AppHandler) {
 	{
 		private.GET("/get/article/id/:id", h.ArticleByID)
 		private.GET("/get/articles", h.Articles)
+		private.GET("/get/drafts", h.DraftArticles)
 		private.GET("/get/images", h.Images)
 		private.POST("/post/article", h.PostArticle)
 		private.POST("/post/image", h.PostImage)
