@@ -1,13 +1,15 @@
 module github.com/champon1020/argus
 
-go 1.13
+go 1.16
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.4.1
-	github.com/champon1020/minigorm v0.0.0-20201026085522-172ebf4f9865
+	cloud.google.com/go/storage v1.14.0
+	github.com/chai2010/webp v1.1.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/gin-contrib/cors v1.3.1
-	github.com/gin-gonic/gin v1.5.0
-	github.com/go-sql-driver/mysql v1.5.0
-	github.com/stretchr/testify v1.6.1
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/google/uuid v1.2.0
+	github.com/labstack/echo/v4 v4.2.1
+	google.golang.org/api v0.43.0
+	gorm.io/driver/mysql v1.0.5
+	gorm.io/gorm v1.21.6
 )

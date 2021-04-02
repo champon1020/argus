@@ -1,10 +1,13 @@
-FROM golang:latest
+FROM golang:1.15-alpine as builder
+
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+ENV GOARCH=amd64
+ENV GO111MODULE=on
+ENV GOPRIVATE=github.com/champon1020
 
 WORKDIR /go/src/github.com/champon1020/argus
-
-COPY . /go/src/github.com/champon1020/argus
-
-RUN go get -d -v ./...
-RUN go build -o cmd/argus cmd/main.go
-
-CMD ./cmd/argus
+COPY . .
+RUN go mod download
+RUN go build -o argus ./cmd/main.go
+RUN chmod +x argus

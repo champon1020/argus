@@ -11,52 +11,104 @@ servers:
   - url: https://argus.champonian.com
     description: domain
 
-paths:
-  /api/find/article/list:
-    get:
-      summary: Return articles list.
-      parameters:
-        - name: p
-          in: query
-          required: true
-          description: Page number.
-          schema:
-            type: number
-        - name: num
-          in: query
-          required: true
-          description: Number of articles.
-          schema:
-            type: number
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  articles:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Article'
-                  count:
-                    type: number
-                required:
-                  - articles
-                  - count
-        '400':
-          description: Query parameters are not valid.
-        '500':
-          description: Internal Server Error.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
-          
-  /api/find/article/id:
+  schemas:
+    Article:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        content:
+          type: string
+        image_url:
+          type: string
+        status:
+          type: number
+      required:
+        - id
+        - title
+        - tags
+        - created_at
+        - updated_at
+        - content
+        - image_url
+        - status
+
+    Tag:
+      type: object
+      properties:
+        name:
+          type: string
+        n_articles:
+          type: number
+      required:
+        - name
+        - n_articles
+
+    Pagenation:
+      type: object
+      properties:
+        next:
+          type: boolean
+        current:
+          type: number
+        prev:
+          type: boolean
+      required:
+        - next
+        - current
+        - prev
+
+    PostArticle:
+      type: object
+      properties:
+        title:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostTag"
+        content:
+          type: string
+        image_url:
+          type: string
+      required:
+        - title
+        - tags
+        - content
+        - image_url
+
+    PostTag:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+
+paths:
+  /api/v3/get/article/id/{id}:
     get:
-      summary: Return an articles by id.
+      summary: Return a public article by id.
       parameters:
         - name: id
-          in: query
+          in: path
           required: true
           description: Article id.
           schema:
@@ -71,44 +123,65 @@ paths:
                 properties:
                   article:
                     $ref: '#/components/schemas/Article'
-                  nextArticle:
-                    $ref: '#/components/schemas/Article'
-                  prevArticle:
-                    $ref: '#/components/schemas/Article'
                 required:
                   - article
-                  - nextArticle
-                  - prevArticle
         '400':
           description: Query parameters are not valid.
         '404':
           description: Not Found.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
 
-  /api/find/article/list/title:
+  /api/v3/get/articles:
     get:
-      summary: Return articles list by title.
+      summary: Return public articles.
       parameters:
-        - name: title
+        - name: p
           in: query
+          required: true
+          description: Page number.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  pagenation:
+                    $ref: '#/components/schemas/Pagenation'
+                required:
+                  - articles
+                  - pagenation
+        '400':
+          description: Query parameters are not valid.
+        '500':
+          description: Internal server error.
+
+
+  /api/v3/get/articles/title/{title}:
+    get:
+      summary: Return public articles by title.
+      parameters:
+        - name: p
+          in: query
+          required: true
+          description: Page number.
+          schema:
+            type: number
+        - name: title
+          in: path
           required: true
           description: Article title.
           schema:
             type: string
-        - name: p
-          in: query
-          required: true
-          description: Page number.
-          schema:
-            type: number
-        - name: num
-          in: query
-          required: true
-          description: Number of articles.
-          schema:
-            type: number
       responses:
         '200':
           description: Success.
@@ -121,41 +194,33 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  count:
-                    type: number
+                  pagenation:
+                    $ref: '#/components/schemas/Pagenation'
                 required:
                   - articles
-                  - count
+                  - pagenation
         '400':
           description: Query parameters are not valid.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
 
-  /api/find/article/list/category:
+  /api/v3/get/articles/tag/{tag}:
     get:
-      summary: Return articles list by category.
+      summary: Return public articles by tag.
       parameters:
-        - name: categoryId
-          in: query
-          required: true
-          description: Category name.
-          schema:
-            type: array
-            items:
-              type: string
         - name: p
           in: query
           required: true
           description: Page number.
           schema:
             type: number
-        - name: num
-          in: query
+        - name: tag
+          in: path
           required: true
-          description: number of articles.
+          description: Tag name.
           schema:
-            type: number
+            type: string
       responses:
         '200':
           description: Success.
@@ -168,20 +233,20 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  count:
-                    type: number
+                  pagenation:
+                    $ref: '#/components/schemas/Pagenation'
                 required:
                   - articles
-                  - count
+                  - pagenation
         '400':
           description: Query parameters are not valid.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
 
-  /api/find/category/list:
+  /api/v3/get/tags:
     get:
-      summary: Return categories list.
+      summary: Return tags which belong to public articles.
       responses:
         '200':
           description: Success.
@@ -190,26 +255,26 @@ paths:
               schema:
                 type: object
                 properties:
-                  categories:
+                  tags:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Category'
+                      $ref: '#/components/schemas/Tag'
                 required:
-                  - categories
+                  - tags
         '400':
           description: Query parameters are not valid.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
 
-  /api/private/find/article/id:
+  /api/v3/private/get/article/id/{id}:
     get:
-      summary: Return an article whose id is selected
+      summary: Return an article by id.
       security:
         - BearerAuth: []
       parameters:
         - name: id
-          in: query
+          in: path
           required: true
           description: Article id.
           schema:
@@ -233,12 +298,12 @@ paths:
         '404':
           description: Not Found.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
 
-  /api/private/find/article/list:
+  /api/v3/private/get/articles:
     get:
-      summary: Return all articles list.
+      summary: Return articles.
       security:
         - BearerAuth: []
       parameters:
@@ -248,10 +313,10 @@ paths:
           description: Page number.
           schema:
             type: number
-        - name: num
+        - name: status
           in: query
-          required: true
-          description: Number of articles.
+          required: false
+          description: Article status.
           schema:
             type: number
       responses:
@@ -266,56 +331,21 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Article'
-                  count:
-                    type: number
+                  pagenation:
+                    $ref: '#/components/schemas/Pagenation'
                 required:
                   - articles
-                  - count
         '400':
           description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
-          
-  /api/private/find/draft/id:
-    get:
-      summary: Return a draft whose id is selected.
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: query
-          required: true
-          description: Draft id.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  draft:
-                    $ref: '#/components/schemas/Draft'
-                required:
-                  - draft
-        '400':
-          description: Query parameters are not valid. No authorization header.
-        '403':
-          description: Forbidden.
-        '404':
-          description: Not Found.
-        '500':
-          description: Internal Server Error.
 
-          
-  /api/private/find/draft/list:
+  /api/v3/private/get/images:
     get:
-      summary: Return all drafts list.
+      summary: Return images.
       security:
         - BearerAuth: []
       parameters:
@@ -325,50 +355,7 @@ paths:
           description: Page number.
           schema:
             type: number
-        - name: num
-          in: query
-          required: true
-          description: Number of drafts.
-          schema:
-            type: number
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  drafts:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Draft'
-                  count:
-                    type: number
-                required:
-                  - drafts
-                  - count
-        '400':
-          description: Query parameters are not valid. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
-
-          
-  /api/private/find/image/list:
-    get:
-      summary: Return images list.
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: p
-          in: query
-          required: true
-          description: Page number.
-          schema:
-            type: number
-        - name: num
+        - name: n
           in: query
           required: true
           description: Number of images.
@@ -386,22 +373,65 @@ paths:
                     type: array
                     items:
                       type: string
-                  next:
-                    type: boolean
                 required:
                   - images
-                  - next
         '400':
           description: Query parameters are not valid. No authorization header.
         '403':
           description: Forbidden.
         '500':
-          description: Internal Server Err
+          description: Internal server error.
 
-          
-  /api/private/register/article:
+
+  /api/v3/private/count/articles:
+    get:
+      summary: Count number of articles.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: number
+                required:
+                  - count
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal server error.
+
+
+  /api/v3/private/count/images:
+    get:
+      summary: Count number of images.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: number
+                required:
+                  - count
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal server error.
+
+
+  /api/v3/private/post/article:
     post:
-      summary: Register new article.
+      summary: Register an article.
       security:
         - BearerAuth: []
       requestBody:
@@ -413,10 +443,11 @@ paths:
               properties:
                 article:
                   $ref: '#/components/schemas/ArticleReq'
-                draftId:
+                id:
                   type: string
               required:
                 - article
+                - id
       responses:
         '200':
           description: Success.
@@ -425,54 +456,12 @@ paths:
         '403':
           description: Forbidden.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
-          
-  /api/private/register/draft:
-    post:
-      summary: Register new draft.
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                draft:
-                  $ref: '#/components/schemas/DraftReq'
-              required:
-                - draft
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  content:
-                    type: string
-                  imageHash:
-                    type: string
-                required:
-                  - id
-                  - content
-                  - imageHash
-        '400':
-          description: Query parameters are not valid. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
 
-          
-  /api/private/register/image:
+  /api/v3/private/post/image:
     post:
-      summary: Register new image.
+      summary: Register a image.
       security:
         - BearerAuth: []
       requestBody:
@@ -493,12 +482,12 @@ paths:
         '403':
           description: Forbidden.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
-          
-  /api/private/update/article:
+
+  /api/v3/private/update/article:
     put:
-      summary: Update article.
+      summary: Update an article.
       security:
         - BearerAuth: []
       requestBody:
@@ -520,12 +509,12 @@ paths:
         '403':
           description: Forbidden.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
-          
-  /api/private/update/article/private:
+
+  /api/v3/private/update/article/status:
     put:
-      summary: Update article's private property.
+      summary: Update article's isPublic property.
       security:
         - BearerAuth: []
       requestBody:
@@ -537,11 +526,11 @@ paths:
               properties:
                 id:
                   type: string
-                _private:
-                  type: boolean
+                status:
+                  type: number
               required:
                 - id
-                - _private
+                - status
       responses:
         '200':
           description: Success.
@@ -550,39 +539,12 @@ paths:
         '403':
           description: Forbidden.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
-          
-  /api/private/update/draft:
-    put:
-      summary: Update draft.
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                draft:
-                  $ref: '#/components/schemas/DraftReq'
-              required:
-                - draft
-      responses:
-        '200':
-          description: Success.
-        '400':
-          description: Query parameters are not valid. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal Server Error.
 
-          
-  /api/private/delete/draft:
+  /api/v3/private/delete/article:
     delete:
-      summary: Delete draft.
+      summary: Delete an article with id.
       security:
         - BearerAuth: []
       requestBody:
@@ -595,7 +557,7 @@ paths:
                 id:
                   type: string
               required:
-                - draft
+                - id
       responses:
         '200':
           description: Success.
@@ -604,10 +566,10 @@ paths:
         '403':
           description: Forbidden.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
-          
-  /api/private/delete/image:
+
+  /api/v3/private/delete/image:
     delete:
       summary: Delete images.
       security:
@@ -623,7 +585,8 @@ paths:
                   type: array
                   items:
                     type: string
-                  
+              required:
+                - imageNames
       responses:
         '200':
           description: Success.
@@ -632,10 +595,10 @@ paths:
         '403':
           description: Forbidden.
         '500':
-          description: Internal Server Error.
+          description: Internal server error.
 
-          
-  /api/verify/token:
+
+  /api/v3/verify/token:
     post:
       summary: Verify token.
       security:
@@ -648,133 +611,4 @@ paths:
         '403':
           description: Forbidden.
         '500':
-          description: Internal Server Error.
-
-          
-components:
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-  schemas:
-    Article:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        categories:
-          type: array
-          items:
-            $ref: "#/components/schemas/Category"
-        createdDate:
-          type: string
-        updatedDate:
-          type: string
-        content:
-          type: string
-        imageName:
-          type: string
-        _private:
-          type: boolean
-      required:
-        - id
-        - title
-        - categories
-        - createdDate
-        - updatedDate
-        - content
-        - imageName
-        - _private
-
-    Category:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        articleNum:
-          type: number
-      required:
-        - id
-        - name
-        - articleNum
-
-    Draft:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        categories:
-          type: string
-        updatedDate:
-          type: string
-        content:
-          type: string
-        imageName:
-          type: string
-      required:
-        - id
-        - title
-        - categories
-        - updatedDate
-        - content
-        - imageName
-
-    ArticleReq:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        categories:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              name:
-                type: string
-            required:
-              - id
-              - name
-        content:
-          type: string
-        imageName:
-          type: string
-        private:
-          type: boolean
-      required:
-        - id
-        - title
-        - categories
-        - content
-        - imageName
-        - private
-
-    DraftReq:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        categories:
-          type: string
-        content:
-          type: string
-        imageName:
-          type: string
-      required:
-        - id
-        - title
-        - categories
-        - content
-        - imageName
+          description: Internal server error.
