@@ -34,7 +34,7 @@ func AppRouter(e *echo.Echo, h handler.AppHandler) {
 		private.PUT("/update/article", h.UpdateArticle)
 		private.PUT("/update/article/status", h.UpdateArticleStatus)
 		private.DELETE("/delete/article", h.DeleteArticle)
-		private.DELETE("/delete/image", h.DeleteImage)
-		private.POST("/verify", dummyHandler)
+		private.DELETE("/delete/images", h.DeleteImage)
+		private.POST("/verify", h.VerifyToken)
 	}
 }

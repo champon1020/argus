@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/config"
 	"github.com/champon1020/argus/domain"
 	"github.com/champon1020/argus/interfaces/handler/httputil"
@@ -29,22 +30,25 @@ type ArticleHandler interface {
 
 type articleHandler struct {
 	config *config.Config
+	logger *argus.Logger
 	aU     usecase.ArticleUseCase
 	tU     usecase.TagUseCase
 }
 
 // NewArticleHandler creates articleHandler.
-func NewArticleHandler(aU usecase.ArticleUseCase, tU usecase.TagUseCase, config *config.Config) ArticleHandler {
-	return &articleHandler{config: config, aU: aU, tU: tU}
+func NewArticleHandler(aU usecase.ArticleUseCase, tU usecase.TagUseCase, config *config.Config, logger *argus.Logger) ArticleHandler {
+	return &articleHandler{config: config, logger: logger, aU: aU, tU: tU}
 }
 
 func (h *articleHandler) PublicArticleByID(c echo.Context) error {
 	id := c.Param("id")
+	if id == "" {
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
+	}
 
 	article, err := h.aU.FindPublicByID(h.config.DB, id)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -55,22 +59,19 @@ func (h *articleHandler) PublicArticleByID(c echo.Context) error {
 func (h *articleHandler) PublicArticles(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	total, err := h.aU.CountPublic(h.config.DB)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumArticles)
 
 	articles, err := h.aU.FindPublic(h.config.DB, *p)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -83,22 +84,19 @@ func (h *articleHandler) PublicArticlesByTitle(c echo.Context) error {
 	title := c.Param("title")
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	total, err := h.aU.CountPublicByTitle(h.config.DB, title)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumArticles)
 
 	articles, err := h.aU.FindPublicByTitle(h.config.DB, *p, title)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -111,22 +109,19 @@ func (h *articleHandler) PublicArticlesByTag(c echo.Context) error {
 	tag := c.Param("tag")
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	total, err := h.aU.CountPublicByTag(h.config.DB, tag)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumArticles)
 
 	articles, err := h.aU.FindPublicByTag(h.config.DB, *p, tag)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -137,11 +132,13 @@ func (h *articleHandler) PublicArticlesByTag(c echo.Context) error {
 
 func (h *articleHandler) ArticleByID(c echo.Context) error {
 	id := c.Param("id")
+	if id == "" {
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
+	}
 
 	article, err := h.aU.FindByID(h.config.DB, id)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -152,22 +149,19 @@ func (h *articleHandler) ArticleByID(c echo.Context) error {
 func (h *articleHandler) Articles(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	total, err := h.aU.Count(h.config.DB)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumPrivArticles)
 
 	articles, err := h.aU.Find(h.config.DB, *p)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -179,22 +173,19 @@ func (h *articleHandler) Articles(c echo.Context) error {
 func (h *articleHandler) DraftArticles(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	total, err := h.aU.CountDraftArticles(h.config.DB)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumPrivArticles)
 
 	articles, err := h.aU.FindDraftArticles(h.config.DB, *p)
 	if err != nil {
-		// 500
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -206,13 +197,12 @@ func (h *articleHandler) DraftArticles(c echo.Context) error {
 func (h *articleHandler) PostArticle(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		// 400
-		return err
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	id, err := h.aU.Post(h.config.DB, body)
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -223,13 +213,12 @@ func (h *articleHandler) PostArticle(c echo.Context) error {
 func (h *articleHandler) UpdateArticle(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		// 400
-		return err
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	id, err := h.aU.Update(h.config.DB, body)
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -240,13 +229,12 @@ func (h *articleHandler) UpdateArticle(c echo.Context) error {
 func (h *articleHandler) UpdateArticleStatus(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		// 400
-		return err
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	id, err := h.aU.UpdateStatus(h.config.DB, body)
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -257,12 +245,11 @@ func (h *articleHandler) UpdateArticleStatus(c echo.Context) error {
 func (h *articleHandler) DeleteArticle(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		// 400
-		return err
+		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	if err := h.aU.Delete(h.config.DB, body); err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.String(http.StatusOK, "success")

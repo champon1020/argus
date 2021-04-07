@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/config"
 	"github.com/champon1020/argus/usecase"
 	"github.com/labstack/echo/v4"
@@ -8,6 +9,7 @@ import (
 
 // AppHandler includes all handlers.
 type AppHandler interface {
+	AuthHandler
 	ArticleHandler
 	TagHandler
 	ImageHandler
@@ -15,18 +17,24 @@ type AppHandler interface {
 
 type appHandler struct {
 	config *config.Config
+	auH    AuthHandler
 	aH     ArticleHandler
 	tH     TagHandler
 	iH     ImageHandler
 }
 
 // NewAppHandler creates appHandler.
-func NewAppHandler(aU usecase.ArticleUseCase, tU usecase.TagUseCase, iU usecase.ImageUseCase, config *config.Config) AppHandler {
+func NewAppHandler(aU usecase.ArticleUseCase, tU usecase.TagUseCase, iU usecase.ImageUseCase, config *config.Config, logger *argus.Logger) AppHandler {
 	return &appHandler{
-		aH: NewArticleHandler(aU, tU, config),
-		tH: NewTagHandler(tU, config),
-		iH: NewImageHandler(iU, config),
+		auH: NewAuthHandler(logger),
+		aH:  NewArticleHandler(aU, tU, config, logger),
+		tH:  NewTagHandler(tU, config, logger),
+		iH:  NewImageHandler(iU, config, logger),
 	}
+}
+
+func (h *appHandler) VerifyToken(c echo.Context) error {
+	return h.auH.VerifyToken(c)
 }
 
 func (h *appHandler) PublicArticleByID(c echo.Context) error {
