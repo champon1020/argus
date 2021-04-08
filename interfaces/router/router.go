@@ -21,6 +21,7 @@ func AppRouter(e *echo.Echo, h handler.AppHandler) {
 		v3.GET("/get/articles/title/:title", h.PublicArticlesByTitle)
 		v3.GET("/get/articles/tag/:tag", h.PublicArticlesByTag)
 		v3.GET("/get/tags", h.PublicTags)
+		v3.GET("/get/headerImages", h.HeaderImages)
 	}
 
 	private := v3.Group("/private")

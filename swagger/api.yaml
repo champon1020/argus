@@ -324,6 +324,29 @@ paths:
           description: Internal server error.
 
 
+  /api/v3/get/headerImages:
+    get:
+      summary: Fetch the header image urls.
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  image_urls:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - image_urls
+        '404':
+          description: Not Found.
+        '500':
+          description: Internal server error.
+
+
   /api/v3/private/get/article/id/{id}:
     get:
       summary: Return an article by id.

@@ -89,6 +89,10 @@ func (h *appHandler) Images(c echo.Context) error {
 	return h.iH.Images(c)
 }
 
+func (h *appHandler) HeaderImages(c echo.Context) error {
+	return h.iH.HeaderImages(c)
+}
+
 func (h *appHandler) PostImage(c echo.Context) error {
 	return h.iH.PostImage(c)
 }

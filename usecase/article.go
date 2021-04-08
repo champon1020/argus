@@ -132,7 +132,6 @@ func (aU articleUseCase) Post(db *gorm.DB, jsonBody []byte) (string, error) {
 	article.ID = uuid.String()
 	article.CreatedAt = time.Now()
 	article.UpdatedAt = time.Now()
-	article.Status = 1
 
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		if err := aU.aR.Post(tx, article); err != nil {
