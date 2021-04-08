@@ -16,6 +16,7 @@ import (
 // ImageHandler is handler ingerface for image.
 type ImageHandler interface {
 	Images(c echo.Context) error
+	HeaderImages(c echo.Context) error
 	PostImage(c echo.Context) error
 	DeleteImage(c echo.Context) error
 }
@@ -50,6 +51,18 @@ func (iH *imageHandler) Images(c echo.Context) error {
 		ImageURLs  []string          `json:"image_urls"`
 		Pagenation domain.Pagenation `json:"pagenation"`
 	}{images, *p.MapToDomain()})
+}
+
+func (iH *imageHandler) HeaderImages(c echo.Context) error {
+	images, err := iH.iU.HeaderImageList(iH.config.StorageBucketName)
+	if err != nil {
+		iH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedGCSExec.Error())
+	}
+
+	return c.JSON(http.StatusOK, struct {
+		ImageURLs []string `json:"image_urls"`
+	}{images})
 }
 
 func (iH *imageHandler) PostImage(c echo.Context) error {

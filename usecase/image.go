@@ -21,6 +21,7 @@ import (
 // ImageUseCase is usecase interface for image.
 type ImageUseCase interface {
 	ImageList(bktName string, p *pagenation.Pagenation) ([]string, error)
+	HeaderImageList(bktName string) ([]string, error)
 	CreateImage(file io.Reader, bktName, fileName string) error
 	DeleteImages(bktName string, jsonBody []byte) error
 }
@@ -36,7 +37,7 @@ func NewImageUseCase(cloudStorage gcp.CloudStorage) ImageUseCase {
 
 func (iU *imageUseCase) ImageList(bktName string, p *pagenation.Pagenation) ([]string, error) {
 	ctx := context.Background()
-	images, err := iU.cloudStorage.List(ctx, bktName)
+	images, err := iU.cloudStorage.List(ctx, bktName, "images/")
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +47,11 @@ func (iU *imageUseCase) ImageList(bktName string, p *pagenation.Pagenation) ([]s
 	p.Total = len(images)
 
 	return images[start:end], nil
+}
+
+func (iU *imageUseCase) HeaderImageList(bktName string) ([]string, error) {
+	ctx := context.Background()
+	return iU.cloudStorage.List(ctx, bktName, "headers/")
 }
 
 func (iU *imageUseCase) CreateImage(file io.Reader, bktName, fileName string) error {
@@ -77,7 +83,7 @@ func (iU *imageUseCase) CreateImage(file io.Reader, bktName, fileName string) er
 	fileName = strings.TrimSuffix(fileName, filepath.Ext(fileName)) + ".webp"
 
 	ctx := context.Background()
-	if err := iU.cloudStorage.Create(ctx, dst.Bytes(), bktName, fileName); err != nil {
+	if err := iU.cloudStorage.Create(ctx, dst.Bytes(), bktName, "images/"+fileName); err != nil {
 		return err
 	}
 
@@ -96,7 +102,7 @@ func (iU *imageUseCase) DeleteImages(bktName string, jsonBody []byte) error {
 
 	ctx := context.Background()
 	for _, imageURL := range urlsMap["image_urls"] {
-		el := strings.Split(imageURL, "/images/")
+		el := strings.Split(imageURL, bktName+"/")
 		if len(el) != 2 {
 			return errors.New("invalid image url")
 		}

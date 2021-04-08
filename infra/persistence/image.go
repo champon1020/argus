@@ -18,14 +18,14 @@ func NewImagePersistence() gcp.CloudStorage {
 	return &imagePersistence{}
 }
 
-func (iP *imagePersistence) List(ctx context.Context, bktName string) ([]string, error) {
+func (iP *imagePersistence) List(ctx context.Context, bktName, directory string) ([]string, error) {
 	client, err := storage.NewClient(ctx, option.WithCredentialsFile(os.Getenv("ARGUS_CLOUD_STORAGE_KEY_PATH")))
 	if err != nil {
 		return nil, err
 	}
 
 	urls := make([]string, 0, 10)
-	it := client.Bucket(bktName).Objects(ctx, &storage.Query{Prefix: "images/"})
+	it := client.Bucket(bktName).Objects(ctx, &storage.Query{Prefix: directory})
 	for {
 		attrs, err := it.Next()
 		if err == iterator.Done {
@@ -40,13 +40,13 @@ func (iP *imagePersistence) List(ctx context.Context, bktName string) ([]string,
 	return urls[1:], nil
 }
 
-func (iP *imagePersistence) Create(ctx context.Context, content []byte, bktName, fileName string) error {
+func (iP *imagePersistence) Create(ctx context.Context, content []byte, bktName, filePath string) error {
 	client, err := storage.NewClient(ctx, option.WithCredentialsFile(os.Getenv("ARGUS_CLOUD_STORAGE_KEY_PATH")))
 	if err != nil {
 		return err
 	}
 
-	wc := client.Bucket(bktName).Object("images/" + fileName).NewWriter(ctx)
+	wc := client.Bucket(bktName).Object(filePath).NewWriter(ctx)
 	wc.ContentType = "image/webp"
 	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 	if _, err := wc.Write(content); err != nil {
@@ -60,13 +60,13 @@ func (iP *imagePersistence) Create(ctx context.Context, content []byte, bktName,
 	return nil
 }
 
-func (iP *imagePersistence) Delete(ctx context.Context, bktName, fileName string) error {
+func (iP *imagePersistence) Delete(ctx context.Context, bktName, filePath string) error {
 	client, err := storage.NewClient(ctx, option.WithCredentialsFile(os.Getenv("ARGUS_CLOUD_STORAGE_KEY_PATH")))
 	if err != nil {
 		return err
 	}
 
-	wc := client.Bucket(bktName).Object("images/" + fileName)
+	wc := client.Bucket(bktName).Object(filePath)
 	if err := wc.Delete(ctx); err != nil {
 		return err
 	}
