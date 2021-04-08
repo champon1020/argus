@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"errors"
-	"strings"
+	"net/http"
 
 	"github.com/champon1020/argus/interfaces/auth"
+	"github.com/champon1020/argus/util"
 	"github.com/labstack/echo/v4"
 )
 
@@ -12,24 +12,15 @@ import (
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")
-		token, err := extractToken(authHeader)
+		token, err := util.ExtractBearerToken(authHeader)
 		if err != nil {
-			return err
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 
 		if err := auth.VerifyJWTToken(token); err != nil {
-			return err
+			return c.String(http.StatusForbidden, err.Error())
 		}
 
 		return next(c)
 	}
-}
-
-func extractToken(auth string) (string, error) {
-	el := strings.Split(auth, "Bearer ")
-	if len(el) < 2 {
-		return "", errors.New("invalid authorization header")
-	}
-
-	return el[1], nil
 }

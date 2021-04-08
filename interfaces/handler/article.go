@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"io"
 	"net/http"
 
+	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/config"
 	"github.com/champon1020/argus/domain"
 	"github.com/champon1020/argus/interfaces/handler/httputil"
@@ -29,22 +31,27 @@ type ArticleHandler interface {
 
 type articleHandler struct {
 	config *config.Config
+	logger *argus.Logger
 	aU     usecase.ArticleUseCase
 	tU     usecase.TagUseCase
 }
 
 // NewArticleHandler creates articleHandler.
-func NewArticleHandler(aU usecase.ArticleUseCase, tU usecase.TagUseCase, config *config.Config) ArticleHandler {
-	return &articleHandler{config: config, aU: aU, tU: tU}
+func NewArticleHandler(aU usecase.ArticleUseCase, tU usecase.TagUseCase, config *config.Config, logger *argus.Logger) ArticleHandler {
+	return &articleHandler{config: config, logger: logger, aU: aU, tU: tU}
 }
 
-func (h *articleHandler) PublicArticleByID(c echo.Context) error {
+func (aH *articleHandler) PublicArticleByID(c echo.Context) error {
 	id := c.Param("id")
+	if id == "" {
+		aH.logger.Error(c, http.StatusBadRequest, errors.New("parameter id is empty"))
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidQueryParam.Error())
+	}
 
-	article, err := h.aU.FindPublicByID(h.config.DB, id)
+	article, err := aH.aU.FindPublicByID(aH.config.DB, id)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -52,25 +59,25 @@ func (h *articleHandler) PublicArticleByID(c echo.Context) error {
 	}{*article})
 }
 
-func (h *articleHandler) PublicArticles(c echo.Context) error {
+func (aH *articleHandler) PublicArticles(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		aH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
-	total, err := h.aU.CountPublic(h.config.DB)
+	total, err := aH.aU.CountPublic(aH.config.DB)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
-	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumArticles)
+	p := pagenation.NewPagenation(page, total, aH.config.LimitOnNumArticles)
 
-	articles, err := h.aU.FindPublic(h.config.DB, *p)
+	articles, err := aH.aU.FindPublic(aH.config.DB, *p)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -79,26 +86,26 @@ func (h *articleHandler) PublicArticles(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
-func (h *articleHandler) PublicArticlesByTitle(c echo.Context) error {
+func (aH *articleHandler) PublicArticlesByTitle(c echo.Context) error {
 	title := c.Param("title")
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		aH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
-	total, err := h.aU.CountPublicByTitle(h.config.DB, title)
+	total, err := aH.aU.CountPublicByTitle(aH.config.DB, title)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
-	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumArticles)
+	p := pagenation.NewPagenation(page, total, aH.config.LimitOnNumArticles)
 
-	articles, err := h.aU.FindPublicByTitle(h.config.DB, *p, title)
+	articles, err := aH.aU.FindPublicByTitle(aH.config.DB, *p, title)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -107,26 +114,26 @@ func (h *articleHandler) PublicArticlesByTitle(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
-func (h *articleHandler) PublicArticlesByTag(c echo.Context) error {
+func (aH *articleHandler) PublicArticlesByTag(c echo.Context) error {
 	tag := c.Param("tag")
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		aH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
-	total, err := h.aU.CountPublicByTag(h.config.DB, tag)
+	total, err := aH.aU.CountPublicByTag(aH.config.DB, tag)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
-	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumArticles)
+	p := pagenation.NewPagenation(page, total, aH.config.LimitOnNumArticles)
 
-	articles, err := h.aU.FindPublicByTag(h.config.DB, *p, tag)
+	articles, err := aH.aU.FindPublicByTag(aH.config.DB, *p, tag)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -135,13 +142,17 @@ func (h *articleHandler) PublicArticlesByTag(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
-func (h *articleHandler) ArticleByID(c echo.Context) error {
+func (aH *articleHandler) ArticleByID(c echo.Context) error {
 	id := c.Param("id")
+	if id == "" {
+		aH.logger.Error(c, http.StatusBadRequest, errors.New("path parameter id is empty"))
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidQueryParam.Error())
+	}
 
-	article, err := h.aU.FindByID(h.config.DB, id)
+	article, err := aH.aU.FindByID(aH.config.DB, id)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -149,25 +160,25 @@ func (h *articleHandler) ArticleByID(c echo.Context) error {
 	}{*article})
 }
 
-func (h *articleHandler) Articles(c echo.Context) error {
+func (aH *articleHandler) Articles(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		aH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
-	total, err := h.aU.Count(h.config.DB)
+	total, err := aH.aU.Count(aH.config.DB)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
-	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumPrivArticles)
+	p := pagenation.NewPagenation(page, total, aH.config.LimitOnNumPrivArticles)
 
-	articles, err := h.aU.Find(h.config.DB, *p)
+	articles, err := aH.aU.Find(aH.config.DB, *p)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -176,25 +187,25 @@ func (h *articleHandler) Articles(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
-func (h *articleHandler) DraftArticles(c echo.Context) error {
+func (aH *articleHandler) DraftArticles(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		// 400
-		return err
+		aH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
-	total, err := h.aU.CountDraftArticles(h.config.DB)
+	total, err := aH.aU.CountDraftArticles(aH.config.DB)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
-	p := pagenation.NewPagenation(page, total, h.config.LimitOnNumPrivArticles)
+	p := pagenation.NewPagenation(page, total, aH.config.LimitOnNumPrivArticles)
 
-	articles, err := h.aU.FindDraftArticles(h.config.DB, *p)
+	articles, err := aH.aU.FindDraftArticles(aH.config.DB, *p)
 	if err != nil {
-		// 500
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -203,16 +214,17 @@ func (h *articleHandler) DraftArticles(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
-func (h *articleHandler) PostArticle(c echo.Context) error {
+func (aH *articleHandler) PostArticle(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		// 400
-		return err
+		aH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidRequestBody.Error())
 	}
 
-	id, err := h.aU.Post(h.config.DB, body)
+	id, err := aH.aU.Post(aH.config.DB, body)
 	if err != nil {
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -220,16 +232,17 @@ func (h *articleHandler) PostArticle(c echo.Context) error {
 	}{id})
 }
 
-func (h *articleHandler) UpdateArticle(c echo.Context) error {
+func (aH *articleHandler) UpdateArticle(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		// 400
-		return err
+		aH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidRequestBody.Error())
 	}
 
-	id, err := h.aU.Update(h.config.DB, body)
+	id, err := aH.aU.Update(aH.config.DB, body)
 	if err != nil {
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -237,16 +250,17 @@ func (h *articleHandler) UpdateArticle(c echo.Context) error {
 	}{id})
 }
 
-func (h *articleHandler) UpdateArticleStatus(c echo.Context) error {
+func (aH *articleHandler) UpdateArticleStatus(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		// 400
-		return err
+		aH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidRequestBody.Error())
 	}
 
-	id, err := h.aU.UpdateStatus(h.config.DB, body)
+	id, err := aH.aU.UpdateStatus(aH.config.DB, body)
 	if err != nil {
-		return err
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -254,15 +268,16 @@ func (h *articleHandler) UpdateArticleStatus(c echo.Context) error {
 	}{id})
 }
 
-func (h *articleHandler) DeleteArticle(c echo.Context) error {
+func (aH *articleHandler) DeleteArticle(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		// 400
-		return err
+		aH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidRequestBody.Error())
 	}
 
-	if err := h.aU.Delete(h.config.DB, body); err != nil {
-		return err
+	if err := aH.aU.Delete(aH.config.DB, body); err != nil {
+		aH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.String(http.StatusOK, "success")

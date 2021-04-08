@@ -32,13 +32,20 @@ func VerifyJWTToken(token string) error {
 }
 
 func validate(user *authUser, tok jwt.MapClaims) error {
-	if user.Sub != tok["sub"] || user.Email != tok["email"] {
+	if user.Iss != tok["iss"] ||
+		user.Azp != tok["azp"] ||
+		user.Aud != tok["aud"] ||
+		user.Sub != tok["sub"] ||
+		user.Email != tok["email"] {
 		return errors.New("failed to verify token")
 	}
 	return nil
 }
 
 type authUser struct {
+	Iss   string `json:"iss"`
+	Azp   string `json:"azp"`
+	Aud   string `json:"aud"`
 	Sub   string `json:"sub"`
 	Email string `json:"email"`
 }

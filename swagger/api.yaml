@@ -75,7 +75,7 @@ components:
         - current
         - prev
 
-    PostArticle:
+    PostArticleRequestBody:
       type: object
       properties:
         title:
@@ -83,24 +83,73 @@ components:
         tags:
           type: array
           items:
-            $ref: "#/components/schemas/PostTag"
+            $ref: "#/components/schemas/Tag"
         content:
           type: string
         image_url:
           type: string
+        status:
+          type: number
       required:
         - title
         - tags
         - content
         - image_url
+        - status
 
-    PostTag:
+    UpdateArticleRequestBody:
       type: object
       properties:
-        name:
+        id:
+          type: string
+        title:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        content:
+          type: string
+        image_url:
+          type: string
+        status:
+          type: number
+      required:
+        - id
+        - title
+        - tags
+        - content
+        - image_url
+        - status
+
+    UpdateArticleStatusRequestBody:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: number
+      required:
+        - id
+        - status
+
+    DeleteArticleRequestBody:
+      type: object
+      properties:
+        id:
           type: string
       required:
-        - name
+        - id
+
+    DeleteImagesRequestBody:
+      properties:
+        image_urls:
+          type: array
+          items:
+            type: string
+      required:
+        - image_urls
+
 
 paths:
   /api/v3/get/article/id/{id}:
@@ -126,7 +175,7 @@ paths:
                 required:
                   - article
         '400':
-          description: Query parameters are not valid.
+          description: Invalid query parameters.
         '404':
           description: Not Found.
         '500':
@@ -161,7 +210,9 @@ paths:
                   - articles
                   - pagenation
         '400':
-          description: Query parameters are not valid.
+          description: Invalid query parameters.
+        '404':
+          description: Not Found.
         '500':
           description: Internal server error.
 
@@ -200,7 +251,9 @@ paths:
                   - articles
                   - pagenation
         '400':
-          description: Query parameters are not valid.
+          description: Invalid query parameters.
+        '404':
+          description: Not Found.
         '500':
           description: Internal server error.
 
@@ -239,7 +292,9 @@ paths:
                   - articles
                   - pagenation
         '400':
-          description: Query parameters are not valid.
+          description: Invalid query parameters.
+        '404':
+          description: Not Found.
         '500':
           description: Internal server error.
 
@@ -262,7 +317,9 @@ paths:
                 required:
                   - tags
         '400':
-          description: Query parameters are not valid.
+          description: Invalid query parameters.
+        '404':
+          description: Not Found.
         '500':
           description: Internal server error.
 
@@ -292,7 +349,7 @@ paths:
                 required:
                   - article
         '400':
-          description: Query parameters are not valid. No authorization header.
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '404':
@@ -313,10 +370,41 @@ paths:
           description: Page number.
           schema:
             type: number
-        - name: status
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  pagenation:
+                    $ref: '#/components/schemas/Pagenation'
+                required:
+                  - articles
+                  - pagenation
+        '400':
+          description: Invalid query parameters. No authorization header.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Internal server error.
+
+
+  /api/v3/private/get/drafts:
+    get:
+      summary: Fetch draft articles.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: p
           in: query
-          required: false
-          description: Article status.
+          required: true
+          description: Page number.
           schema:
             type: number
       responses:
@@ -335,8 +423,9 @@ paths:
                     $ref: '#/components/schemas/Pagenation'
                 required:
                   - articles
+                  - pagenation
         '400':
-          description: Query parameters are not valid. No authorization header.
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '500':
@@ -345,7 +434,7 @@ paths:
 
   /api/v3/private/get/images:
     get:
-      summary: Return images.
+      summary: Fetch images.
       security:
         - BearerAuth: []
       parameters:
@@ -355,12 +444,6 @@ paths:
           description: Page number.
           schema:
             type: number
-        - name: n
-          in: query
-          required: true
-          description: Number of images.
-          schema:
-            type: number
       responses:
         '200':
           description: Success.
@@ -369,60 +452,17 @@ paths:
               schema:
                 type: object
                 properties:
-                  images:
+                  image_urls:
                     type: array
                     items:
                       type: string
+                  pagenation:
+                    $ref: '#/components/schemas/Pagenation'
                 required:
-                  - images
+                  - image_urls
+                  - pagenation
         '400':
-          description: Query parameters are not valid. No authorization header.
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal server error.
-
-
-  /api/v3/private/count/articles:
-    get:
-      summary: Count number of articles.
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  count:
-                    type: number
-                required:
-                  - count
-        '403':
-          description: Forbidden.
-        '500':
-          description: Internal server error.
-
-
-  /api/v3/private/count/images:
-    get:
-      summary: Count number of images.
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  count:
-                    type: number
-                required:
-                  - count
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '500':
@@ -431,7 +471,7 @@ paths:
 
   /api/v3/private/post/article:
     post:
-      summary: Register an article.
+      summary: Post an article.
       security:
         - BearerAuth: []
       requestBody:
@@ -439,20 +479,21 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                article:
-                  $ref: '#/components/schemas/ArticleReq'
-                id:
-                  type: string
-              required:
-                - article
-                - id
+              $ref: "#/components/schemas/PostArticleRequestBody"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
         '400':
-          description: Query parameters are not valid. No authorization header.
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '500':
@@ -471,14 +512,16 @@ paths:
             schema:
               type: object
               properties:
-                images:
+                image:
                   type: string
                   format: binary
+              required:
+                - image
       responses:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not valid. No authorization header.
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '500':
@@ -495,17 +538,21 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                article:
-                  $ref: '#/components/schemas/ArticleReq'
-              required:
-                - article
+              $ref: "#/components/schemas/UpdateArticleRequestBody"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
         '400':
-          description: Query parameters are not valid. No authorization header.
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '500':
@@ -514,7 +561,7 @@ paths:
 
   /api/v3/private/update/article/status:
     put:
-      summary: Update article's isPublic property.
+      summary: Update the article status.
       security:
         - BearerAuth: []
       requestBody:
@@ -522,20 +569,12 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                id:
-                  type: string
-                status:
-                  type: number
-              required:
-                - id
-                - status
+              $ref: "#/components/schemas/UpdateArticleStatusRequestBody"
       responses:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not valid. No authorization header.
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '500':
@@ -552,24 +591,19 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                id:
-                  type: string
-              required:
-                - id
+              $ref: "#/components/schemas/DeleteArticleRequestBody"
       responses:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not valid. No authorization header.
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal server error.
 
 
-  /api/v3/private/delete/image:
+  /api/v3/private/delete/images:
     delete:
       summary: Delete images.
       security:
@@ -579,26 +613,19 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                imageNames:
-                  type: array
-                  items:
-                    type: string
-              required:
-                - imageNames
+              $ref: "#/components/schemas/DeleteImagesRequestBody"
       responses:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not valid. No authorization header.
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '500':
           description: Internal server error.
 
 
-  /api/v3/verify/token:
+  /api/v3/private/verify:
     post:
       summary: Verify token.
       security:
@@ -607,7 +634,7 @@ paths:
         '200':
           description: Success.
         '400':
-          description: Query parameters are not valid. No authorization header.
+          description: Invalid query parameters. No authorization header.
         '403':
           description: Forbidden.
         '500':

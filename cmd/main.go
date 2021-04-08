@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"os"
 
+	"github.com/champon1020/argus"
 	"github.com/champon1020/argus/config"
 	"github.com/champon1020/argus/interfaces/di"
 	"github.com/champon1020/argus/interfaces/router"
@@ -16,16 +16,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	di := di.NewDI(config)
+
+	logger := argus.NewLogger()
+
+	di := di.NewDI(config, logger)
 
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"https://blog.champonian.com", "http://localhost:8000"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "[ECHO] ${method} | ${uri} | ${status} : ${error}\n",
-		Output: os.Stdout,
+		AllowOrigins: []string{"https://champonian.com", "http://localhost:3000"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 	}))
 
 	router.AppRouter(e, di.NewAppHandler())

@@ -3,6 +3,7 @@ package usecase
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"image"
 	"image/jpeg"
@@ -21,7 +22,7 @@ import (
 type ImageUseCase interface {
 	ImageList(bktName string, p *pagenation.Pagenation) ([]string, error)
 	CreateImage(file io.Reader, bktName, fileName string) error
-	DeleteImage(bktName, imageURL string) error
+	DeleteImages(bktName string, jsonBody []byte) error
 }
 
 type imageUseCase struct {
@@ -83,15 +84,25 @@ func (iU *imageUseCase) CreateImage(file io.Reader, bktName, fileName string) er
 	return nil
 }
 
-func (iU *imageUseCase) DeleteImage(bktName, fileURL string) error {
-	el := strings.Split(fileURL, bktName+"/images/")
-	if len(el) == 1 {
-		return errors.New("invalid image path")
+func (iU *imageUseCase) DeleteImages(bktName string, jsonBody []byte) error {
+	urlsMap := make(map[string][]string)
+	if err := json.Unmarshal(jsonBody, &urlsMap); err != nil {
+		return err
+	}
+
+	if _, ok := urlsMap["image_urls"]; !ok {
+		return errors.New("no images selected")
 	}
 
 	ctx := context.Background()
-	if err := iU.cloudStorage.Delete(ctx, bktName, el[1]); err != nil {
-		return err
+	for _, imageURL := range urlsMap["image_urls"] {
+		el := strings.Split(imageURL, "/images/")
+		if len(el) != 2 {
+			return errors.New("invalid image url")
+		}
+		if err := iU.cloudStorage.Delete(ctx, bktName, el[1]); err != nil {
+			return err
+		}
 	}
 
 	return nil
