@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/champon1020/argus"
@@ -33,14 +34,16 @@ func NewImageHandler(iU usecase.ImageUseCase, config *config.Config, logger *arg
 func (iH *imageHandler) Images(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
-		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
+		iH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
 	p := &pagenation.Pagenation{Page: page, Limit: iH.config.LimitOnNumImages}
 
 	images, err := iH.iU.ImageList(iH.config.StorageBucketName, p)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, ErrFailedGCSExec.Error())
+		iH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedGCSExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
@@ -52,19 +55,22 @@ func (iH *imageHandler) Images(c echo.Context) error {
 func (iH *imageHandler) PostImage(c echo.Context) error {
 	form, err := c.MultipartForm()
 	if err != nil {
-		return c.String(http.StatusBadRequest, ErrInvalidQueryParam.Error())
+		iH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidQueryParam.Error())
 	}
 
-	files := form.File["images"]
+	files := form.File["image"]
 	for _, file := range files {
 		src, err := file.Open()
 		if err != nil {
-			return c.String(http.StatusInternalServerError, ErrFailedOpenImage.Error())
+			iH.logger.Error(c, http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedOpenImage.Error())
 		}
 		defer src.Close()
 
 		if err := iH.iU.CreateImage(src, iH.config.StorageBucketName, file.Filename); err != nil {
-			return c.String(http.StatusInternalServerError, ErrFailedGCSExec.Error())
+			iH.logger.Error(c, http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedGCSExec.Error())
 		}
 	}
 
@@ -72,10 +78,15 @@ func (iH *imageHandler) PostImage(c echo.Context) error {
 }
 
 func (iH *imageHandler) DeleteImage(c echo.Context) error {
-	url := c.QueryParam("image_urls")
+	body, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		iH.logger.Error(c, http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidRequestBody.Error())
+	}
 
-	if err := iH.iU.DeleteImage(iH.config.StorageBucketName, url); err != nil {
-		return c.String(http.StatusInternalServerError, ErrFailedGCSExec.Error())
+	if err := iH.iU.DeleteImages(iH.config.StorageBucketName, body); err != nil {
+		iH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedGCSExec.Error())
 	}
 
 	return c.String(http.StatusOK, "success")

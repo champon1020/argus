@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/champon1020/argus/interfaces/handler"
+	"github.com/champon1020/argus/interfaces/middleware"
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,7 +24,7 @@ func AppRouter(e *echo.Echo, h handler.AppHandler) {
 	}
 
 	private := v3.Group("/private")
-	//private.Use(middleware.AuthMiddleware)
+	private.Use(middleware.AuthMiddleware)
 	{
 		private.GET("/get/article/id/:id", h.ArticleByID)
 		private.GET("/get/articles", h.Articles)

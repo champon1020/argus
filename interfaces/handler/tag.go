@@ -29,7 +29,8 @@ func NewTagHandler(tU usecase.TagUseCase, config *config.Config, logger *argus.L
 func (tH *tagHandler) PublicTags(c echo.Context) error {
 	tags, err := tH.tU.FindPublic(tH.config.DB)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, ErrFailedDBExec.Error())
+		tH.logger.Error(c, http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrFailedDBExec.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct {
