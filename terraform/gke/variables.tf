@@ -1,0 +1,9 @@
+variable "credentials" {}
+variable "service_account_id" {}
+variable "project" {}
+variable "region" {}
+variable "zone" {}
+variable "cluster_ipv4_cidr_block" {}
+variable "cluster_secondary_range_name" {}
+variable "services_ipv4_cidr_block" {}
+variable "services_secondary_range_name" {}
