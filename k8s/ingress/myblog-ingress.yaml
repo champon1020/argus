@@ -4,7 +4,7 @@ metadata:
   name: myblog-ingress
   annotations:
     kubernetes.io/ingress.global-static-ip-name: myblog-external
-    networking.gke.io/managed-certificates: alfheim-crt
+    networking.gke.io/managed-certificates: myblog-crt
 spec:
   backend:
     serviceName: alfheim-svc
@@ -16,7 +16,3 @@ spec:
             backend:
               serviceName: argus-svc
               servicePort: 8000
-          - path: /resrc/*
-            backend:
-              serviceName: argus-file-svc
-              servicePort: 8001

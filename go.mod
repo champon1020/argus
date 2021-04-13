@@ -4,15 +4,14 @@ go 1.16
 
 require (
 	cloud.google.com/go/storage v1.14.0
-	github.com/chai2010/webp v1.1.0 // indirect
-	github.com/cosmtrek/air v1.21.2 // indirect
-	github.com/creack/pty v1.1.11 // indirect
+	github.com/chai2010/webp v1.1.0
+	github.com/cosmtrek/air v1.26.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/fatih/color v1.10.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/uuid v1.2.0
-	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/labstack/echo/v4 v4.2.1
+	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/pelletier/go-toml v1.9.0 // indirect
 	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect
 	google.golang.org/api v0.43.0

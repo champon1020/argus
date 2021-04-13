@@ -7,18 +7,20 @@ terraform {
   }
 }
 
-provider "google" {
+provider "google-beta" {
   credentials = file(var.credentials)
   project = var.project
   region = var.region
   zone = var.zone
 }
 
-resource "google_service_account" "terraform" {
-  account_id = var.service_account_id
+data "google_service_account" "myblog_cluster" {
+  account_id = "myblog-cluster"
+  project = var.project
 }
 
 resource "google_container_cluster" "myblog_cluster" {
+  provider = google-beta
   name = "myblog-cluster"
   location = var.zone
   project = var.project
@@ -28,13 +30,22 @@ resource "google_container_cluster" "myblog_cluster" {
     services_ipv4_cidr_block = var.services_ipv4_cidr_block
   }
 
+  workload_identity_config {
+    identity_namespace = "${var.project}.svc.id.goog"
+  }
+
+  addons_config {
+    config_connector_config {
+      enabled = false
+    }
+  }
+
   node_pool {
-    initial_node_count = 3
+    initial_node_count = 4
     name = "myblog-preemptible-pool"
-    node_count = 3
 
     autoscaling {
-      max_node_count = 3
+      max_node_count = 4
       min_node_count = 0
     }
 
@@ -56,7 +67,11 @@ resource "google_container_cluster" "myblog_cluster" {
         "https://www.googleapis.com/auth/trace.append",
       ]
       preemptible = true
-      service_account = google_service_account.terraform.email
+      service_account = data.google_service_account.myblog_cluster.email
+
+      workload_metadata_config {
+        node_metadata = "GKE_METADATA_SERVER"
+      }
     }
   }
 }

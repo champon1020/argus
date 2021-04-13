@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: alfheim
-          image: gcr.io/alfheim-argus-269319/alfheim:2.1.8
+          image: gcr.io/alfheim-argus-269319/alfheim:3.0
           imagePullPolicy: IfNotPresent
           readinessProbe:
             timeoutSeconds: 30
