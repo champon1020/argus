@@ -13,3 +13,5 @@ COPY . .
 RUN go mod download
 RUN go build -o argus ./cmd/main.go
 RUN chmod +x argus
+
+CMD ./argus

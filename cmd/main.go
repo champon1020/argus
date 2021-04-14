@@ -18,13 +18,17 @@ func main() {
 	}
 
 	logger := argus.NewLogger()
-
 	di := di.NewDI(config, logger)
 
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"https://champonian.com", "http://localhost:3000"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderAuthorization,
+		},
 	}))
 
 	router.AppRouter(e, di.NewAppHandler())

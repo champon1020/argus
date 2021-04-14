@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql" // mysql driver
@@ -22,5 +23,10 @@ func dsn() string {
 
 // ConnDB conntects to database.
 func ConnDB() (*gorm.DB, error) {
-	return gorm.Open(mysql.Open(dsn()), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn()), &gorm.Config{})
+	if err != nil {
+		log.Printf("%v, dsn: %s\n", err, dsn())
+		return nil, err
+	}
+	return db, nil
 }

@@ -29,7 +29,6 @@ spec:
           image: gcr.io/alfheim-argus-269319/argus:3.0
           imagePullPolicy: IfNotPresent
           readinessProbe:
-            timeoutSeconds: 30
             failureThreshold: 3
             httpGet:
               path: /healthcheck
@@ -40,6 +39,9 @@ spec:
             - secretRef:
                 name: argus-env
           volumeMounts:
+            - name: argus-admin
+              mountPath: /secret/user
+              readOnly: true
             - name: argus-client-secret
               mountPath: /secret/secret
               readOnly: true
@@ -63,11 +65,14 @@ spec:
           secret:
             secretName: argus-env
         - name: argus-cloud-storage-key
-          emptyDir:
-            medium: Memory
+          secret:
+            secretName: argus-cloud-storage-key
         - name: argus-cloud-sql-key
-          emptyDir:
-            medium: Memory
+          secret:
+            secretName: argus-cloud-sql-key
         - name: argus-client-secret
-          emptyDir:
-            medium: Memory
+          secret:
+            secretName: argus-client-secret
+        - name: argus-admin
+          secret:
+            secretName: argus-admin

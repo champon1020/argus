@@ -2,7 +2,7 @@
 
 kubectl create secret generic argus-env \
         --from-literal=ARGUS_DB_USER=${ARGUS_DB_USER} \
-        --from-literal=ARGUS_DB_PASSWORD=${ARGUS_DB_PASSOWRD} \
+        --from-literal=ARGUS_DB_PASSWORD=${ARGUS_DB_PASSWORD} \
         --from-literal=ARGUS_DB_HOST=${ARGUS_DB_HOST} \
         --from-literal=ARGUS_DB_PORT=${ARGUS_DB_PORT} \
         --from-literal=ARGUS_DB_NAME=${ARGUS_DB_NAME} \

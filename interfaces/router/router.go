@@ -15,7 +15,7 @@ func dummyHandler(c echo.Context) error {
 
 // AppRouter declares the api routes.
 func AppRouter(e *echo.Echo, h handler.AppHandler) {
-	e.GET("/api/healthcheck", func(c echo.Context) error {
+	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.String(http.StatusOK, "success")
 	})
 
