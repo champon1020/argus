@@ -10,6 +10,7 @@ type ArticleFilter struct {
 	Title  *string
 	Tags   []string
 	Status *domain.Status
+	Order  string
 }
 
 // Apply applies filter.
@@ -22,6 +23,9 @@ func (af *ArticleFilter) Apply(base *gorm.DB) *gorm.DB {
 	}
 	if af.Status != nil {
 		base = base.Where("status = ?", *af.Status)
+	}
+	if af.Order != "" {
+		base = base.Order(af.Order)
 	}
 	return base
 }

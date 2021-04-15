@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/champon1020/argus/domain"
-	"github.com/champon1020/argus/domain/filter"
 	"github.com/champon1020/argus/domain/repository"
+	"github.com/champon1020/argus/infra/filter"
 	"github.com/champon1020/argus/usecase/pagenation"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -49,6 +49,7 @@ func (aU articleUseCase) FindPublicByID(db *gorm.DB, id string) (*domain.Article
 func (aU articleUseCase) FindPublic(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
+		Order:  "created_at desc",
 	}
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
@@ -57,6 +58,7 @@ func (aU articleUseCase) FindPublicByTitle(db *gorm.DB, p pagenation.Pagenation,
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
 		Title:  &title,
+		Order:  "created_at desc",
 	}
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
@@ -65,6 +67,7 @@ func (aU articleUseCase) FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, t
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
 		Tags:   []string{tag},
+		Order:  "created_at desc",
 	}
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
@@ -72,6 +75,7 @@ func (aU articleUseCase) FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, t
 func (aU articleUseCase) CountPublic(db *gorm.DB) (int, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
+		Order:  "created_at desc",
 	}
 	return aU.aR.Count(db, filter)
 }
@@ -97,12 +101,16 @@ func (aU articleUseCase) FindByID(db *gorm.DB, id string) (*domain.Article, erro
 }
 
 func (aU articleUseCase) Find(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
-	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, nil)
+	filter := &filter.ArticleFilter{
+		Order: "created_at desc",
+	}
+	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
 func (aU articleUseCase) FindDraftArticles(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Draft,
+		Order:  "created_at desc",
 	}
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
