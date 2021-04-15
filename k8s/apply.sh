@@ -16,7 +16,9 @@ kubectl create secret generic argus-env \
 #helm install myblog-external-secrets external-secrets/kubernetes-external-secrets
 
 kubectl apply -f secrets/external-secret.yaml
+kubectl apply -f service/argus-backendconfig.yaml
 kubectl apply -f service/argus-svc.yaml
+kubectl apply -f service/alfheim-backendconfig.yaml
 kubectl apply -f service/alfheim-svc.yaml
 kubectl apply -f deployment/argus-dep.yaml
 kubectl apply -f deployment/alfheim-dep.yaml

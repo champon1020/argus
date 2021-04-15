@@ -18,7 +18,6 @@ spec:
           image: gcr.io/alfheim-argus-269319/alfheim:3.0
           imagePullPolicy: IfNotPresent
           readinessProbe:
-            timeoutSeconds: 30
             failureThreshold: 3
             httpGet:
               path: /
