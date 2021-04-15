@@ -14,12 +14,12 @@ provider "google" {
   zone = var.zone
 }
 
-resource "google_sql_database_instance" "argus_mysql" {
-  name = "argus-mysql"
+resource "google_sql_database_instance" "myblog_db_instance" {
+  name = "myblog-db"
   region = var.region
   project = var.project
 
-  database_version = "MYSQL_5_7"
+  database_version = "MYSQL_8_0"
 
   settings {
     disk_autoresize = false
