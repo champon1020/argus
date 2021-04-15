@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"net/http"
 
 	"github.com/champon1020/argus/interfaces/handler"
 	"github.com/champon1020/argus/interfaces/middleware"
@@ -14,6 +15,10 @@ func dummyHandler(c echo.Context) error {
 
 // AppRouter declares the api routes.
 func AppRouter(e *echo.Echo, h handler.AppHandler) {
+	e.GET("/healthcheck", func(c echo.Context) error {
+		return c.String(http.StatusOK, "success")
+	})
+
 	v3 := e.Group("/api/v3")
 	{
 		v3.GET("/get/article/id/:id", h.PublicArticleByID)

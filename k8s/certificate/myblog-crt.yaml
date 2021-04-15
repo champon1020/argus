@@ -1,7 +1,7 @@
 apiVersion: networking.gke.io/v1beta2
 kind: ManagedCertificate
 metadata:
-  name: alfheim-crt
+  name: myblog-crt
 spec:
   domains:
-    - blog.champonian.com
+    - champonian.com

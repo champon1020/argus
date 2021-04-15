@@ -1,0 +1,66 @@
+---
+# Source: kubernetes-external-secrets/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: myblog-external-secrets-kubernetes-external-secrets
+  labels:
+    app.kubernetes.io/name: kubernetes-external-secrets
+    helm.sh/chart: kubernetes-external-secrets-7.0.1
+    app.kubernetes.io/instance: myblog-external-secrets
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "update"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    resourceNames: ["externalsecrets.kubernetes-client.io"]
+    verbs: ["get", "update"]
+  - apiGroups: ["kubernetes-client.io"]
+    resources: ["externalsecrets"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["kubernetes-client.io"]
+    resources: ["externalsecrets/status"]
+    verbs: ["get", "update"]
+---
+# Source: kubernetes-external-secrets/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: myblog-external-secrets-kubernetes-external-secrets
+  labels:
+    app.kubernetes.io/name: kubernetes-external-secrets
+    helm.sh/chart: kubernetes-external-secrets-7.0.1
+    app.kubernetes.io/instance: myblog-external-secrets
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: myblog-external-secrets-kubernetes-external-secrets
+subjects:
+  - name: myblog-external-secrets-kubernetes-external-secrets
+    namespace: "default"
+    kind: ServiceAccount
+---
+# Source: kubernetes-external-secrets/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: myblog-external-secrets-kubernetes-external-secrets-auth
+  labels:
+    app.kubernetes.io/name: kubernetes-external-secrets
+    helm.sh/chart: kubernetes-external-secrets-7.0.1
+    app.kubernetes.io/instance: myblog-external-secrets
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- name: myblog-external-secrets-kubernetes-external-secrets
+  namespace: "default"
+  kind: ServiceAccount

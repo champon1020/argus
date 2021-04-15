@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/champon1020/argus/domain"
-	"github.com/champon1020/argus/domain/filter"
+	"github.com/champon1020/argus/infra/filter"
 	"gorm.io/gorm"
 )
 

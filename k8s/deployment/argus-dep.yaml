@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argus-dep
+  annotations:
+    externalsecrets.kubernetes-client.io/volumes: |
+      - name: "argus-cloud-storage-key"
+        externalSecret:
+          externalSecretName: "argus-cloud-storage-key"
+      - name: "argus-cloud-sql-key"
+        externalSecret:
+          externalSecretName: "argus-cloud-sql-key"
+      - name: "argus-client-secret"
+        externalSecret:
+          externalSecretName: "argus-client-secret"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argus-backend
+  template:
+    metadata:
+      name: argus-backend
+      labels:
+        app: argus-backend
+    spec:
+      containers:
+        - name: argus
+          image: gcr.io/alfheim-argus-269319/argus:3.1
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthcheck
+              port: 8000
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: argus-env
+          volumeMounts:
+            - name: argus-admin
+              mountPath: /secret/user
+              readOnly: true
+            - name: argus-client-secret
+              mountPath: /secret/secret
+              readOnly: true
+            - name: argus-cloud-storage-key
+              mountPath: /secret/gcs
+              readOnly: true
+        - name: cloud-sql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.17
+          command:
+            - "/cloud_sql_proxy"
+            - "-instances=alfheim-argus-269319:us-west1:myblog-db=tcp:0.0.0.0:3306"
+            - "-credential_file=/secret/cloudsql/argus-cloud-sql-key"
+          securityContext:
+            runAsNonRoot: true
+          volumeMounts:
+            - name: argus-cloud-sql-key
+              mountPath: /secret/cloudsql
+              readOnly: true
+      volumes:
+        - name: argus-env-volume
+          secret:
+            secretName: argus-env
+        - name: argus-cloud-storage-key
+          secret:
+            secretName: argus-cloud-storage-key
+        - name: argus-cloud-sql-key
+          secret:
+            secretName: argus-cloud-sql-key
+        - name: argus-client-secret
+          secret:
+            secretName: argus-client-secret
+        - name: argus-admin
+          secret:
+            secretName: argus-admin
