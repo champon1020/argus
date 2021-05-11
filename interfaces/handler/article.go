@@ -41,6 +41,7 @@ func NewArticleHandler(aU usecase.ArticleUseCase, tU usecase.TagUseCase, config 
 	return &articleHandler{config: config, logger: logger, aU: aU, tU: tU}
 }
 
+// PublicArticleById gets the public article by id.
 func (aH *articleHandler) PublicArticleByID(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
@@ -59,6 +60,7 @@ func (aH *articleHandler) PublicArticleByID(c echo.Context) error {
 	}{*article})
 }
 
+// PublicArticles gets the public articles.
 func (aH *articleHandler) PublicArticles(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
@@ -86,6 +88,7 @@ func (aH *articleHandler) PublicArticles(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
+// PublicArticlesByTitle gets the public articles by title.
 func (aH *articleHandler) PublicArticlesByTitle(c echo.Context) error {
 	title := c.Param("title")
 	page, err := httputil.ParsePage(c)
@@ -114,6 +117,7 @@ func (aH *articleHandler) PublicArticlesByTitle(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
+// PublicArticlesByTag gets the public articles by tag.
 func (aH *articleHandler) PublicArticlesByTag(c echo.Context) error {
 	tag := c.Param("tag")
 	page, err := httputil.ParsePage(c)
@@ -142,6 +146,7 @@ func (aH *articleHandler) PublicArticlesByTag(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
+// ArticleByID gets the article by id.
 func (aH *articleHandler) ArticleByID(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
@@ -160,6 +165,7 @@ func (aH *articleHandler) ArticleByID(c echo.Context) error {
 	}{*article})
 }
 
+// Articles gets the articles.
 func (aH *articleHandler) Articles(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
@@ -187,6 +193,7 @@ func (aH *articleHandler) Articles(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
+// DraftArticles gets the draft articles.
 func (aH *articleHandler) DraftArticles(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
@@ -214,6 +221,7 @@ func (aH *articleHandler) DraftArticles(c echo.Context) error {
 	}{*articles, *p.MapToDomain()})
 }
 
+// PostArticle posts a new article.
 func (aH *articleHandler) PostArticle(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
@@ -232,6 +240,7 @@ func (aH *articleHandler) PostArticle(c echo.Context) error {
 	}{id})
 }
 
+// UpdateArticle updates the article.
 func (aH *articleHandler) UpdateArticle(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
@@ -250,6 +259,7 @@ func (aH *articleHandler) UpdateArticle(c echo.Context) error {
 	}{id})
 }
 
+// UpdateArticleStatus updates the article status.
 func (aH *articleHandler) UpdateArticleStatus(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
@@ -268,6 +278,7 @@ func (aH *articleHandler) UpdateArticleStatus(c echo.Context) error {
 	}{id})
 }
 
+// DeleteArticle deletes the article.
 func (aH *articleHandler) DeleteArticle(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {

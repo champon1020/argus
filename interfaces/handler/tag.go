@@ -26,6 +26,7 @@ func NewTagHandler(tU usecase.TagUseCase, config *config.Config, logger *argus.L
 	return &tagHandler{config: config, logger: logger, tU: tU}
 }
 
+// PublicTags gets the public tags.
 func (tH *tagHandler) PublicTags(c echo.Context) error {
 	tags, err := tH.tU.FindPublic(tH.config.DB)
 	if err != nil {

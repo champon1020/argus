@@ -32,6 +32,7 @@ func NewImageHandler(iU usecase.ImageUseCase, config *config.Config, logger *arg
 	return &imageHandler{iU: iU, config: config, logger: logger}
 }
 
+// Images gets the image urls.
 func (iH *imageHandler) Images(c echo.Context) error {
 	page, err := httputil.ParsePage(c)
 	if err != nil {
@@ -53,6 +54,7 @@ func (iH *imageHandler) Images(c echo.Context) error {
 	}{images, *p.MapToDomain()})
 }
 
+// HeaderImages gets the header image urls.
 func (iH *imageHandler) HeaderImages(c echo.Context) error {
 	images, err := iH.iU.HeaderImageList(iH.config.StorageBucketName)
 	if err != nil {
@@ -65,6 +67,7 @@ func (iH *imageHandler) HeaderImages(c echo.Context) error {
 	}{images})
 }
 
+// PostImage posts a new image.
 func (iH *imageHandler) PostImage(c echo.Context) error {
 	form, err := c.MultipartForm()
 	if err != nil {
@@ -90,6 +93,7 @@ func (iH *imageHandler) PostImage(c echo.Context) error {
 	return c.String(http.StatusOK, "success")
 }
 
+// DeleteImage deletes the image.
 func (iH *imageHandler) DeleteImage(c echo.Context) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {

@@ -23,6 +23,7 @@ func NewAuthHandler(logger *argus.Logger) AuthHandler {
 	return &authHandler{logger: logger}
 }
 
+// VerifyToken check if the token is valid.
 func (aH *authHandler) VerifyToken(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
 	token, err := util.ExtractBearerToken(authHeader)

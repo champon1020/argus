@@ -31,6 +31,7 @@ func VerifyJWTToken(token string) error {
 	return nil
 }
 
+// validate validates if the token is valid.
 func validate(user *authUser, tok jwt.MapClaims) error {
 	if user.Iss != tok["iss"] ||
 		user.Azp != tok["azp"] ||
@@ -42,6 +43,7 @@ func validate(user *authUser, tok jwt.MapClaims) error {
 	return nil
 }
 
+// authUser is the information type of authenticated user.
 type authUser struct {
 	Iss   string `json:"iss"`
 	Azp   string `json:"azp"`
@@ -50,12 +52,14 @@ type authUser struct {
 	Email string `json:"email"`
 }
 
+// secret is the secret type.
 type secret struct {
 	Web struct {
 		CertURL string `json:"auth_provider_x509_cert_url"`
 	} `json:"web"`
 }
 
+// readUserInfo reads the user information from the user information file.
 func readUserInfo() (*authUser, error) {
 	file := os.Getenv("ARGUS_USER_PATH")
 	body, err := os.ReadFile(file)
@@ -71,6 +75,7 @@ func readUserInfo() (*authUser, error) {
 	return user, nil
 }
 
+// decodeJwt decodes jwt.
 func decodeJwt(token string) (jwt.MapClaims, error) {
 	pubKey, err := readPublicKey(token)
 	if err != nil {
@@ -96,6 +101,7 @@ func decodeJwt(token string) (jwt.MapClaims, error) {
 	return claim, nil
 }
 
+// readPublicKey reads the public key.
 func readPublicKey(token string) (*rsa.PublicKey, error) {
 	file := os.Getenv("ARGUS_PUBLIC_KEY_PATH")
 
@@ -118,6 +124,7 @@ func readPublicKey(token string) (*rsa.PublicKey, error) {
 	return key, nil
 }
 
+// fetchPublicKey gets the public key.
 func fetchPublicKey(token string) error {
 	// Read secret file.
 	secret, err := readSecret()
@@ -142,6 +149,7 @@ func fetchPublicKey(token string) error {
 	return nil
 }
 
+// readSecret reads the secret file.
 func readSecret() (*secret, error) {
 	file := os.Getenv("ARGUS_CLIENT_SECRET_PATH")
 	body, err := os.ReadFile(file)
@@ -157,6 +165,7 @@ func readSecret() (*secret, error) {
 	return sec, nil
 }
 
+// downloadPublicKey downloads the public key files.
 func downloadPublicKey(url string, kid string) error {
 	client := new(http.Client)
 	req, err := http.NewRequest("GET", url, nil)
@@ -186,6 +195,7 @@ func downloadPublicKey(url string, kid string) error {
 	return nil
 }
 
+// saveKeyAsPem saves the key as pem format.
 func saveKeyAsPem(key string) error {
 	block, _ := pem.Decode([]byte(key))
 	file := os.Getenv("ARGUS_PUBLIC_KEY_PATH")
