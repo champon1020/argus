@@ -18,6 +18,7 @@ func NewImagePersistence() gcp.CloudStorage {
 	return &imagePersistence{}
 }
 
+// List fetches the file path list from GCS.
 func (iP *imagePersistence) List(ctx context.Context, bktName, directory string) ([]string, error) {
 	client, err := storage.NewClient(ctx, option.WithCredentialsFile(os.Getenv("ARGUS_CLOUD_STORAGE_KEY_PATH")))
 	if err != nil {
@@ -40,6 +41,7 @@ func (iP *imagePersistence) List(ctx context.Context, bktName, directory string)
 	return urls[1:], nil
 }
 
+// Create adds the file to GCS.
 func (iP *imagePersistence) Create(ctx context.Context, content []byte, bktName, filePath string) error {
 	client, err := storage.NewClient(ctx, option.WithCredentialsFile(os.Getenv("ARGUS_CLOUD_STORAGE_KEY_PATH")))
 	if err != nil {
@@ -48,6 +50,8 @@ func (iP *imagePersistence) Create(ctx context.Context, content []byte, bktName,
 
 	wc := client.Bucket(bktName).Object(filePath).NewWriter(ctx)
 	wc.ContentType = "image/webp"
+	wc.CacheControl = "7200"
+	wc.ContentEncoding = "gzip"
 	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 	if _, err := wc.Write(content); err != nil {
 		return err
@@ -60,6 +64,7 @@ func (iP *imagePersistence) Create(ctx context.Context, content []byte, bktName,
 	return nil
 }
 
+// Delete removes the file from GCS.
 func (iP *imagePersistence) Delete(ctx context.Context, bktName, filePath string) error {
 	client, err := storage.NewClient(ctx, option.WithCredentialsFile(os.Getenv("ARGUS_CLOUD_STORAGE_KEY_PATH")))
 	if err != nil {
