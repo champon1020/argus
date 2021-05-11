@@ -14,6 +14,7 @@ func NewTagPersistence() repository.TagRepository {
 	return &tagPersistence{}
 }
 
+// FindByArticleID fetches the tags by article id.
 func (tP *tagPersistence) FindByArticleID(db *gorm.DB, articleID string) (*[]domain.Tag, error) {
 	tagDTOs := []dto.TagDTO{}
 
@@ -29,6 +30,7 @@ func (tP *tagPersistence) FindByArticleID(db *gorm.DB, articleID string) (*[]dom
 	return &tags, nil
 }
 
+// Find fetches the tags.
 func (tP *tagPersistence) Find(db *gorm.DB, articleStatus *domain.Status) (*[]domain.Tag, error) {
 	tagDTOs := []dto.TagDTO{}
 
@@ -52,6 +54,7 @@ func (tP *tagPersistence) Find(db *gorm.DB, articleStatus *domain.Status) (*[]do
 	return &tags, nil
 }
 
+// Posts registers new tags.
 func (tP *tagPersistence) Posts(db *gorm.DB, tags *[]domain.Tag, articleID string) error {
 	if len(*tags) == 0 {
 		return nil
@@ -65,6 +68,7 @@ func (tP *tagPersistence) Posts(db *gorm.DB, tags *[]domain.Tag, articleID strin
 	return nil
 }
 
+// DeleteByArticleID deletes the tag by article id.
 func (tP *tagPersistence) DeleteByArticleID(db *gorm.DB, articleID string) error {
 	if err := db.Exec("DELETE FROM tags WHERE article_id = ?", articleID).Error; err != nil {
 		return err
