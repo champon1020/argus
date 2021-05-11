@@ -42,10 +42,12 @@ func NewArticleUseCase(aR repository.ArticleRepository, tR repository.TagReposit
 	return &articleUseCase{aR: aR, tR: tR}
 }
 
+// FindPublicByID fetches the public article by id.
 func (aU articleUseCase) FindPublicByID(db *gorm.DB, id string) (*domain.Article, error) {
 	return aU.aR.FindByID(db, id, &domain.Public)
 }
 
+// FindPublic fetches the public articles.
 func (aU articleUseCase) FindPublic(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
@@ -54,6 +56,7 @@ func (aU articleUseCase) FindPublic(db *gorm.DB, p pagenation.Pagenation) (*[]do
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
+// FindPublicByTitle fetches the public articles by title.
 func (aU articleUseCase) FindPublicByTitle(db *gorm.DB, p pagenation.Pagenation, title string) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
@@ -63,6 +66,7 @@ func (aU articleUseCase) FindPublicByTitle(db *gorm.DB, p pagenation.Pagenation,
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
+// FindPublicByTag fetches the public articles by tag.
 func (aU articleUseCase) FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, tag string) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
@@ -72,6 +76,7 @@ func (aU articleUseCase) FindPublicByTag(db *gorm.DB, p pagenation.Pagenation, t
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
+// CountPublic counts the number of public articles.
 func (aU articleUseCase) CountPublic(db *gorm.DB) (int, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
@@ -80,6 +85,7 @@ func (aU articleUseCase) CountPublic(db *gorm.DB) (int, error) {
 	return aU.aR.Count(db, filter)
 }
 
+// CountPublicByTitle counts the public number of articles by title.
 func (aU articleUseCase) CountPublicByTitle(db *gorm.DB, title string) (int, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
@@ -88,6 +94,7 @@ func (aU articleUseCase) CountPublicByTitle(db *gorm.DB, title string) (int, err
 	return aU.aR.Count(db, filter)
 }
 
+// CountPublicByTag counts the number of public articles by tag.
 func (aU articleUseCase) CountPublicByTag(db *gorm.DB, tag string) (int, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Public,
@@ -96,10 +103,12 @@ func (aU articleUseCase) CountPublicByTag(db *gorm.DB, tag string) (int, error) 
 	return aU.aR.Count(db, filter)
 }
 
+// FindByID fetches the article by id.
 func (aU articleUseCase) FindByID(db *gorm.DB, id string) (*domain.Article, error) {
 	return aU.aR.FindByID(db, id, nil)
 }
 
+// Find fetches the articles.
 func (aU articleUseCase) Find(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Order: "created_at desc",
@@ -107,6 +116,7 @@ func (aU articleUseCase) Find(db *gorm.DB, p pagenation.Pagenation) (*[]domain.A
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
+// FindDraftArticles fetche the draft articles.
 func (aU articleUseCase) FindDraftArticles(db *gorm.DB, p pagenation.Pagenation) (*[]domain.Article, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Draft,
@@ -115,10 +125,12 @@ func (aU articleUseCase) FindDraftArticles(db *gorm.DB, p pagenation.Pagenation)
 	return aU.aR.Find(db, p.Limit, (p.Page-1)*p.Limit, filter)
 }
 
+// Count counts the number of articles.
 func (aU articleUseCase) Count(db *gorm.DB) (int, error) {
 	return aU.aR.Count(db, nil)
 }
 
+// CountDraftArticles counts the number of draft articles.
 func (aU articleUseCase) CountDraftArticles(db *gorm.DB) (int, error) {
 	filter := &filter.ArticleFilter{
 		Status: &domain.Draft,
@@ -126,6 +138,7 @@ func (aU articleUseCase) CountDraftArticles(db *gorm.DB) (int, error) {
 	return aU.aR.Count(db, filter)
 }
 
+// Post registers a new article.
 func (aU articleUseCase) Post(db *gorm.DB, jsonBody []byte) (string, error) {
 	article := &domain.Article{}
 	if err := json.Unmarshal(jsonBody, article); err != nil {
@@ -157,6 +170,7 @@ func (aU articleUseCase) Post(db *gorm.DB, jsonBody []byte) (string, error) {
 	return article.ID, nil
 }
 
+// Update updates the article.
 func (aU articleUseCase) Update(db *gorm.DB, jsonBody []byte) (string, error) {
 	article := &domain.Article{}
 	if err := json.Unmarshal(jsonBody, article); err != nil {
@@ -186,6 +200,7 @@ func (aU articleUseCase) Update(db *gorm.DB, jsonBody []byte) (string, error) {
 	return article.ID, nil
 }
 
+// UpdateStatus updates the article status.
 func (aU articleUseCase) UpdateStatus(db *gorm.DB, jsonBody []byte) (string, error) {
 	article := &domain.Article{}
 	if err := json.Unmarshal(jsonBody, article); err != nil {
@@ -206,6 +221,7 @@ func (aU articleUseCase) UpdateStatus(db *gorm.DB, jsonBody []byte) (string, err
 	return article.ID, nil
 }
 
+// Delete removes the article.
 func (aU articleUseCase) Delete(db *gorm.DB, jsonBody []byte) error {
 	article := &domain.Article{}
 	if err := json.Unmarshal(jsonBody, article); err != nil {
