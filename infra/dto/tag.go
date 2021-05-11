@@ -21,6 +21,7 @@ func NewTagDTO(t *domain.Tag) *TagDTO {
 	return &TagDTO{Name: t.Name}
 }
 
+// NewTagDTOs creates the slice of TagDTO.
 func NewTagDTOs(tags *[]domain.Tag, articleID string) *[]TagDTO {
 	tagDTOs := make([]TagDTO, len(*tags))
 	for i, t := range *tags {

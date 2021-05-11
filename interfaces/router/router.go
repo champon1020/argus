@@ -1,17 +1,12 @@
 package router
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/champon1020/argus/interfaces/handler"
 	"github.com/champon1020/argus/interfaces/middleware"
 	"github.com/labstack/echo/v4"
 )
-
-func dummyHandler(c echo.Context) error {
-	return errors.New("Not implemented")
-}
 
 // AppRouter declares the api routes.
 func AppRouter(e *echo.Echo, h handler.AppHandler) {

@@ -17,6 +17,7 @@ func NewLogger() *Logger {
 	return &Logger{TimeFormat: time.RFC3339}
 }
 
+// Error outputs the error.
 func (l *Logger) Error(c echo.Context, status int, err error) {
 	// TIME | METHOD | REMOTE_IP | URI | STATUS | MESSAGE
 	fmt.Printf("[ARGUS] %v | %v | %s | %s | %d | %s\n",

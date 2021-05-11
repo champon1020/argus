@@ -12,8 +12,6 @@ import (
 
 // DI is struct for dependency injection.
 type DI interface {
-	NewArticleRepository() repository.ArticleRepository
-	NewArticleUseCase() usecase.ArticleUseCase
 	NewAppHandler() handler.AppHandler
 }
 
@@ -44,14 +42,7 @@ func NewDI(config *config.Config, logger *argus.Logger) DI {
 	return d
 }
 
-func (d di) NewArticleRepository() repository.ArticleRepository {
-	return d.aP
-}
-
-func (d di) NewArticleUseCase() usecase.ArticleUseCase {
-	return d.aU
-}
-
+// NewAppHandler returns the app handler.
 func (d di) NewAppHandler() handler.AppHandler {
 	return d.h
 }

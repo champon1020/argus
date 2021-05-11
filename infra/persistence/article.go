@@ -15,6 +15,7 @@ func NewArticlePersistence() repository.ArticleRepository {
 	return &articlePersistence{}
 }
 
+// FindByID fetches the article by id.
 func (aP *articlePersistence) FindByID(db *gorm.DB, id string, status *domain.Status) (*domain.Article, error) {
 	articleDTO := &dto.ArticleDTO{}
 
@@ -36,6 +37,7 @@ func (aP *articlePersistence) FindByID(db *gorm.DB, id string, status *domain.St
 	return article, nil
 }
 
+// Find fetches the articles that filter conditions are met.
 func (aP *articlePersistence) Find(db *gorm.DB, limit int, offset int, filter *filter.ArticleFilter) (*[]domain.Article, error) {
 	articleDTOs := []dto.ArticleDTO{}
 
@@ -60,6 +62,7 @@ func (aP *articlePersistence) Find(db *gorm.DB, limit int, offset int, filter *f
 	return &articles, nil
 }
 
+// Count counts the number of articles that filter conditions are met.
 func (aP *articlePersistence) Count(db *gorm.DB, filter *filter.ArticleFilter) (int, error) {
 	var cnt int64
 
@@ -74,6 +77,7 @@ func (aP *articlePersistence) Count(db *gorm.DB, filter *filter.ArticleFilter) (
 	return int(cnt), nil
 }
 
+// Post registers a new article.
 func (aP *articlePersistence) Post(db *gorm.DB, article *domain.Article) error {
 	articleDTO := dto.NewArticleDTO(article)
 	if err := db.Table("articles").Create(articleDTO).Error; err != nil {
@@ -82,6 +86,7 @@ func (aP *articlePersistence) Post(db *gorm.DB, article *domain.Article) error {
 	return nil
 }
 
+// Update updates the article.
 func (aP *articlePersistence) Update(db *gorm.DB, article *domain.Article) error {
 	articleDTO := dto.NewArticleDTO(article)
 	if err := db.Table("articles").
@@ -93,6 +98,7 @@ func (aP *articlePersistence) Update(db *gorm.DB, article *domain.Article) error
 	return nil
 }
 
+// UpdateStatus update the article status.
 func (aP *articlePersistence) UpdateStatus(db *gorm.DB, article *domain.Article) error {
 	articleDTO := dto.NewArticleDTO(article)
 	if err := db.Table("articles").
@@ -104,6 +110,7 @@ func (aP *articlePersistence) UpdateStatus(db *gorm.DB, article *domain.Article)
 	return nil
 }
 
+// Delete removes the article by id.
 func (aP *articlePersistence) Delete(db *gorm.DB, id string) error {
 	if err := db.Exec("DELETE FROM articles WHERE id = ?", id).Error; err != nil {
 		return err

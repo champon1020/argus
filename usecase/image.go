@@ -35,6 +35,7 @@ func NewImageUseCase(cloudStorage gcp.CloudStorage) ImageUseCase {
 	return &imageUseCase{cloudStorage: cloudStorage}
 }
 
+// ImageList fetches the images.
 func (iU *imageUseCase) ImageList(bktName string, p *pagenation.Pagenation) ([]string, error) {
 	ctx := context.Background()
 	images, err := iU.cloudStorage.List(ctx, bktName, "images/")
@@ -49,11 +50,13 @@ func (iU *imageUseCase) ImageList(bktName string, p *pagenation.Pagenation) ([]s
 	return images[start:end], nil
 }
 
+// HeaderImageList fetches the header images.
 func (iU *imageUseCase) HeaderImageList(bktName string) ([]string, error) {
 	ctx := context.Background()
 	return iU.cloudStorage.List(ctx, bktName, "headers/")
 }
 
+// CreateImage registers a new image.
 func (iU *imageUseCase) CreateImage(file io.Reader, bktName, fileName string) error {
 	var img image.Image
 
@@ -90,6 +93,7 @@ func (iU *imageUseCase) CreateImage(file io.Reader, bktName, fileName string) er
 	return nil
 }
 
+// DeleteImages removes the images.
 func (iU *imageUseCase) DeleteImages(bktName string, jsonBody []byte) error {
 	urlsMap := make(map[string][]string)
 	if err := json.Unmarshal(jsonBody, &urlsMap); err != nil {
